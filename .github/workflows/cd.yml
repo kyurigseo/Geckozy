@@ -1,27 +1,47 @@
-name: EC2 Spring Boot Direct Deploy
+name: CD with Gradle (SCP)
 
 on:
   push:
-    branches: [ "main" ] # main 브랜치에 푸시될 때 자동 배포 실행
+    branches: [ "main" ]
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: SSH로 EC2 접속 및 배포 실행
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build with Gradle Wrapper
+        working-directory: ./backend # backend 폴더로 이동해서 빌드
+        run: |
+          chmod +x ./gradlew
+          ./gradlew bootJar -x test
+
+      - name: Transfer Build File using SCP
+        uses: appleboy/scp-action@master
+        with:
+          username: ubuntu
+          host: ${{ secrets.SSH_HOST }}
+          key: ${{ secrets.SSH_KEY }}
+          source: "backend/build/libs/*.jar" # GitHub 러너 기준 모노레포 경로
+          target: "/home/ubuntu/Geckozy/backend/build/libs/" # EC2 내 저장될 위치
+          strip_components: 3 # 앞의 'backend/build/libs/' 경로를 떼고 pure .jar 파일만 전송
+
+      - name: SSH로 EC2 접속 및 Docker 실행
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
+          username: ubuntu
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd /home/ubuntu/Geckozy
             git fetch origin main
             git reset --hard origin/main
-            cd backend
-            chmod +x ./gradlew
-            ./gradlew bootJar
-            cd ..
             docker compose up -d --build
             docker image prune -f
