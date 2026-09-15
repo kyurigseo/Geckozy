@@ -1,8 +1,8 @@
-name: CD with Gradle
+name: Integrated Monorepo CD (Frontend + Backend)
 
 on:
   push:
-    branches: [ "dev", "main" ]
+    branches: [ "dev" ]
 
 jobs:
   build:
@@ -13,11 +13,13 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
-          username: ubuntu
+          username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
-          port: 22
           script: |
             cd ~/geckozy
             git pull origin dev
+            cd backend
+            ./gradlew clean build -x test
+            cd ..
             docker compose up -d --build
             docker image prune -f
