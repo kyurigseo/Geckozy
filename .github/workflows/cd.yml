@@ -1,0 +1,27 @@
+name: EC2 Spring Boot Direct Deploy
+
+on:
+  push:
+    branches: [ "main" ] # main 브랜치에 푸시될 때 자동 배포 실행
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: SSH로 EC2 접속 및 배포 실행
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /home/ubuntu/Geckozy
+            git fetch origin main
+            git reset --hard origin/main
+            cd backend
+            chmod +x ./gradlew
+            ./gradlew bootJar
+            cd ..
+            docker compose up -d --build
+            docker image prune -f
