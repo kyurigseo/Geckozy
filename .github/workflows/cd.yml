@@ -1,4 +1,4 @@
-name: Integrated Monorepo CD (Frontend + Backend)
+name: CD with Gradle
 
 on:
   push:
@@ -6,18 +6,40 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # GitHub Actions가 실행되는 가상 서버(runner) 환경
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Build Backend with Gradle
+      - name: Build with Gradle Wrapper -> jar 파일 생성
         run: |
           cd backend
-          chmod +x gradlew
+          chmod +x ./gradlew
           ./gradlew build -x test
+
+      - name: Transfer Build File using SCP -> jar 파일 원격 서버 복사
+        uses: appleboy/scp-action@master
+        with:
+          username: ubuntu
+          host: ${{ secrets.SSH_HOST }}
+          key: ${{ secrets.SSH_KEY }}
+          source: "backend/build/libs/*.jar" # 모노레포 backend 하위 jar 파일 경로
+          target: "/home/ubuntu/geckozy/" # 서버 상의 배포 대상 폴더
+          strip_components: 3 # backend/build/libs 경로 제거 후 jar 파일만 전송
+
+      - name: docker compose up -> make (mysql, spring, nginx)
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ubuntu
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd ~/geckozy
+            docker compose up -d --build
+            docker image prune -f
