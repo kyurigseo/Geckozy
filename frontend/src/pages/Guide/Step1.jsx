@@ -5,6 +5,7 @@ import Nav from '../../components/nav/Nav'
 
 import background from '../../assets/guide/가이드 배경.svg'
 import stepTitle from '../../assets/guide/1단계 준비.svg'
+import step1intro from '../../assets/guide/1단계 인트로.svg'
 import back from '../../assets/guide/뒤로가기.svg'
 import enclosureButton from '../../assets/guide/사육장 버튼.svg'
 import enclosureButtonPressed from '../../assets/guide/사육장 버튼 눌림.svg'
@@ -37,9 +38,7 @@ const Step1 = () => {
 
       <img className="step1-title" src={stepTitle} alt="1단계 사육장 준비" />
 
-      <p className="step1-intro">
-        크레스티드 게코 에게는 이런 사육장이 좋아요!
-      </p>
+      <img className="step1-intro" src={step1intro} alt="" />
 
       <div className="step1-card card1">
         <div className="card-title">
