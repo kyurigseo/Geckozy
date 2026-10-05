@@ -1,0 +1,209 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+.guide {
+  position: relative;
+  width: 393px;
+  height: 852px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.guide-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+
+.guide-stage {
+  position: relative;
+  width: 100%;
+  height: 390px;
+  margin-top: 20px;
+}
+
+.stage-image {
+  position: absolute;
+  object-fit: contain;
+}
+
+.stage1 {
+  width: 195px;
+  height: 181px;
+
+  top: 217px;
+  left: 99px;
+}
+
+.stage2 {
+  width: 217px;
+  height: 174px;
+  top: 224px;
+  left: 88px;
+}
+
+.stage3 {
+  width: 170px;
+  height: 195px;
+  top: 209px;
+  left: 112px;
+}
+
+.stage4 {
+  width: 212px;
+  height: 158px;
+  top: 238px;
+  left: 91px;
+}
+
+.stage5 {
+  width: 178px;
+  height: 186px;
+  top: 217px;
+  left: 108px;
+}
+
+.stage-title {
+  position: absolute;
+  width: auto;
+  height: 39px;
+
+  top: 426px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.stage-description {
+
+    width: 203px;
+    height: 46px;
+
+ 
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 150%;
+
+    text-align: center;
+    letter-spacing: -0.02em;
+
+    color: #5B3524;
+
+
+    flex: none;
+    order: 1;
+    align-self: stretch;
+    flex-grow: 0;
+
+    position: absolute;
+    top: 464px;
+    left: 50%;
+    transform: translateX(-50%);
+
+}
+
+.guide-arrow {
+  position: absolute;
+  top: 451px;
+
+  width: 32px;
+  height: 45px;
+
+  padding: 0;
+  margin: 0;
+  border: none !important;
+  background: transparent !important;
+  outline: none;
+  box-shadow: none;
+
+  cursor: pointer;
+}
+
+.guide-arrow-left {
+  left: 28px;
+}
+
+.guide-arrow-right {
+  right: 28px;
+}
+
+.guide-arrow img {
+  display: block;
+  width: 33px;
+  height: 44px;
+
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+
+  transform: translateZ(0);
+}
+
+.guide-arrow-left img {
+  transform: translateZ(0) scaleX(-1);
+}
+
+.guide-arrow .arrow-hover {
+  display: none;
+}
+
+.guide-arrow:hover .arrow-normal {
+  display: none;
+}
+
+.guide-arrow:hover .arrow-hover {
+  display: block;
+}
+.guide-start {
+  position: absolute;
+  bottom: 209px;
+  left: 88.5px;
+
+  width: 216px;
+  height: 70px;
+
+  padding: 0;
+  margin: -5px auto 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.guide-start img {
+  width: 100%;
+  height: auto;
+}
+
+.guide-start .start-hover {
+  display: none;
+}
+
+.guide-start:hover .start-normal {
+  display: none;
+}
+
+.guide-start:hover .start-hover {
+  display: block;
+}
+
+.guide-start-text {
+  width: 218px;
+
+  position: absolute;
+
+  bottom:170px;
+  left:87.5px;
+
+}
+
+.guide-background-music {
+  position: absolute;
+  top: 189px;
+  right:26px;
+
+  width: 52px;
+  height: auto;
+}
