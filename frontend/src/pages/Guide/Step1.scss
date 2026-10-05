@@ -3,10 +3,9 @@
 .step1 {
   position: relative;
   width: 393px;
-  min-height: 852px;
+  height: 852px;
   margin: 0 auto;
-  overflow: visible;
-  padding-bottom: 120px;
+  overflow: hidden;
 }
 
 .step1-background {
@@ -15,7 +14,31 @@
   left: 0;
   width: 393px;
   height: 852px;
-  z-index: -1;
+  z-index: 0;
+}
+.step1-scroll {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  width: 393px;
+  height: 852px;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  z-index: 1;
+
+  scrollbar-width: none;
+}
+
+.step1-scroll::-webkit-scrollbar {
+  display: none;
+}
+.step1-inner {
+  position: relative;
+  width: 393px;
+  height: 990px;
 }
 
 .step1-back {
@@ -111,33 +134,122 @@
 
 
 .step1-card {
-  position: absolute;
-  left: 25px;
-  width: 343px;
-  padding: 14px 17px;
-  box-sizing: border-box;
-  background: #FFF8EE;
-  border: 2px solid #FFCB86;
-  border-radius: 18px;
-  color: #5B3524;
+    box-sizing: border-box;
+
+    position: absolute;
+
+    left: 22px;
+    top: 260px;
+
+    background: #FDF7EE;
+
+    border: 2px solid #FFC58D;
+    box-shadow: inset -15px -15px 0px #FFECCB;
+    border-radius: 20px;
+
+    width: 350px;
+
 }
 
 .step1-card .card-title {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-bottom: 8px;
+  
+
+  padding: 13px 0 8px 14px;
+
+  font-family: 'AndongKaturi', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 140%;
+  letter-spacing: -0.02em;
 }
 
 .step1-card .card-title > span:first-child {
-  font-size: 14px;
-  font-weight: bold;
+  position: relative;
+  display: inline-block;
+  z-index: 1;
+
+  font-family: 'AndongKaturi', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 140%;
+
+  text-align: center;
+  letter-spacing: -0.02em;
+
+  color: #FFB8BD;
+
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+
+.step1-card .card-title > span:first-child::before {
+  content: attr(data-text);
+
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  font-family: 'AndongKaturi', sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 140%;
+  letter-spacing: -0.02em;
+
+  color: #5B3524;
+  -webkit-text-stroke: 2.3px #5B3524;
+
+  z-index: -1;
+}
+
+.card-question{
+    margin-right:24px;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0px;
+    gap: 6px;
+
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 150%;
+
+    text-align: right;
+    letter-spacing: -0.02em;
+
+    color: #B47952;
+
+    flex: none;
+    order: 0;
+    flex-grow: 0;
+
+    padding: 0;
+    border: none;
+    background: none;
+
 }
 
 .step1-card .card-title strong {
-  font-size: 16px;
-  font-weight: bold;
+    font-family: 'AndongKaturi', sans-serif;
+    color: #5B3524;
+
+    font-style: normal;
+    font-weight: 400;
+    font-size: 15px;
+    line-height: 140%;
+
+    letter-spacing: -0.02em;
 }
+
 
 .card-question {
   margin-left: auto;
@@ -146,47 +258,58 @@
 }
 
 .step1-card p {
-  margin: 0;
-  font-size: 13px;
-  line-height: 155%;
-  word-break: keep-all;
+    margin: 0 0 0 12px;
+    font-size: 13px;
+    line-height: 155%;
+    word-break: keep-all;
+
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 150%;
+
+    letter-spacing: -0.02em;
+
+    color: #5B3524;
 }
 
 .card1 {
-  top: 276px;
-  height: 117px;
+  top: 260px;
+  height: 120px;
 }
 
 .card2 {
-  top: 400px;
-  height: 92px;
+  top: 390px;
+  height: 101px;
 }
 
 .card3 {
-  top: 499px;
-  height: 117px;
+  top: 501px;
+  height: 120px;
 }
 
 .card4 {
-  top: 623px;
-  height: 100px;
+  top: 631px;
+  height: 101px;
 }
 
 .step1-button {
   position: absolute;
   left: 50%;
-  bottom: 115px;
-  width: 225px;
+  top: 764px;
+
   padding: 0;
   border: none;
   background: none;
   transform: translateX(-50%);
-  cursor: pointer;
 }
 
 .step1-button img {
   display: block;
-  width: 100%;
+  width: 196px;
+
+  margin: 0 auto;
 }
 
 .step1-button .button-pressed {
@@ -199,4 +322,206 @@
 
 .step1-button:hover .button-pressed {
   display: block;
+}
+
+.guide-popup-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 393px;
+  height: 852px;
+  background: rgba(73, 37, 21, 0.28);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.guide-popup {
+    padding: 20px 18px 25px 18px;
+    box-sizing: border-box;
+
+    flex-direction: row;
+    align-items: flex-start;
+
+    gap: 10px;
+
+    position: absolute;
+    width: 351px;
+    background: #FDF7EE;
+    border: 2px solid #DAA576;
+    border-radius: 20px;
+}
+
+.guide-popup-close {
+    position: absolute;
+    top: 20px;
+    right: 14px;
+    width: 32px;
+
+    border: none;
+    border-radius: 50%;
+
+    color: #B47952;
+    font-size: 26px;
+    line-height: 28px;
+    cursor: pointer;
+
+
+    box-sizing: border-box;
+
+    background: #FFECCB;
+
+    border: 2px solid #FFDCB9;
+    border-radius: 16px;
+    transform: matrix(-1, 0, 0, 1, 0, 0);
+
+    flex: none;
+    order: 1;
+    flex-grow: 0;
+
+}
+
+.guide-popup-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'AndongKaturi', sans-serif;
+}
+
+
+.guide-popup-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  
+
+  font-family: 'AndongKaturi', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 140%;
+  letter-spacing: -0.02em;
+}
+
+.guide-popup-title > span:first-child {
+  position: relative;
+  display: inline-block;
+  z-index: 1;
+
+  font-family: 'AndongKaturi', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 140%;
+
+  text-align: center;
+  letter-spacing: -0.02em;
+
+  color: #FFB8BD;
+
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+
+.guide-popup-title > span:first-child::before {
+  content: attr(data-text);
+
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  font-family: 'AndongKaturi', sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 140%;
+  letter-spacing: -0.02em;
+
+  color: #5B3524;
+  -webkit-text-stroke: 2.3px #5B3524;
+
+  z-index: -1;
+}
+
+.guide-popup-title strong {
+    font-family: 'AndongKaturi', sans-serif;
+    color: #5B3524;
+
+    font-style: normal;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 140%;
+
+    letter-spacing: -0.02em;
+
+    
+}
+
+.guide-popup-text {
+
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 150%;
+    letter-spacing: -0.02em;
+
+    color: #5B3524;
+}
+
+.guide-popup-recommend {
+  padding: 11px 11px 9px 11px;
+  background: #FFE8BD;
+  border-radius: 10px;
+  font-family: 'Pretendard', sans-serif;
+  color: #5B3524;
+}
+
+.recommend-title {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.recommend-bar {
+  display: block;
+
+  width: 4px;
+  height: 18px;
+
+  background: #B47952;
+  border-radius: 10px;
+
+  flex-shrink: 0;
+}
+
+.recommend-title strong {
+    font-family: 'Pretendard', sans-serif;
+
+    width: 78px;
+    height: 21px;
+
+    font-style: normal;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 150%;
+
+    letter-spacing: -0.02em;
+
+    color: #492515;
+
+}
+
+.guide-popup-recommend p {
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 150%;
+
+    letter-spacing: -0.02em;
+
+    color: #5B3524;
 }
