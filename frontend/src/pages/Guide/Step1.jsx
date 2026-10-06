@@ -9,12 +9,15 @@ import back from '../../assets/guide/뒤로가기.svg'
 import enclosureButton from '../../assets/guide/사육장 버튼.svg'
 import enclosureButtonPressed from '../../assets/guide/사육장 버튼 눌림.svg'
 
+import EnclosureInfo from './EnclosureInfo'
+
 import './Step1.scss'
+
 
 const Step1 = () => {
   const navigate = useNavigate()
   const [popup, setPopup] = useState(null)
-
+  const [isModalOpen, setIsModalOpen] = useState(false)
   return (
     <div className="step1">
       <img
@@ -121,27 +124,24 @@ const Step1 = () => {
             </p>
           </div>
 
-          <button
+            <button
             className="step1-button"
-            onClick={() => navigate('')}
-          >
-            <img
-              className="button-normal"
-              src={enclosureButton}
-              alt="사육장 정보 입력하기"
-            />
-
-            <img
-              className="button-pressed"
-              src={enclosureButtonPressed}
-              alt="사육장 정보 입력하기"
-            />
-          </button>
+            onClick={() => setIsModalOpen(true)}
+            >
+            <img className="button-normal" src={enclosureButton} alt="사육장 정보 입력하기" />
+            <img className="button-pressed" src={enclosureButtonPressed} alt="사육장 정보 입력하기" />
+            </button>
 
         </div>
       </div>
 
       <Nav />
+
+        {isModalOpen && (
+        <EnclosureInfo
+            onClose={() => setIsModalOpen(false)}
+        />
+        )}
 
       {popup && (
         <div className="guide-popup-overlay">
