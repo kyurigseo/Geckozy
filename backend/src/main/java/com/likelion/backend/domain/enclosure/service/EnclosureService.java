@@ -13,6 +13,7 @@ import com.likelion.backend.domain.enclosure.entity.ManagementSetting;
 import com.likelion.backend.domain.enclosure.repository.EnclosureComponentRepository;
 import com.likelion.backend.domain.enclosure.repository.EnclosureConcernRepository;
 import com.likelion.backend.domain.enclosure.repository.EnclosureRepository;
+import com.likelion.backend.domain.management.repository.ManagementSettingRepository;
 import com.likelion.backend.domain.lizard.entity.Lizard;
 import com.likelion.backend.domain.lizard.repository.LizardRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class EnclosureService {
     private final ConcernRepository concernRepository;
     private final EnclosureComponentRepository enclosureComponentRepository;
     private final EnclosureConcernRepository enclosureConcernRepository;
+    private final ManagementSettingRepository managementSettingRepository; // 1. 리포지토리 필드 추가
 
     public EnclosureCreateResponse createEnclosure(EnclosureCreateRequest request) {
         // 1. 도마뱀 존재 여부 확인
@@ -81,25 +83,20 @@ public class EnclosureService {
                 .build();
     }
 
-
-    // EnclosureService.java 내부에 추가
-
-    @Transactional
     public ManagementSettingResponse updateManagementSetting(Long enclosureId, ManagementSettingRequest request) {
-        // 1. 사육장 존재 여부 확인 (없으면 404 예외)
+        // 1. 사육장 존재 여부 확인 (없으면 예외)
         Enclosure enclosure = enclosureRepository.findById(enclosureId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사육장입니다. id=" + enclosureId));
 
-        // 2. 관리 방식 엔티티 생성 및 저장 (또는 연관관계 설정)
+        // 2. Enum 타입 매핑 및 엔티티 생성
         ManagementSetting managementSetting = ManagementSetting.builder()
                 .enclosure(enclosure)
-                .sprayingMethod(request.getSprayingMethod())
-                .sprayingFrequency(request.getSprayingFrequency())
-                .sprayingTimes(request.getSprayingTimes())
+                .sprayingMethod(request.getSprayingMethod() != null ? ManagementSetting.SprayingMethod.valueOf(request.getSprayingMethod().name()) : null)
+                .sprayingFrequency(request.getSprayingFrequency() != null ? ManagementSetting.SprayingFrequency.valueOf(request.getSprayingFrequency().name()) : null)
                 .lightingEnabled(request.getLightingEnabled())
                 .lightingStartTime(request.getLightingStartTime())
                 .lightingEndTime(request.getLightingEndTime())
-                .heatingUsageMode(request.getHeatingUsageMode())
+                .heatingUsageMode(request.getHeatingUsageMode() != null ? ManagementSetting.HeatingUsageMode.valueOf(request.getHeatingUsageMode().name()) : null)
                 .heatingStartTime(request.getHeatingStartTime())
                 .heatingEndTime(request.getHeatingEndTime())
                 .build();
@@ -108,5 +105,4 @@ public class EnclosureService {
 
         return new ManagementSettingResponse(savedSetting.getId());
     }
-
 }
