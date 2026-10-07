@@ -1,13 +1,13 @@
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 
-.step1 {
+.step2 {
   position: relative;
   width: 393px;
   height: 852px;
   margin: 0 auto;
   overflow: hidden;
 
-  .step1-background {
+  .step2-background {
     position: absolute;
     top: 0;
     left: 0;
@@ -16,7 +16,7 @@
     z-index: 0;
   }
 
-  .step1-scroll {
+  .step2-scroll {
     position: absolute;
     top: 0;
     left: 0;
@@ -32,13 +32,13 @@
     }
   }
 
-  .step1-inner {
+  .step2-inner {
     position: relative;
     width: 393px;
-    height: 990px;
+    height: 939px;
   }
 
-  .step1-back {
+  .step2-back {
     position: absolute;
     top: 56px;
     left: 22px;
@@ -50,7 +50,7 @@
     cursor: pointer;
   }
 
-  .step1-progress {
+  .step2-progress {
     position: absolute;
     top: 65px;
     left: 50%;
@@ -95,7 +95,7 @@
     flex-shrink: 0;
   }
 
-  .step1-title {
+  .step2-title {
     position: absolute;
     top: 101px;
     left: 50%;
@@ -104,7 +104,7 @@
     transform: translateX(-50%);
   }
 
-  .step1-intro {
+  .step2-intro {
     position: absolute;
     top: 228px;
     left: 50%;
@@ -113,11 +113,10 @@
     height: 25px;
   }
 
-  .step1-card {
+  .step2-card {
     box-sizing: border-box;
     position: absolute;
     left: 22px;
-    top: 260px;
     background: #FDF7EE;
     border: 2px solid #FFC58D;
     box-shadow: inset -15px -15px 0px #FFECCB;
@@ -219,28 +218,28 @@
 
   .card1 {
     top: 260px;
-    height: 120px;
+    height: 100px;
   }
 
   .card2 {
-    top: 390px;
+    top: 370px;
     height: 101px;
   }
 
   .card3 {
-    top: 501px;
-    height: 120px;
+    top: 481px;
+    height: 100px;
   }
 
   .card4 {
-    top: 631px;
-    height: 101px;
+    top: 591px;
+    height: 120px;
   }
 
-  .step1-button {
+  .step2-button {
     position: absolute;
     left: 50%;
-    top: 764px;
+    top: 740px;
     padding: 0;
     border: none;
     background: none;
@@ -250,18 +249,6 @@
       display: block;
       width: 196px;
       margin: 0 auto;
-    }
-
-    .button-pressed {
-      display: none;
-    }
-
-    &:hover .button-normal {
-      display: none;
-    }
-
-    &:hover .button-pressed {
-      display: block;
     }
   }
 
@@ -354,13 +341,16 @@
     }
 
     strong {
-      font-family: 'AndongKaturi', sans-serif;
-      color: #5B3524;
+      font-family: 'Pretendard';
       font-style: normal;
-      font-weight: 400;
-      font-size: 18px;
-      line-height: 140%;
+      font-weight: 600;
+      font-size: 15px;
+      line-height: 150%;
+
       letter-spacing: -0.02em;
+
+      color: #492515;
+
     }
   }
 
@@ -430,4 +420,187 @@
       }
     }
   }
+
+//팝업
+  .preparation-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 393px;
+    height: 100%;
+
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+
+    background: rgba(0, 0, 0, 0.20);
+    z-index: 300;
+
+    .preparation-modal {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+
+      box-sizing: border-box;
+      width: 393px;
+      height: 550px;
+
+      padding: 29px 29px 0 22px;
+
+      background: #FDF7EE;
+
+      border-width: 3px 0 0;
+      border-style: solid;
+      border-color: #5B3524;
+      box-shadow: 0 -5px 0 rgba(91, 53, 36, 0.3);
+      border-radius: 40px 40px 0 0;
+
+      overflow: hidden;
+    }
+
+    .preparation-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      height: 30px;
+      margin: 0 0 25px;
+    }
+
+    .preparation-leaf {
+      width: 29px;
+      height: 20px;
+      object-fit: contain;
+
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      transform: translateZ(0);
+    }
+
+    .preparation-title-text {
+      width: auto;
+      height: 20px;
+      object-fit: contain;
+    }
+
+    .preparation-list {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+
+      margin: 25px 0 0 0;
+    }
+
+    .preparation-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 13px;
+
+      width: 100%;
+
+      cursor: pointer;
+
+      input {
+        appearance: none;
+        box-sizing: border-box;
+
+        width: 25px;
+        height: 25px;
+
+        flex: none;
+
+        margin: 0;
+
+        border: none;
+        border-radius: 4px;
+
+        background: #D9D2D4;
+
+        cursor: pointer;
+      }
+
+      input:checked {
+        background: #FFB8BD;
+      }
+
+      input:checked::after {
+        content: '✓';
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        width: 100%;
+        height: 100%;
+
+        font-family: 'Pretendard', sans-serif;
+        font-size: 15px;
+        font-weight: 700;
+        line-height: 1;
+
+        color: #FFFFFF;
+      }
+
+      div {
+        flex: 1;
+        min-width: 0;
+      }
+
+      strong {
+        display: block;
+
+        font-family: 'Pretendard', sans-serif;
+        font-style: normal;
+        font-weight: 600;
+        font-size: 15px;
+        line-height: 150%;
+
+        letter-spacing: -0.02em;
+
+        color: #5B3524;
+
+        margin: 0;
+      }
+
+      p {
+        margin: 1px 0 0;
+
+        font-family: 'Pretendard', sans-serif;
+        font-style: normal;
+        font-weight: 500;
+        font-size: 15px;
+        line-height: 150%;
+
+        letter-spacing: -0.02em;
+
+        color: #7B7578;
+      }
+    }
+
+    .preparation-complete {
+      display: block;
+
+      position: absolute;
+      left: 50%;
+      bottom: 54px;
+
+      width: 162px;
+
+      padding: 0;
+
+      border: none;
+      background: none;
+
+      transform: translateX(-50%);
+
+      cursor: pointer;
+    }
+
+    .preparation-complete img {
+      display: block;
+      width: 162px;
+      height: auto;
+    }
+  }
+  
 }
