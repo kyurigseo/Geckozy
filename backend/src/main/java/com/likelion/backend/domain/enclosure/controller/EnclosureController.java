@@ -1,9 +1,6 @@
 package com.likelion.backend.domain.enclosure.controller;
 
-import com.likelion.backend.domain.enclosure.dto.EnclosureCreateRequest;
-import com.likelion.backend.domain.enclosure.dto.EnclosureCreateResponse;
-import com.likelion.backend.domain.enclosure.dto.ManagementSettingRequest;
-import com.likelion.backend.domain.enclosure.dto.ManagementSettingResponse;
+import com.likelion.backend.domain.enclosure.dto.*;
 import com.likelion.backend.domain.enclosure.service.EnclosureService;
 import com.likelion.backend.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +33,14 @@ public class EnclosureController {
 
         ManagementSettingResponse response = enclosureService.updateManagementSetting(enclosureId, request);
 
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/{enclosureId}/temperatures/status")
+    public ResponseEntity<ApiResponse<TemperatureStatusResponse>> getTemperatureStatus(
+            @PathVariable Long enclosureId) {
+
+        TemperatureStatusResponse response = enclosureService.getTemperatureStatus(enclosureId);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

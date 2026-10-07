@@ -1,6 +1,8 @@
 package com.likelion.backend.domain.enclosure.dto;
 
 import com.likelion.backend.domain.enclosure.entity.Enclosure;
+import com.likelion.backend.domain.enclosure.entity.EnclosureComponent;
+import com.likelion.backend.domain.lizard.entity.Lizard;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -32,10 +34,35 @@ public class EnclosureCreateRequest {
     // 사육장 구성품 목록
     private List<ComponentDto> components;
 
+    public Enclosure toEntity(Lizard lizard) {
+        return Enclosure.builder()
+                .lizard(lizard)
+                .width(width)
+                .height(height)
+                .depth(depth)
+                .material(material)
+                .ventilation(ventilation)
+                .materialOther(materialOther)
+                .wallDesign(wallDesign)
+                .vineDesign(vineDesign)
+                .floorDesign(floorDesign)
+                .decorationDesign(decorationDesign)
+                .concernDetail(concernDetail)
+                .build();
+    }
+
     @Getter
     @NoArgsConstructor
     public static class ComponentDto {
         private String componentCategory;
         private String componentName;
+
+        public EnclosureComponent toEntity(Enclosure enclosure) {
+            return EnclosureComponent.builder()
+                    .enclosure(enclosure)
+                    .componentCategory(componentCategory)
+                    .componentName(componentName)
+                    .build();
+        }
     }
 }

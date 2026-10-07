@@ -1,6 +1,7 @@
 package com.likelion.backend.domain.enclosure.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.likelion.backend.domain.enclosure.entity.Enclosure;
 import com.likelion.backend.domain.management.entity.ManagementSetting;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,4 +32,18 @@ public class ManagementSettingRequest {
 
     @JsonFormat(pattern = "HH:mm")
     private LocalTime heatingEndTime;
+
+    public ManagementSetting toEntity(Enclosure enclosure) {
+        return ManagementSetting.builder()
+                .enclosure(enclosure)
+                .sprayingMethod(sprayingMethod)
+                .sprayingFrequency(sprayingFrequency)
+                .lightingEnabled(lightingEnabled)
+                .lightingStartTime(lightingStartTime)
+                .lightingEndTime(lightingEndTime)
+                .heatingUsageMode(heatingUsageMode)
+                .heatingStartTime(heatingStartTime)
+                .heatingEndTime(heatingEndTime)
+                .build();
+    }
 }

@@ -17,7 +17,7 @@ public class ManagementSetting {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "management_setting_id")
-    private Long id;
+    private Long managementSettingId;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "enclosure_id", nullable = false, unique = true)
