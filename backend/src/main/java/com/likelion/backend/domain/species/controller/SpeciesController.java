@@ -3,7 +3,7 @@ package com.likelion.backend.domain.species.controller;
 import com.likelion.backend.domain.species.dto.SpeciesHumidityCycleGuideResponse;
 import com.likelion.backend.domain.species.dto.SpeciesTemperatureStandardResponse;
 import com.likelion.backend.domain.species.service.SpeciesService;
-import com.likelion.backend.global.dto.ApiResponse;
+import com.likelion.backend.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,8 +18,6 @@ public class SpeciesController {
 
     private final SpeciesService speciesService;
 
-
-     // 1. 종별 온도 기준 제공 API
     @GetMapping("/{speciesId}/temperature-standards")
     public ResponseEntity<ApiResponse<SpeciesTemperatureStandardResponse>> getTemperatureStandards(
             @PathVariable("speciesId") Long speciesId
@@ -28,8 +26,6 @@ public class SpeciesController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-
-     // 2. 습윤 사이클 정보 제공 API
     @GetMapping("/{speciesId}/humidity-cycle-guides")
     public ResponseEntity<ApiResponse<SpeciesHumidityCycleGuideResponse>> getHumidityCycleGuides(
             @PathVariable("speciesId") Long speciesId
