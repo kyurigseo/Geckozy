@@ -4,6 +4,7 @@ import com.likelion.backend.domain.species.entity.Species;
 import com.likelion.backend.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -63,6 +64,11 @@ public class Lizard {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    public enum Gender {
+        MALE, FEMALE
+    }
+
+    @Builder
     public Lizard(
             User user,
             Species species,
@@ -133,7 +139,6 @@ public class Lizard {
         if (sizeCm != null || weightG != null) {
             this.sizeWeightUnknown = false;
         }
-
     }
 
     public void delete() {

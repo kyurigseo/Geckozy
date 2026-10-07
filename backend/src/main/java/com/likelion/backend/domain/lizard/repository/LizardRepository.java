@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface LizardRepository extends JpaRepository<Lizard, Long> {
+
     List<Lizard> findAllByUser_UserIdAndDeletedAtIsNull(Long userId);
+
     Optional<Lizard> findByLizardIdAndDeletedAtIsNull(Long lizardId);
 }
