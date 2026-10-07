@@ -1,5 +1,6 @@
 package com.likelion.backend.domain.enclosure.controller;
 
+import com.likelion.backend.domain.enclosure.dto.EnclosureGuidebookRecommendationResponse;
 import com.likelion.backend.domain.enclosure.dto.EnclosureHumiditySuggestionResponse;
 import com.likelion.backend.domain.enclosure.dto.EnclosureTemperatureSuggestionResponse;
 import com.likelion.backend.domain.enclosure.service.EnclosureService;
@@ -31,6 +32,14 @@ public class EnclosureController {
             @PathVariable("enclosureId") Long enclosureId
     ) {
         EnclosureHumiditySuggestionResponse response = enclosureService.getHumiditySuggestions(enclosureId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/{enclosureId}/guidebooks/recommendations")
+    public ResponseEntity<ApiResponse<EnclosureGuidebookRecommendationResponse>> getGuidebookRecommendations(
+            @PathVariable("enclosureId") Long enclosureId
+    ) {
+        EnclosureGuidebookRecommendationResponse response = enclosureService.getGuidebookRecommendations(enclosureId);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 }
