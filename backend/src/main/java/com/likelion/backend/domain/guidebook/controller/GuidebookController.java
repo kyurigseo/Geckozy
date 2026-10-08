@@ -7,6 +7,7 @@ import com.likelion.backend.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,5 +37,14 @@ public class GuidebookController {
     ) {
         GuidebookScrapResponse response = guidebookService.scrapGuidebook(userId, guidebookId);
         return ResponseEntity.ok(ApiResponse.success("SCRAP_SUCCESS", response));
+    }
+
+    @DeleteMapping("/{guidebookId}/scrap")
+    public ResponseEntity<ApiResponse<GuidebookScrapResponse>> unscrapGuidebook(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable("guidebookId") Long guidebookId
+    ) {
+        GuidebookScrapResponse response = guidebookService.unscrapGuidebook(userId, guidebookId);
+        return ResponseEntity.ok(ApiResponse.success("UNSCRAP_SUCCESS", response));
     }
 }

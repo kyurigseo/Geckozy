@@ -89,6 +89,28 @@ public class GuidebookService {
                 .build();
     }
 
+    public GuidebookScrapResponse unscrapGuidebook(Long userId, Long guidebookId) {
+        if (userId == null) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+
+        if (!MOCK_GUIDEBOOKS.containsKey(guidebookId)) {
+            throw new BusinessException(ErrorCode.GUIDEBOOK_NOT_FOUND);
+        }
+
+        Map<Long, ScrapInfo> scraps = userScraps.get(userId);
+        if (scraps == null || !scraps.containsKey(guidebookId)) {
+            throw new BusinessException(ErrorCode.SCRAP_NOT_FOUND);
+        }
+
+        scraps.remove(guidebookId);
+
+        return GuidebookScrapResponse.builder()
+                .guidebookId(guidebookId)
+                .scrapped(false)
+                .build();
+    }
+
     private record MockGuidebook(String title, String thumbnailUrl, List<MockPage> pages) {}
     private record MockPage(String title, String description, String imageUrl) {}
     private record ScrapInfo(Long guidebookId, String scrappedAt) {}
