@@ -30,7 +30,7 @@ const Step2 = () => {
           </button>
 
           <div className="step2-progress">
-            <div className="progress-dot"></div>
+            <div className="progress-dot active"></div>
             <div className="progress-line"></div>
             <div className="progress-dot active"></div>
             <div className="progress-line"></div>

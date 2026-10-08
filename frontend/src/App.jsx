@@ -6,6 +6,7 @@ import Loading from './pages/Guide/Loading'
 import Step1 from './pages/Guide/Step1'
 import EnclosureCheck from './pages/Guide/EnclosureCheck'
 import Step2 from './pages/Guide/Step2'
+import Step3 from './pages/Guide/Step3'
 
 const App = () => {
   return (
@@ -16,6 +17,7 @@ const App = () => {
       <Route path="/guide/step1" element={<Step1 />} />
       <Route path="/guide/enclosure-check" element={<EnclosureCheck />} />
       <Route path="/guide/step2" element={<Step2 />} />
+      <Route path="/guide/step3" element={<Step3 />} />
     </Routes>
   )
 }
