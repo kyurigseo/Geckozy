@@ -1,3 +1,6 @@
+import './OnboardingButton.scss'
+
+// variant: 'primary'(픽셀 버튼) | 'text'(텍스트 링크형)
 const OnboardingButton = ({ children, type = 'button', variant = 'primary', disabled = false, onClick }) => {
   return (
     <button
@@ -6,7 +9,7 @@ const OnboardingButton = ({ children, type = 'button', variant = 'primary', disa
       disabled={disabled}
       onClick={onClick}
     >
-      {children}
+      <span className="onboarding-button-label">{children}</span>
     </button>
   )
 }

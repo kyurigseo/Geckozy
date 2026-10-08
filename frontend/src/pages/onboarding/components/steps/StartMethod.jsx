@@ -10,9 +10,9 @@ const START_METHOD_OPTIONS = [
   { value: 'custom', label: '직접 꾸미기', image: paletteIcon },
 ]
 
-const StartMethodStep = ({ form, updateForm, onNext, onPrev }) => {
+const StartMethod = ({ form, updateForm, onNext, onPrev }) => {
   return (
-    <section className="start-method-step">
+    <section className="start-method">
       <OnboardingRadioGroup
         name="startMethod"
         options={START_METHOD_OPTIONS}
@@ -26,4 +26,4 @@ const StartMethodStep = ({ form, updateForm, onNext, onPrev }) => {
   )
 }
 
-export default StartMethodStep
+export default StartMethod

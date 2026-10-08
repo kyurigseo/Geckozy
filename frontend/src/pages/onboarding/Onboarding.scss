@@ -1,3 +1,11 @@
 @use 'variables' as *;
 
-// 온보딩 스타일 — 디자인 확정 후 작성
+// 모바일 프레임 기준. 화면이 더 넓으면 가운데 정렬
+.onboarding {
+  position: relative;
+  width: 100%;
+  max-width: $frame-width;
+  min-height: 100dvh;
+  margin: 0 auto;
+  overflow: hidden;
+}

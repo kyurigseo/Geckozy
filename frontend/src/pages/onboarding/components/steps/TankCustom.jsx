@@ -55,24 +55,24 @@ const TANK_PARTS = [
   },
 ]
 
-const TankCustomStep = ({ form, updateForm, onNext, onPrev }) => {
+const TankCustom = ({ form, updateForm, onNext, onPrev }) => {
   const { tank } = form
 
   const isComplete = TANK_PARTS.every((part) => tank[part.key])
 
   return (
-    <section className="tank-custom-step">
-      <div className="tank-custom-step-preview">
+    <section className="tank-custom">
+      <div className="tank-custom-preview">
         <img src={tankEmpty} alt="" />
         {TANK_PARTS.map((part) => {
           const selected = part.options.find((option) => option.value === tank[part.key])
-          return selected && <img key={part.key} className={`tank-custom-step-${part.key}`} src={selected.image} alt="" />
+          return selected && <img key={part.key} className={`tank-custom-${part.key}`} src={selected.image} alt="" />
         })}
       </div>
 
       {TANK_PARTS.map((part) => (
-        <div key={part.key} className="tank-custom-step-part">
-          <span className="tank-custom-step-part-label">{part.label}</span>
+        <div key={part.key} className="tank-custom-part">
+          <span className="tank-custom-part-label">{part.label}</span>
           <OnboardingRadioGroup
             name={`tank-${part.key}`}
             options={part.options}
@@ -88,4 +88,4 @@ const TankCustomStep = ({ form, updateForm, onNext, onPrev }) => {
   )
 }
 
-export default TankCustomStep
+export default TankCustom

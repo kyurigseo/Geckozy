@@ -7,7 +7,7 @@ import geckoPixel from '../../../../assets/onboarding/gecko-pixel-rock.png'
 
 const LOADING_DURATION = 2000
 
-const LoadingStep = () => {
+const Loading = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -17,12 +17,12 @@ const LoadingStep = () => {
   }, [navigate])
 
   return (
-    <section className="loading-step">
-      <img className="loading-step-image" src={geckoPixel} alt="" />
-      <p className="loading-step-text">사육장을 준비하고 있어요</p>
+    <section className="loading">
+      <img className="loading-image" src={geckoPixel} alt="" />
+      <p className="loading-text">사육장을 준비하고 있어요</p>
       <LoadingDots />
     </section>
   )
 }
 
-export default LoadingStep
+export default Loading

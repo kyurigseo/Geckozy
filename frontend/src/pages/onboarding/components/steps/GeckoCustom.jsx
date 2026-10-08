@@ -21,15 +21,15 @@ const GECKO_COLORS = [
   { value: 'blue', swatch: swatchBlue, gecko: geckoBlue },
 ]
 
-const GeckoCustomStep = ({ form, updateForm, onNext, onPrev }) => {
+const GeckoCustom = ({ form, updateForm, onNext, onPrev }) => {
   const { gecko } = form
   const selected = GECKO_COLORS.find((color) => color.value === gecko.color)
 
   const handleChange = (field) => (value) => updateForm('gecko', { ...gecko, [field]: value })
 
   return (
-    <section className="gecko-custom-step">
-      <div className="gecko-custom-step-preview">
+    <section className="gecko-custom">
+      <div className="gecko-custom-preview">
         {selected && <img src={selected.gecko} alt="선택한 도마뱀" />}
       </div>
 
@@ -48,4 +48,4 @@ const GeckoCustomStep = ({ form, updateForm, onNext, onPrev }) => {
   )
 }
 
-export default GeckoCustomStep
+export default GeckoCustom

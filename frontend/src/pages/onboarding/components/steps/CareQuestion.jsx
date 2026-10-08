@@ -6,17 +6,17 @@ import OnboardingButton from '../common/OnboardingButton'
 // 사용 가능 아이콘: icon-water, icon-temperature, icon-calendar, icon-clock
 const CARE_QUESTIONS = []
 
-const CareQuestionStep = ({ form, updateForm, onNext, onPrev }) => {
+const CareQuestion = ({ form, updateForm, onNext, onPrev }) => {
   const { care } = form
 
   const isComplete = CARE_QUESTIONS.every((question) => care[question.key])
 
   return (
-    <section className="care-question-step">
+    <section className="care-question">
       {CARE_QUESTIONS.map((question) => (
-        <div key={question.key} className="care-question-step-question">
+        <div key={question.key} className="care-question-question">
           {question.icon && <img src={question.icon} alt="" />}
-          <span className="care-question-step-title">{question.title}</span>
+          <span className="care-question-title">{question.title}</span>
           <OnboardingRadioGroup
             name={question.key}
             options={question.options}
@@ -32,4 +32,4 @@ const CareQuestionStep = ({ form, updateForm, onNext, onPrev }) => {
   )
 }
 
-export default CareQuestionStep
+export default CareQuestion

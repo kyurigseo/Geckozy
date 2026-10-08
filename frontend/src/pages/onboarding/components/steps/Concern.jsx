@@ -4,9 +4,9 @@ import OnboardingButton from '../common/OnboardingButton'
 // TODO: 디자인 확정 후 고민 항목 채우기. 형식: [{ value, label }]
 const CONCERN_OPTIONS = []
 
-const ConcernStep = ({ form, updateForm, onNext, onPrev }) => {
+const Concern = ({ form, updateForm, onNext, onPrev }) => {
   return (
-    <section className="concern-step">
+    <section className="concern">
       <OnboardingCheckboxGroup
         name="concerns"
         options={CONCERN_OPTIONS}
@@ -20,4 +20,4 @@ const ConcernStep = ({ form, updateForm, onNext, onPrev }) => {
   )
 }
 
-export default ConcernStep
+export default Concern

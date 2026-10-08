@@ -1,15 +1,47 @@
 // 온보딩 공통 색상·폰트 변수
 // 팀 공통 styles/ 폴더가 생기면 이 파일을 그대로 옮기고 @use 경로만 바꾸면 된다.
 // 사용: @use '경로/variables' as *;
+// 피그마 변수가 있는 값은 피그마 이름을 기준으로 이름을 붙이고, 원래 이름을 주석으로 남긴다.
+
+// ===== Layout =====
+$frame-width: 393px; // 피그마 모바일 프레임 너비
 
 // ===== Color =====
-// 에셋에서 추출한 값. 디자인 확정 후 정리
+// 메인컬러
+$color-main-beige-3: #ffdcb9; // 메인컬러/베이지3
+$color-main-beige-4: #fdf7ee; // 메인컬러/베이지4
+$color-main-brown-2: #b47952; // 메인컬러/브라운2
+$color-main-brown-3: #daa576; // 메인컬러/브라운3
+$color-main-outline: #5b3524; // 메인컬러/글꼴 테두리
+
+// GrayScale
+$color-gray-400: #a89ea1; // GrayScale/400
+$color-gray-800: #5b5658; // GrayScale/800
+
+// 피그마 변수 없음 (이펙트 값)
+$color-button-shadow: #f9c593; // 픽셀 버튼 안쪽 그림자
+
+// 로딩 점 — 기존 로딩 1·2.png 에셋에서 추출 (피그마 확인 후 정리)
 $color-brown-dark: #7c4c2d;
 $color-brown-light: #ddc1a8;
-$color-outline: #251001;
-
-// TODO: 디자인 받으면 추가 (배경, 텍스트, 버튼, 비활성 등)
 
 // ===== Font =====
-// TODO: 디자인 받으면 폰트 확정
-$font-family-base: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+// @font-face는 src/styles/fonts.scss. 픽셀 폰트 파일이 들어오기 전까지는 Pretendard로 표시됨
+$font-family-pixel: 'YoonA px Pixman', 'Pretendard', sans-serif;
+$font-family-andong: 'Andong Kkaturi', 'Pretendard', sans-serif; // 안동까투리
+$font-family-pretendard: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+$font-family-base: $font-family-pretendard;
+
+$font-weight-regular: 400;
+$font-weight-medium: 500;
+
+// Pixel/L, Pixel/XL (letterSpacing -2%)
+$font-size-pixel-l: 15px;
+$font-size-pixel-xl: 20px;
+$line-height-pixel: 1.5;
+$letter-spacing-pixel: -0.02em;
+
+// Pretendard 13 Medium (피그마 텍스트 스타일 없음, 진입화면 링크)
+$font-size-caption: 13px;
+$line-height-caption: 1.5;
+$letter-spacing-caption: -0.02em;
