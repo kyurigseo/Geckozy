@@ -1,6 +1,6 @@
 package com.likelion.backend.domain.lizard.dto.request;
 
-import com.likelion.backend.domain.lizard.entity.Gender;
+import com.likelion.backend.domain.lizard.entity.Lizard;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -23,7 +23,7 @@ public record LizardCreateRequest(
         Boolean birthDateUnknown,
 
         @NotNull
-        Gender gender,
+        Lizard.Gender gender,
 
         @NotBlank
         @Size(max = 20)

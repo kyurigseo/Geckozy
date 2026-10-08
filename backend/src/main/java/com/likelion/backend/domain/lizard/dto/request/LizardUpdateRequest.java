@@ -1,6 +1,6 @@
 package com.likelion.backend.domain.lizard.dto.request;
 
-import com.likelion.backend.domain.lizard.entity.Gender;
+import com.likelion.backend.domain.lizard.entity.Lizard;
 import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
@@ -16,7 +16,7 @@ public record LizardUpdateRequest(
 
         Boolean birthDateUnknown,
 
-        Gender gender,
+        Lizard.Gender gender,
 
         @Size(max = 20)
         String characterColor,

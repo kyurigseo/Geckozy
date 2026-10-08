@@ -1,6 +1,6 @@
 package com.likelion.backend.domain.lizard.dto.response;
 
-import com.likelion.backend.domain.lizard.entity.Gender;
+import com.likelion.backend.domain.lizard.entity.Lizard;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -13,7 +13,7 @@ public record LizardResponse(
         LocalDate birthDate,
         boolean birthDateUnknown,
         String characterColor,
-        Gender gender,
+        Lizard.Gender gender,
         BigDecimal sizeCm,
         BigDecimal weightG,
         boolean sizeWeightUnknown
