@@ -1,0 +1,35 @@
+// 프로젝트 공통 폰트 (main.jsx에서 import)
+
+// ===== Pretendard (CDN) =====
+$pretendard-cdn: 'https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/packages/pretendard/dist/web/static/woff2';
+
+@each $weight, $name in (400: 'Regular', 500: 'Medium', 600: 'SemiBold', 700: 'Bold') {
+  @font-face {
+    font-family: 'Pretendard';
+    font-weight: $weight;
+    font-style: normal;
+    font-display: swap;
+    src: url('#{$pretendard-cdn}/Pretendard-#{$name}.woff2') format('woff2');
+  }
+}
+
+// ===== 픽셀 폰트 (로컬 파일) =====
+// TODO: 디자이너에게 폰트 파일을 받으면 src/assets/fonts/에 넣고 아래 주석을 푼다.
+//       파일 이름·확장자는 받은 파일에 맞게 수정. 파일이 없는 동안에는 Pretendard로 대신 표시된다.
+//       (Vite는 없는 파일을 url()로 참조하면 빌드가 실패해서 주석으로 둠)
+//
+// @font-face {
+//   font-family: 'YoonA px Pixman';
+//   font-weight: 400;
+//   font-style: normal;
+//   font-display: swap;
+//   src: url('../assets/fonts/YoonApxPixman.woff2') format('woff2');
+// }
+//
+// @font-face {
+//   font-family: 'Andong Kkaturi';
+//   font-weight: 400;
+//   font-style: normal;
+//   font-display: swap;
+//   src: url('../assets/fonts/AndongKkaturi.woff2') format('woff2');
+// }

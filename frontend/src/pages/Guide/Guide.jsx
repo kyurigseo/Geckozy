@@ -136,7 +136,7 @@ const Guide = () => {
 
       <img className="guide-start-text" src={guideText} alt="원하는 단계를 선택해 시작해주세요." />
 
-      <Nav />
+      {/* <Nav /> */}
       
       {isModalOpen && (
         <LizardInfo

@@ -135,7 +135,7 @@ const Step1 = () => {
         </div>
       </div>
 
-      <Nav />
+      {/* <Nav /> */}
 
         {isModalOpen && (
         <EnclosureInfo

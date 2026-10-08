@@ -95,7 +95,7 @@ const Step2 = () => {
         </div>
       </div>
 
-      <Nav />
+      {/* <Nav /> */}
 
       {popup && (
         <div className="guide-popup-overlay">

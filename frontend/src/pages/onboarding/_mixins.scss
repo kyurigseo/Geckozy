@@ -1,0 +1,45 @@
+@use 'sass:list';
+
+// 픽셀 아트 계단형 모서리를 clip-path로 만든다.
+// $xs, $ys: 좌상단 모서리 계단 좌표 (바깥 → 안쪽, $ys의 첫 값은 0, $xs의 마지막 값은 0).
+// 나머지 세 모서리는 대칭으로 계산한다.
+@function pixel-corner-points($xs, $ys) {
+  $points: ();
+  $count: list.length($xs);
+  @for $i from 1 through $count {
+    $points: list.append($points, (list.nth($xs, $i) list.nth($ys, $i)), comma);
+    @if $i < $count {
+      $points: list.append($points, (list.nth($xs, $i) list.nth($ys, $i + 1)), comma);
+    }
+  }
+  @return $points;
+}
+
+@mixin pixel-corners($xs, $ys) {
+  $points: pixel-corner-points($xs, $ys);
+  $count: list.length($points);
+  $polygon: ();
+
+  // 좌상단 (왼쪽 변 → 위쪽 변)
+  @for $i from $count through 1 {
+    $p: list.nth($points, $i);
+    $polygon: list.append($polygon, list.nth($p, 1) list.nth($p, 2), comma);
+  }
+  // 우상단
+  @for $i from 1 through $count {
+    $p: list.nth($points, $i);
+    $polygon: list.append($polygon, calc(100% - #{list.nth($p, 1)}) list.nth($p, 2), comma);
+  }
+  // 우하단
+  @for $i from $count through 1 {
+    $p: list.nth($points, $i);
+    $polygon: list.append($polygon, calc(100% - #{list.nth($p, 1)}) calc(100% - #{list.nth($p, 2)}), comma);
+  }
+  // 좌하단
+  @for $i from 1 through $count {
+    $p: list.nth($points, $i);
+    $polygon: list.append($polygon, list.nth($p, 1) calc(100% - #{list.nth($p, 2)}), comma);
+  }
+
+  clip-path: polygon($polygon);
+}

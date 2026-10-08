@@ -1,58 +1,53 @@
 .bottom-nav {
   position: absolute;
-  bottom: 27px;
-  left: 50%;
-  transform: translateX(-50%);
-
-  width: 100%;
+  left: 0;
+  bottom: 0;
+  width: 393px;
   height: 114px;
   z-index: 100;
-  overflow: visible;
-
-
 }
 
 .bottom-nav-background {
   position: absolute;
   left: 50%;
-  width: 410px;
+  bottom: 27px;
+  width: 400px;
   transform: translateX(-50%);
+  z-index: 1;
 }
 
 .bottom-nav-menu {
   position: absolute;
   left: 50%;
-  transform: translateX(-50%);
+  bottom: 50px;
   width: 310px;
-  height: 100%;
+  
+  transform: translateX(-50%);
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   z-index: 2;
 }
+
 .bottom-nav-item {
   width: 60px;
   height: 65px;
-
+  padding: 0;
   border: none;
   background: none;
-
   display: flex;
   align-items: flex-end;
   justify-content: center;
-
 }
 
 .bottom-nav-item img {
   width: 67px;
   height: 72px;
-
   display: block;
 }
 
 .bottom-nav-item.active img {
   width: 80px;
   height: 95px;
-
   filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
 }

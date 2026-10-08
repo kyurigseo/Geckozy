@@ -87,7 +87,7 @@ const Step3 = () => {
         </div>
       </div>
 
-      <Nav />
+      {/* <Nav /> */}
     </div>
   )
 }

@@ -1,0 +1,73 @@
+@use '../../variables' as *;
+
+// 피그마 '진입 화면' (393x852). 세로 간격은 피그마 절대 좌표 기준
+.login {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100dvh;
+  padding: 79px 36px 40px;
+  background: url('../../../../assets/onboarding/bg-entry.png') center top / cover no-repeat;
+}
+
+// 피그마 스피커 아이콘 52x56, top 79
+.login-sound {
+  width: 52px;
+  height: 56px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+
+  img {
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated; // 1x 픽셀 에셋이 레티나에서 흐려지지 않도록
+  }
+}
+
+.login-logo {
+  width: 220px;
+  height: 153px;
+  margin-top: 32px; // 스피커 아이콘 아래(135) ↔ 로고(167)
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 17px; // 비밀번호 입력창 ↔ 로그인 버튼
+  width: 100%;
+  margin-top: 40px; // 로고 ↔ 이메일 입력창
+}
+
+.login-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.login-links {
+  display: flex;
+  align-items: center;
+  gap: 6px; // 피그마: 구분자 양쪽 공백 2칸
+  margin-top: 17px;
+}
+
+.login-links-divider {
+  font-family: $font-family-pretendard;
+  font-size: $font-size-caption;
+  font-weight: $font-weight-medium;
+  line-height: $line-height-caption;
+  color: $color-gray-800;
+}
+
+// 피그마에 없는 요소 (빈칸 검사 안내)
+.login-error {
+  margin: 8px 0 0;
+  font-family: $font-family-pretendard;
+  font-size: $font-size-caption;
+  font-weight: $font-weight-medium;
+  line-height: $line-height-caption;
+  letter-spacing: $letter-spacing-caption;
+  color: $color-main-outline;
+}
