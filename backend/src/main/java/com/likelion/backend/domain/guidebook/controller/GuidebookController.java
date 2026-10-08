@@ -1,6 +1,7 @@
 package com.likelion.backend.domain.guidebook.controller;
 
 import com.likelion.backend.domain.guidebook.dto.GuidebookPageResponse;
+import com.likelion.backend.domain.guidebook.dto.GuidebookScrapListResponse;
 import com.likelion.backend.domain.guidebook.dto.GuidebookScrapResponse;
 import com.likelion.backend.domain.guidebook.service.GuidebookService;
 import com.likelion.backend.global.response.ApiResponse;
@@ -46,5 +47,13 @@ public class GuidebookController {
     ) {
         GuidebookScrapResponse response = guidebookService.unscrapGuidebook(userId, guidebookId);
         return ResponseEntity.ok(ApiResponse.success("UNSCRAP_SUCCESS", response));
+    }
+
+    @GetMapping("/scraps")
+    public ResponseEntity<ApiResponse<GuidebookScrapListResponse>> getScrappedGuidebooks(
+            @AuthenticationPrincipal Long userId
+    ) {
+        GuidebookScrapListResponse response = guidebookService.getScrappedGuidebooks(userId);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 }

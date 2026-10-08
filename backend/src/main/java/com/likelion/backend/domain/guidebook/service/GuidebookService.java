@@ -1,6 +1,7 @@
 package com.likelion.backend.domain.guidebook.service;
 
 import com.likelion.backend.domain.guidebook.dto.GuidebookPageResponse;
+import com.likelion.backend.domain.guidebook.dto.GuidebookScrapListResponse;
 import com.likelion.backend.domain.guidebook.dto.GuidebookScrapResponse;
 import com.likelion.backend.global.exception.BusinessException;
 import com.likelion.backend.global.exception.ErrorCode;
@@ -9,8 +10,10 @@ import org.springframework.stereotype.Service;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -108,6 +111,39 @@ public class GuidebookService {
         return GuidebookScrapResponse.builder()
                 .guidebookId(guidebookId)
                 .scrapped(false)
+                .build();
+    }
+
+    public GuidebookScrapListResponse getScrappedGuidebooks(Long userId) {
+        if (userId == null) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+
+        Map<Long, ScrapInfo> scraps = userScraps.get(userId);
+        if (scraps == null || scraps.isEmpty()) {
+            return GuidebookScrapListResponse.builder()
+                    .guidebooks(Collections.emptyList())
+                    .build();
+        }
+
+        List<GuidebookScrapListResponse.GuidebookScrapItemDto> items = scraps.values().stream()
+                .map(scrap -> {
+                    MockGuidebook guidebook = MOCK_GUIDEBOOKS.get(scrap.guidebookId());
+                    if (guidebook == null) {
+                        return null;
+                    }
+                    return GuidebookScrapListResponse.GuidebookScrapItemDto.builder()
+                            .guidebookId(scrap.guidebookId())
+                            .title(guidebook.title())
+                            .thumbnailUrl(guidebook.thumbnailUrl())
+                            .scrappedAt(scrap.scrappedAt())
+                            .build();
+                })
+                .filter(Objects::nonNull)
+                .toList();
+
+        return GuidebookScrapListResponse.builder()
+                .guidebooks(items)
                 .build();
     }
 
