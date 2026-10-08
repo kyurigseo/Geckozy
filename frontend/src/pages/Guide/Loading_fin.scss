@@ -1,4 +1,4 @@
-.loading {
+.loading-fin {
   position: relative;
   width: 393px;
   height: 852px;
@@ -142,20 +142,27 @@
   }
   h1{
     position: absolute;
-    height: 36px;
-    left: 71.5px;
     top: 234px;
+    left: 23.5px;
 
     font-family: 'yoon-px-pixman', sans-serif;
 
+    height: 32px;
+
     font-style: normal;
     font-weight: 400;
-    font-size: 24px;
+    font-size: 21px;
     line-height: 150%;
+
     text-align: center;
     letter-spacing: 0.15em;
 
+
     color: #5B3524;
+
+    flex: none;
+    order: 0;
+    flex-grow: 0;
 
   }
   p{

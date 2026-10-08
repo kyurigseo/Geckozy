@@ -9,7 +9,7 @@ import loadingStone from '../../assets/guide/로딩중 돌.svg'
 import loadingStoneSelected from '../../assets/guide/로딩중 돌 선택.svg'
 import backgroundMusic from '../../assets/guide/배경음악.svg'
 
-import './Loading.scss'
+import './Loading_fin.scss'
 
 const Loading = () => {
   const navigate = useNavigate()
@@ -19,18 +19,18 @@ const Loading = () => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigate(`/guide/step${step}`)
+      navigate(`/home`)
     }, 2000)
 
     return () => clearTimeout(timer)
   }, [navigate, step])
 
   return (
-    <div className="loading">
+    <div className="loading-fin">
 
       <img className="loading-background" src={background} alt="" />
-      <h1>정보가 저장되었어요!</h1>
-      <p>내 도마뱀에 적합한 가이드를 불러 오고 있어요...</p>
+      <h1>도마뱀을 맞이할 준비를 마쳤어요!</h1>
+      <p>앞으로는 홈에서 사육환경을 계속 확인할 수 있어요.</p>
       <img className="loading-lizard" src={loadinglizard} alt="" />
 
       <div className="loading-content">

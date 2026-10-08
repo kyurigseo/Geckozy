@@ -1,6 +1,5 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Nav from '../../components/nav/Nav'
 
 import background from '../../assets/guide/가이드 배경.svg'
 import stepTitle from '../../assets/guide/3단계 준비.svg'
@@ -8,11 +7,11 @@ import step3intro from '../../assets/guide/3단계 인트로.svg'
 import back from '../../assets/guide/뒤로가기.svg'
 import sensorButton from '../../assets/guide/센서측정확인하기.svg'
 
-
 import './Step3.scss'
 
 const Step3 = () => {
   const navigate = useNavigate()
+  const [isSensorConnected, setIsSensorConnected] = useState(true)
 
   return (
     <div className="step3">
@@ -51,8 +50,24 @@ const Step3 = () => {
               핸드폰의 블루투스를 통해 온습도 센서를 앱과 연결해주세요.
             </p>
 
-            <div className="sensor-connect">
-              연결된 센서가 없어요.
+            <div className={`sensor-connect ${isSensorConnected ? 'connected' : ''}`}>
+              {isSensorConnected ? (
+                <>
+                  <div className="sensor-name">
+                    <span className="sensor-status"></span>
+                    <strong>Geckozy Sensor</strong>
+                  </div>
+
+                  <div className="sensor-info">
+                    <span>연결됨</span>
+                    <span>·</span>
+                    <span className="battery-icon"></span>
+                    <span>&nbsp;배터리 92%</span>
+                  </div>
+                </>
+              ) : (
+                <span>연결된 센서가 없어요.</span>
+              )}
             </div>
           </div>
 
@@ -70,24 +85,27 @@ const Step3 = () => {
               센서 위치에 따라 측정값이 달라질 수 있으므로, 열원이나 보금자리가 직접 닿는 곳은 피해주세요.
             </p>
 
-            <p>설치할 때 아래 항목을 확인해주세요.</p>
+            <div className="sensor-check-box">
+              <div className="sensor-check-title">
+                <span className="sensor-check-bar"></span>
+                <strong>설치할 때 확인해주세요</strong>
+              </div>
 
-            <div className="sensor-check-list">
-              <label><input type="checkbox" /> 센서가 열원 바로 아래에 있지 않아요</label>
-              <label><input type="checkbox" /> 몸무게 등이 센서에 직접 닿지 않아요</label>
-              <label><input type="checkbox" /> 물그릇 바로 옆처럼 습도가 과도적으로 높은 곳을 피했어요</label>
-              <label><input type="checkbox" /> 도마뱀의 센서를 떨어뜨리거나 손상시키지 않도록 주의했어요</label>
+              <div className="sensor-check-list">
+                <label><input type="checkbox" /> 센서가 열원 바로 아래에 있지 않아요</label>
+                <label><input type="checkbox" /> 몸무게 등이 센서에 직접 닿지 않아요</label>
+                <label><input type="checkbox" /> 물그릇 바로 옆처럼 습도가 과도적으로 높은 곳을 피했어요</label>
+                <label><input type="checkbox" /> 도마뱀의 센서를 떨어뜨리거나 손상시키지 않도록 주의했어요</label>
+              </div>
             </div>
           </div>
 
-          <button className="step3-button">
+          <button className="step3-button" onClick={() => navigate('/guide/step4')}>
             <img src={sensorButton} alt="센서 측정 확인하기" />
           </button>
 
         </div>
       </div>
-
-      {/* <Nav /> */}
     </div>
   )
 }

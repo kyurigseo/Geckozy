@@ -134,6 +134,7 @@ const Guide = () => {
         <img className="start-hover" src={startAction} alt="Start" />
       </button>
 
+
       <img className="guide-start-text" src={guideText} alt="원하는 단계를 선택해 시작해주세요." />
 
       {/* <Nav /> */}
