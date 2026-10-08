@@ -1,0 +1,15 @@
+// 온보딩 공통 색상·폰트 변수
+// 팀 공통 styles/ 폴더가 생기면 이 파일을 그대로 옮기고 @use 경로만 바꾸면 된다.
+// 사용: @use '경로/variables' as *;
+
+// ===== Color =====
+// 에셋에서 추출한 값. 디자인 확정 후 정리
+$color-brown-dark: #7c4c2d;
+$color-brown-light: #ddc1a8;
+$color-outline: #251001;
+
+// TODO: 디자인 받으면 추가 (배경, 텍스트, 버튼, 비활성 등)
+
+// ===== Font =====
+// TODO: 디자인 받으면 폰트 확정
+$font-family-base: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;

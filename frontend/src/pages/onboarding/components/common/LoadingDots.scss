@@ -1,0 +1,24 @@
+@use '../../variables' as *;
+
+// 크기·간격·속도는 디자인 확정 후 조정
+.loading-dots {
+  display: flex;
+  gap: 8px;
+}
+
+.loading-dots-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: $color-brown-light;
+  animation: loading-dots-blink 0.9s infinite steps(1);
+}
+
+@keyframes loading-dots-blink {
+  0% {
+    background-color: $color-brown-dark;
+  }
+  33% {
+    background-color: $color-brown-light;
+  }
+}
