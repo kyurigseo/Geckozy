@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+
 import Nav from '../../components/nav/Nav'
 
 import background from '../../assets/guide/가이드 배경.svg'
@@ -17,6 +18,13 @@ const Step2 = () => {
   const navigate = useNavigate()
   const [popup, setPopup] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [checked, setChecked] = useState([false, false, false, false, false])
+
+  const handleCheck = (index) => {
+    setChecked((prev) => prev.map((item, i) => i === index ? !item : item))
+  }
+
+  const isAllChecked = checked.every((item) => item)
 
   return (
     <div className="step2">
@@ -51,8 +59,10 @@ const Step2 = () => {
               <strong>이동/은신 공간</strong>
               <button className="card-question" onClick={() => setPopup('Placement')}>어떻게 배치하면 좋을까요? 〉</button>
             </div>
+
             <p>
-              오르고 숨을 수 있는 공간을 만들어주세요. 가지와 덩굴을 여러 높이로<br />연결하고, 몸을 가리고 쉴 수 있는 공간도 함께 마련해주세요.
+              오르고 숨을 수 있는 공간을 만들어주세요. 가지와 덩굴을 여러 높이로<br />
+              연결하고, 몸을 가리고 쉴 수 있는 공간도 함께 마련해주세요.
             </p>
           </div>
 
@@ -62,8 +72,10 @@ const Step2 = () => {
               <strong>바닥재</strong>
               <button className="card-question" onClick={() => setPopup('Substrate')}>어떤 바닥재가 좋을까요? 〉</button>
             </div>
+
             <p>
-              성장 단계와 관리 방식에 맞는 바닥재를 준비해주세요. 습도 관리와<br />청소가 가능하고 개체에게 안전한 바닥재인지 확인해주세요.
+              성장 단계와 관리 방식에 맞는 바닥재를 준비해주세요. 습도 관리와<br />
+              청소가 가능하고 개체에게 안전한 바닥재인지 확인해주세요.
             </p>
           </div>
 
@@ -72,8 +84,10 @@ const Step2 = () => {
               <span data-text="03">03</span>
               <strong>물/먹이 공간</strong>
             </div>
+
             <p>
-              편하게 접근할 수 있는 급여 공간을 마련해주세요. 깨끗한 물을<br />제공하고 먹이와 물그릇이 안정적으로 놓여 있는지 확인해주세요.
+              편하게 접근할 수 있는 급여 공간을 마련해주세요. 깨끗한 물을<br />
+              제공하고 먹이와 물그릇이 안정적으로 놓여 있는지 확인해주세요.
             </p>
           </div>
 
@@ -83,8 +97,11 @@ const Step2 = () => {
               <strong>조명/히팅 장비</strong>
               <button className="card-question" onClick={() => setPopup('Equipment')}>어떤 장비가 필요한가요? 〉</button>
             </div>
+
             <p>
-              빛과 온도를 관리할 장비를 준비해주세요. 낮과 밤의 주기를 위한<br />조명과 필요한 열원을 준비하고, 열원을 사용할 경우 온도조절기를<br />함께 설치해주세요.
+              빛과 온도를 관리할 장비를 준비해주세요. 낮과 밤의 주기를 위한<br />
+              조명과 필요한 열원을 준비하고, 열원을 사용할 경우 온도조절기를<br />
+              함께 설치해주세요.
             </p>
           </div>
 
@@ -94,8 +111,6 @@ const Step2 = () => {
 
         </div>
       </div>
-
-      {/* <Nav /> */}
 
       {popup && (
         <div className="guide-popup-overlay">
@@ -140,7 +155,8 @@ const Step2 = () => {
                 </p>
 
                 <p className="guide-popup-text">
-                  크레스티드 게코 사육에서는 <strong>코코넛 파이버나 토양계 바닥<br />재</strong> 등이 사용되지만, 어린 개체나 상태를 자주 관찰해야<br />하는 경우에는 <strong>관리하기 쉬운 종이타월</strong>을 사용해요.
+                  크레스티드 게코 사육에서는 <strong>코코넛 파이버나 토양계 바닥<br />재</strong> 등이 사용되지만, 어린 개체나 상태를 자주 관찰해야<br />
+                  하는 경우에는 <strong>관리하기 쉬운 종이타월</strong>을 사용해요.
                 </p>
 
                 <div className="guide-popup-recommend">
@@ -199,7 +215,7 @@ const Step2 = () => {
           </div>
         </div>
       )}
-//팝업
+
       {isModalOpen && (
         <div className="preparation-overlay" onClick={() => setIsModalOpen(false)}>
           <div className="preparation-modal" onClick={(e) => e.stopPropagation()}>
@@ -212,7 +228,7 @@ const Step2 = () => {
             <div className="preparation-list">
 
               <label className="preparation-item">
-                <input type="checkbox" defaultChecked />
+                <input type="checkbox" checked={checked[0]} onChange={() => handleCheck(0)} />
                 <div>
                   <strong>가지와 덩굴을 여러 높이에 연결해 설치했어요</strong>
                   <p>위아래로 이동할 수 있는 경로가 있어요.</p>
@@ -220,7 +236,7 @@ const Step2 = () => {
               </label>
 
               <label className="preparation-item">
-                <input type="checkbox" defaultChecked />
+                <input type="checkbox" checked={checked[1]} onChange={() => handleCheck(1)} />
                 <div>
                   <strong>몸을 충분히 가릴 수 있는 은신 공간을 마련했어요</strong>
                   <p>잎이나 은신처처럼 편하게 숨어 쉴 공간이 있어요.</p>
@@ -228,7 +244,7 @@ const Step2 = () => {
               </label>
 
               <label className="preparation-item">
-                <input type="checkbox" />
+                <input type="checkbox" checked={checked[2]} onChange={() => handleCheck(2)} />
                 <div>
                   <strong>성장 단계와 관리 방식에 맞는 바닥재를 준비했어요</strong>
                   <p>바닥재가 지나치게 젖어 있거나 오염되어 있지 않아요.</p>
@@ -236,7 +252,7 @@ const Step2 = () => {
               </label>
 
               <label className="preparation-item">
-                <input type="checkbox" />
+                <input type="checkbox" checked={checked[3]} onChange={() => handleCheck(3)} />
                 <div>
                   <strong>물과 먹이에 편하게 접근할 수 있는 공간을 마련했어요</strong>
                   <p>그릇이 쉽게 넘어지지 않도록 안정적으로 배치했어요.</p>
@@ -244,7 +260,7 @@ const Step2 = () => {
               </label>
 
               <label className="preparation-item">
-                <input type="checkbox" />
+                <input type="checkbox" checked={checked[4]} onChange={() => handleCheck(4)} />
                 <div>
                   <strong>낮과 밤을 구분할 수 있는 조명을 준비했어요</strong>
                   <p>일정한 주기로 조명을 켜고 끌 수 있어요.</p>
@@ -253,7 +269,11 @@ const Step2 = () => {
 
             </div>
 
-            <button className="preparation-complete" onClick={() => navigate('/guide/step3')}>
+            <button
+              className="preparation-complete"
+              disabled={!isAllChecked}
+              onClick={() => navigate('/guide/step3')}
+            >
               <img src={completeButton} alt="완료" />
             </button>
 

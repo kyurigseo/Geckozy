@@ -11,7 +11,7 @@ import './Step3.scss'
 
 const Step3 = () => {
   const navigate = useNavigate()
-  const [isSensorConnected, setIsSensorConnected] = useState(true)
+  const [isSensorConnected, setIsSensorConnected] = useState(false)
 
   return (
     <div className="step3">
