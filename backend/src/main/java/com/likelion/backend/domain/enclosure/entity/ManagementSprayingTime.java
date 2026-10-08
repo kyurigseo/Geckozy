@@ -21,14 +21,13 @@ public class ManagementSprayingTime {
 
     public ManagementSprayingTime(ManagementSetting managementSetting, SprayingTime sprayingTime) {
         this.managementSetting = managementSetting;
-        this.id = new ManagementSprayingTimeId(managementSetting.getId(), sprayingTime);
+        this.id = new ManagementSprayingTimeId(managementSetting.getManagementSettingId(), sprayingTime);
     }
 
     public enum SprayingTime {
         MORNING, DAY, EVENING, NIGHT
     }
 
-    // --- 복합키 클래스 ---
     @Embeddable
     @Getter
     @NoArgsConstructor

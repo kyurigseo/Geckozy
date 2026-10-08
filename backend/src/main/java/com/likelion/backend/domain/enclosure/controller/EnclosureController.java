@@ -1,24 +1,12 @@
 package com.likelion.backend.domain.enclosure.controller;
 
-import com.likelion.backend.domain.enclosure.dto.EnclosureCreateRequest;
-import com.likelion.backend.domain.enclosure.dto.EnclosureCreateResponse;
-import com.likelion.backend.domain.enclosure.dto.EnclosureGuidebookRecommendationResponse;
-import com.likelion.backend.domain.enclosure.dto.EnclosureHumiditySuggestionResponse;
-import com.likelion.backend.domain.enclosure.dto.EnclosureTemperatureSuggestionResponse;
-import com.likelion.backend.domain.enclosure.dto.ManagementSettingRequest;
-import com.likelion.backend.domain.enclosure.dto.ManagementSettingResponse;
+import com.likelion.backend.domain.enclosure.dto.*;
 import com.likelion.backend.domain.enclosure.service.EnclosureService;
 import com.likelion.backend.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -45,6 +33,14 @@ public class EnclosureController {
 
         ManagementSettingResponse response = enclosureService.updateManagementSetting(enclosureId, request);
 
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/{enclosureId}/temperatures/status")
+    public ResponseEntity<ApiResponse<TemperatureStatusResponse>> getTemperatureStatus(
+            @PathVariable("enclosureId") Long enclosureId) {
+
+        TemperatureStatusResponse response = enclosureService.getTemperatureStatus(enclosureId);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
