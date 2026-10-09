@@ -6,20 +6,38 @@ import MyPage from "./pages/my/MyPage";
 import MyGeckoCustom from "./pages/my/components/screens/GeckoCustom";
 import MyTankCustom from "./pages/my/components/screens/TankCustom";
 
+import Guide from "./pages/Guide/Guide";
+import LizardInfo from "./pages/Guide/LizardInfo";
+import Loading from "./pages/Guide/Loading";
+import Step1 from "./pages/Guide/Step1";
+import EnclosureCheck from "./pages/Guide/EnclosureCheck";
+import Step2 from "./pages/Guide/Step2";
+import Step3 from "./pages/Guide/Step3";
+import Step4 from "./pages/Guide/Step4";
+import Step5 from "./pages/Guide/Step5";
+import LoadingFin from "./pages/Guide/Loading_fin";
+
 function App() {
   return (
     <div className="app">
       <Routes>
-        {/* Nav 없는 페이지 */}
         <Route path="/onboarding" element={<Onboarding />} />
-        {/* TODO: 마이 > 도마뱀·사육장 커스텀 디자인 받으면 하단바 여부 확정 (지금은 온보딩 커스텀처럼 하단바 없음) */}
         <Route path="/my/gecko-custom" element={<MyGeckoCustom />} />
         <Route path="/my/tank-custom" element={<MyTankCustom />} />
 
-        {/* Nav 있는 페이지: 페이지가 생기면 여기에 추가 (예: /home, /record, /guide, /my) */}
+        <Route path="/lizard-info" element={<LizardInfo />} />
+        <Route path="/loading" element={<Loading />} />
+        <Route path="/guide/enclosure-check" element={<EnclosureCheck />} />
+        <Route path="/loading-fin" element={<LoadingFin />} />
+
         <Route element={<Layout />}>
           <Route path="/my" element={<MyPage />} />
-          {/* TODO: 임시. 페이지가 아직 없어서 온보딩 외 모든 주소에서 Nav만 보이도록 함. 페이지 추가 후 삭제 */}
+          <Route path="/guide" element={<Guide />} />
+          <Route path="/guide/step1" element={<Step1 />} />
+          <Route path="/guide/step2" element={<Step2 />} />
+          <Route path="/guide/step3" element={<Step3 />} />
+          <Route path="/guide/step4" element={<Step4 />} />
+          <Route path="/guide/step5" element={<Step5 />} />
           <Route path="*" element={null} />
         </Route>
       </Routes>

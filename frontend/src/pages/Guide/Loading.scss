@@ -1,0 +1,180 @@
+.guide-loading {
+  position: relative;
+  width: 393px;
+  height: 852px;
+  margin: 0 auto;
+  overflow: hidden;
+
+  background: #FDF7EE;
+
+
+  .loading-background{
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    width: 393px;
+    height: 852px;
+
+    z-index: 100;
+  }
+
+  .loading-lizard{
+      width: 160px;
+      height: 81px;
+      z-index: 100;
+
+      position: absolute;
+      top: 363px;
+      left: 116.5px;
+  }
+
+  .loading-content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+
+
+  .loading-text {
+    position: absolute;
+    top: 468px;
+    left: 50%;
+
+    width: 119px;
+    height: 30px;
+
+    transform: translateX(-50%);
+  }
+
+  .loading-stones {
+    position: absolute;
+    top: 516px;
+    left: 50%;
+
+    display: flex;
+    gap: 11px;
+
+    transform: translateX(-50%);
+  }
+
+  .loading-stone {
+    position: relative;
+    width: 16px;
+    height: 16px;
+  }
+
+  .loading-stone img {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    width: 16px;
+    height: 16px;
+  }
+
+  .loading-stone .selected {
+    opacity: 0;
+  }
+
+  .loading-stone:nth-child(1) .selected {
+    animation: stone1 1.5s infinite;
+  }
+
+  .loading-stone:nth-child(2) .selected {
+    animation: stone2 1.5s infinite;
+  }
+
+  .loading-stone:nth-child(3) .selected {
+    animation: stone3 1.5s infinite;
+  }
+
+  @keyframes stone1 {
+    0%,
+    33.33% {
+      opacity: 1;
+    }
+
+    33.34%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes stone2 {
+    0%,
+    33.33% {
+      opacity: 0;
+    }
+
+    33.34%,
+    66.66% {
+      opacity: 1;
+    }
+
+    66.67%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes stone3 {
+    0%,
+    66.66% {
+      opacity: 0;
+    }
+
+    66.67%,
+    100% {
+      opacity: 1;
+    }
+  }
+
+  .backgroundMusic{
+      width: 52px;
+      height: 56px;
+
+      position: absolute;
+      top: 603px;
+      left: 172px;
+
+  }
+  h1{
+    position: absolute;
+    height: 36px;
+    left: 71.5px;
+    top: 234px;
+
+    font-family: 'yoon-px-pixman', sans-serif;
+
+    font-style: normal;
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 150%;
+    text-align: center;
+    letter-spacing: 0.15em;
+
+    color: #5B3524;
+
+  }
+  p{
+    position: absolute;
+    width: 341px;
+    height: 20px;
+
+    left: 26px;
+    top: 280px;
+
+    font-family: 'yoon-px-pixman', sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 150%;
+
+    text-align: center;
+    letter-spacing: 0.15em;
+
+    color: #DAA576;
+  }
+}

@@ -1,0 +1,433 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+.step1 {
+  position: relative;
+  width: 393px;
+  height: 852px;
+  margin: 0 auto;
+  overflow: hidden;
+
+  .step1-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 393px;
+    height: 852px;
+    z-index: 0;
+  }
+
+  .step1-scroll {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 393px;
+    height: 852px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 1;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .step1-inner {
+    position: relative;
+    width: 393px;
+    height: 990px;
+  }
+
+  .step1-back {
+    position: absolute;
+    top: 50px;
+    left: 22px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+  }
+
+  .step1-progress {
+    position: absolute;
+    top: 65px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    z-index: 1;
+  }
+
+  .progress-dot {
+    position: relative;
+    z-index: 10;
+    flex-shrink: 0;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    box-sizing: border-box;
+    background: #FFDCB9;
+    border: 1.5px solid #FFFFFF;
+
+    &.active {
+      position: relative;
+      z-index: 20;
+      width: 13px;
+      height: 13px;
+      box-sizing: border-box;
+      background: #FF646E;
+      border: 1.5px solid #FFFFFF;
+      box-shadow: 0 0 0 6px #FFB8BD;
+    }
+  }
+
+  .progress-line {
+    position: relative;
+    z-index: 0;
+    width: 41px;
+    height: 3px;
+    margin-left: -6px;
+    margin-right: -6px;
+    background: #FDF7EE;
+    border: none;
+    flex-shrink: 0;
+  }
+
+  .step1-title {
+    position: absolute;
+    top: 101px;
+    left: 50%;
+    width: 358px;
+    height: 98px;
+    transform: translateX(-50%);
+  }
+
+  .step1-intro {
+    position: absolute;
+    top: 228px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px;
+    height: 25px;
+  }
+
+  .step1-card {
+    box-sizing: border-box;
+    position: absolute;
+    left: 22px;
+    top: 260px;
+    background: #FDF7EE;
+    border: 2px solid #FFC58D;
+    box-shadow: inset -15px -15px 0px #FFECCB;
+    border-radius: 20px;
+    width: 350px;
+
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 13px 0 8px 14px;
+      font-family: 'AndongKaturi', sans-serif;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 140%;
+      letter-spacing: -0.02em;
+
+      > span:first-child {
+        position: relative;
+        display: inline-block;
+        z-index: 1;
+        font-family: 'AndongKaturi', sans-serif;
+        font-style: normal;
+        font-weight: 400;
+        font-size: 16px;
+        line-height: 140%;
+        text-align: center;
+        letter-spacing: -0.02em;
+        color: #FFB8BD;
+        flex: none;
+        order: 0;
+        flex-grow: 0;
+
+        &::before {
+          content: attr(data-text);
+          position: absolute;
+          top: 0;
+          left: 0;
+          font-family: 'AndongKaturi', sans-serif;
+          font-style: normal;
+          font-weight: 500;
+          font-size: 16px;
+          line-height: 140%;
+          letter-spacing: -0.02em;
+          color: #5B3524;
+          -webkit-text-stroke: 2.3px #5B3524;
+          z-index: -1;
+        }
+      }
+
+      strong {
+        font-family: 'AndongKaturi', sans-serif;
+        color: #5B3524;
+        font-style: normal;
+        font-weight: 400;
+        font-size: 15px;
+        line-height: 140%;
+        letter-spacing: -0.02em;
+      }
+    }
+
+    p {
+      margin: 0 0 0 12px;
+      font-size: 13px;
+      line-height: 155%;
+      word-break: keep-all;
+      font-family: 'Pretendard', sans-serif;
+      font-style: normal;
+      font-weight: 600;
+      font-size: 12px;
+      line-height: 150%;
+      letter-spacing: -0.02em;
+      color: #5B3524;
+    }
+  }
+
+  .card-question {
+    margin-right: 24px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0;
+    gap: 6px;
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 150%;
+    text-align: right;
+    letter-spacing: -0.02em;
+    color: #B47952;
+    flex: none;
+    order: 0;
+    flex-grow: 0;
+    border: none;
+    background: none;
+    margin-left: auto;
+  }
+
+  .card1 {
+    top: 260px;
+    height: 120px;
+  }
+
+  .card2 {
+    top: 390px;
+    height: 101px;
+  }
+
+  .card3 {
+    top: 501px;
+    height: 120px;
+  }
+
+  .card4 {
+    top: 631px;
+    height: 101px;
+  }
+
+  .step1-button {
+    position: absolute;
+    left: 50%;
+    top: 764px;
+    padding: 0;
+    border: none;
+    background: none;
+    transform: translateX(-50%);
+
+    img {
+      display: block;
+      width: 196px;
+      margin: 0 auto;
+    }
+
+    .button-pressed {
+      display: none;
+    }
+
+    &:hover .button-normal {
+      display: none;
+    }
+
+    &:hover .button-pressed {
+      display: block;
+    }
+  }
+
+  .guide-popup-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 393px;
+    height: 852px;
+    background: rgba(73, 37, 21, 0.28);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .guide-popup {
+    padding: 20px 18px 25px;
+    box-sizing: border-box;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 10px;
+    position: absolute;
+    width: 351px;
+    background: #FDF7EE;
+    border: 2px solid #DAA576;
+    border-radius: 20px;
+  }
+
+  .guide-popup-close {
+    position: absolute;
+    top: 20px;
+    right: 14px;
+    width: 32px;
+    border: 2px solid #FFDCB9;
+    border-radius: 16px;
+    color: #B47952;
+    font-size: 26px;
+    line-height: 28px;
+    cursor: pointer;
+    box-sizing: border-box;
+    background: #FFECCB;
+    transform: matrix(-1, 0, 0, 1, 0, 0);
+    flex: none;
+    order: 1;
+    flex-grow: 0;
+  }
+
+  .guide-popup-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'AndongKaturi', sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 140%;
+    letter-spacing: -0.02em;
+
+    > span:first-child {
+      position: relative;
+      display: inline-block;
+      z-index: 1;
+      font-family: 'AndongKaturi', sans-serif;
+      font-style: normal;
+      font-weight: 400;
+      font-size: 18px;
+      line-height: 140%;
+      text-align: center;
+      letter-spacing: -0.02em;
+      color: #FFB8BD;
+      flex: none;
+      order: 0;
+      flex-grow: 0;
+
+      &::before {
+        content: attr(data-text);
+        position: absolute;
+        top: 0;
+        left: 0;
+        font-family: 'AndongKaturi', sans-serif;
+        font-style: normal;
+        font-weight: 500;
+        font-size: 18px;
+        line-height: 140%;
+        letter-spacing: -0.02em;
+        color: #5B3524;
+        -webkit-text-stroke: 2.3px #5B3524;
+        z-index: -1;
+      }
+    }
+
+    strong {
+      font-family: 'AndongKaturi', sans-serif;
+      color: #5B3524;
+      font-style: normal;
+      font-weight: 400;
+      font-size: 18px;
+      line-height: 140%;
+      letter-spacing: -0.02em;
+    }
+  }
+
+  .guide-popup-text {
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 150%;
+    letter-spacing: -0.02em;
+    color: #5B3524;
+  }
+
+  .guide-popup-recommend {
+    padding: 11px 11px 9px;
+    background: #FFE8BD;
+    border-radius: 10px;
+    font-family: 'Pretendard', sans-serif;
+    color: #5B3524;
+
+    .recommend-title {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .recommend-bar {
+      display: block;
+      width: 4px;
+      height: 18px;
+      background: #B47952;
+      border-radius: 10px;
+      flex-shrink: 0;
+    }
+
+    .recommend-title strong {
+      font-family: 'Pretendard', sans-serif;
+      width: 78px;
+      height: 21px;
+      font-style: normal;
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 150%;
+      letter-spacing: -0.02em;
+      color: #492515;
+    }
+
+    p {
+      display: flex;
+      align-items: flex-start;
+      margin: 0;
+      padding: 0;
+      word-break: keep-all;
+      font-family: 'Pretendard', sans-serif;
+      font-weight: 500;
+      font-size: 12px;
+      line-height: 150%;
+      letter-spacing: -0.02em;
+      color: #5B3524;
+
+      &::before {
+        content: '•';
+        flex-shrink: 0;
+        margin-right: 5px;
+        font-size: 12px;
+        line-height: 150%;
+      }
+    }
+  }
+}

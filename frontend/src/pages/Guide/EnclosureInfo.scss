@@ -1,0 +1,283 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+.enclosure-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 393px;
+  height: 100%;
+
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+
+  background: rgba(0, 0, 0, 0.20);
+  z-index: 200;
+
+  .enclosure-modal {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+
+    box-sizing: border-box;
+    width: 393px;
+    height: 550px;
+
+    padding: 29px 21px 0;
+
+    background: #FDF7EE;
+
+    border-width: 3px 0 0;
+    border-style: solid;
+    border-color: #5B3524;
+    box-shadow: 0 -5px 0 rgba(91, 53, 36, 0.3);
+    border-radius: 40px 40px 0 0;
+
+    overflow-y: hidden;
+    overflow-x: hidden;
+    scrollbar-width: none;
+  }
+
+  .enclosure-modal::-webkit-scrollbar {
+    display: none;
+  }
+
+  .enclosure-section {
+    width: 350px;
+    margin: 0 auto 25px;
+  }
+
+  .enclosure-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    height: 30px;
+    margin: 0 0 8px;
+  }
+
+  .enclosure-leaf {
+    width: 29px;
+    height: 20px;
+    object-fit: contain;
+
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    transform: translateZ(0);
+  }
+
+  .enclosure-title-text {
+    width: auto;
+    height: 20px;
+    object-fit: contain;
+  }
+
+  .enclosure-size-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 5px;
+    width: 100%;
+  }
+
+  .enclosure-size-row input {
+    box-sizing: border-box;
+    width: 0;
+    min-width: 0;
+    height: 40px;
+    flex: 1;
+
+    padding: 0 4px;
+
+    background: #FFF1DA;
+    border: 1.5px solid #FFDCB9;
+    border-radius: 10px;
+
+    font-family: 'Pretendard', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 150%;
+    letter-spacing: -0.02em;
+
+    color: #FFC58D;
+    text-align: center;
+    outline: none;
+
+    appearance: none;
+    -moz-appearance: textfield;
+  }
+
+  .enclosure-size-row input::placeholder {
+    color: #FFC58D;
+  }
+
+  .enclosure-size-row input::-webkit-inner-spin-button,
+  .enclosure-size-row input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+
+  .enclosure-size-row > span {
+    font-family: 'Pretendard', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #B9825C;
+  }
+
+  .enclosure-options {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+
+    column-gap: 24px;
+    row-gap: 12px;
+
+    padding-left: 39px;
+  }
+
+  .enclosure-option {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+
+    cursor: pointer;
+
+    height: 24px;
+
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 150%;
+
+    letter-spacing: -0.02em;
+
+    color: #5B3524;
+
+    flex: none;
+    order: 1;
+    flex-grow: 0;
+
+  }
+
+  .enclosure-option input {
+    appearance: none;
+    box-sizing: border-box;
+
+    width: 22px;
+    height: 22px;
+    flex: none;
+
+    margin: 0;
+
+    border: 2px solid #8DB34C;
+    border-radius: 50%;
+    background: transparent;
+
+    cursor: pointer;
+  }
+
+  .enclosure-option input:checked {
+    background: #5B911C;
+    box-shadow: inset 0 0 0 4px #FDF7EE;
+  }
+
+  .enclosure-custom-input {
+    display: block;
+    box-sizing: border-box;
+
+    width: 150px;
+    height: 40px;
+
+    margin: 11px 47px 0 auto;
+    padding: 0 10px;
+
+    background: #FFF1DA;
+    border: 1.5px solid #FFDCB9;
+    border-radius: 10px;
+
+    font-family: 'Pretendard', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+
+    color: #FFC58D; 
+    text-align: center;
+    outline: none;
+  }
+
+
+
+  .enclosure-custom-input::placeholder {
+    color: #FFC58D;
+  }
+
+  .ventilation-options {
+    column-gap: 14px;
+    row-gap: 12px;
+  }
+
+  .enclosure-complete {
+    display: block;
+    width: 162px;
+
+    margin: 40px auto 54px;
+    padding: 0;
+
+    border: none;
+    background: none;
+
+    cursor: pointer;
+  }
+
+  .enclosure-complete img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+
+  .enclosure-options {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    row-gap: 11px;
+    padding-left: 39px;
+  }
+
+
+  .material-options .enclosure-option-break {
+
+    order: 0;
+  }
+
+  .material-options {
+    display: grid;
+    grid-template-columns: repeat(3, max-content);
+    column-gap: 24px;
+    row-gap: 11px;
+  }
+
+  .material-options .enclosure-option:nth-child(4) {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .material-options .enclosure-option:nth-child(5) {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+
+  .ventilation-options {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 24px;
+    row-gap: 12px;
+  }
+
+  .ventilation-options .enclosure-option-break {
+    flex-basis: 100%;
+  }
+}
