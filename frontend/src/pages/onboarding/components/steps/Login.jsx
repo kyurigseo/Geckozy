@@ -3,16 +3,16 @@ import { useNavigate } from 'react-router-dom'
 
 import OnboardingInput from '../common/OnboardingInput'
 import OnboardingButton from '../common/OnboardingButton'
+import SoundToggle from '../common/SoundToggle'
 import { login as requestLogin } from '../../../../api/onboarding'
 
 import logo from '../../../../assets/onboarding/logo.png'
 import mailIcon from '../../../../assets/onboarding/icon-mail.png'
 import lockIcon from '../../../../assets/onboarding/icon-lock.png'
-import soundOnIcon from '../../../../assets/onboarding/icon-sound-on.png'
 
 import './Login.scss'
 
-const Login = ({ form, updateForm, goTo }) => {
+const Login = ({ form, updateForm, goTo, isSoundOn, onToggleSound }) => {
   const navigate = useNavigate()
   const { login } = form
   const [error, setError] = useState('')
@@ -35,8 +35,12 @@ const Login = ({ form, updateForm, goTo }) => {
     setIsSubmitting(false)
 
     if (result.success) {
-      // TODO: API 응답에 온보딩 완료 여부가 생기면, 미완료 사용자는 goTo('start-method')로 보내기
-      navigate('/home')
+      // 온보딩은 처음 로그인했을 때만 진행. 이미 마친 사용자는 홈으로
+      if (result.user.isOnboardingCompleted) {
+        navigate('/home')
+      } else {
+        goTo('start-method')
+      }
     } else {
       setError('로그인에 실패했어요. 다시 시도해주세요.')
     }
@@ -44,16 +48,14 @@ const Login = ({ form, updateForm, goTo }) => {
 
   return (
     <section className="login">
-      {/* TODO: 배경음악 재생/정지 연결, '끄기' 상태 아이콘 받으면 토글 처리 */}
-      <button type="button" className="login-sound" aria-label="배경음악 끄기">
-        <img src={soundOnIcon} alt="" />
-      </button>
+      <SoundToggle isOn={isSoundOn} onToggle={onToggleSound} />
 
       <img className="login-logo" src={logo} alt="Geckozy" />
 
       <form className="login-form" onSubmit={handleSubmit} noValidate>
         <div className="login-inputs">
           <OnboardingInput
+            variant="pixel"
             icon={mailIcon}
             type="email"
             name="email"
@@ -63,6 +65,7 @@ const Login = ({ form, updateForm, goTo }) => {
             onChange={handleChange('email')}
           />
           <OnboardingInput
+            variant="pixel"
             icon={lockIcon}
             type="password"
             name="password"

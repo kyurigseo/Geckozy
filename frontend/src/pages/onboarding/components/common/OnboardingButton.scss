@@ -56,21 +56,25 @@
     box-shadow: inset -10px -10px 0 $color-button-shadow;
     @include pixel-corners((10.42px 5.2px 2.6px 0px), (0px 1.95px 3.92px 5.89px));
 
-    font-family: $font-family-pixel;
-    font-size: $font-size-pixel-xl;
-    font-weight: $font-weight-regular;
-    line-height: $line-height-pixel;
-    letter-spacing: $letter-spacing-pixel;
+    @include text-pixel-xl;
     color: $color-main-outline;
   }
 }
 
+// 작은 채움 버튼 (회원가입 '중복확인')
+.onboarding-button-filled {
+  flex-shrink: 0;
+  height: 51px;
+  padding: 0 28px;
+  border-radius: 10px;
+  background-color: $color-sub-beige-2;
+  @include text-body-m-medium-bold;
+  color: $color-white;
+  white-space: nowrap;
+}
+
 // 텍스트 링크형 버튼 (진입화면 '이메일 찾기 | 비밀번호 찾기 | 회원가입')
 .onboarding-button-text {
-  font-family: $font-family-pretendard;
-  font-size: $font-size-caption;
-  font-weight: $font-weight-medium;
-  line-height: $line-height-caption;
-  letter-spacing: $letter-spacing-caption;
+  @include text-link;
   color: $color-gray-800;
 }

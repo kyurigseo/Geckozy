@@ -1,0 +1,63 @@
+@use '../../variables' as *;
+@use '../../mixins' as *;
+
+.quest-popup {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  background-color: $color-dim;
+  cursor: pointer;
+}
+
+// 배경 이미지는 피그마처럼 박스보다 조금 크게 깔린다 (left -4.46%, top -5.73%, 108.38% x 112.24%)
+.quest-popup-box {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 358px;
+  max-width: calc(100% - 36px);
+  height: 164px;
+  padding: 79px 32px 30px;
+  text-align: center;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -5.73%;
+    left: -4.46%;
+    z-index: -1;
+    width: 108.38%;
+    height: 112.24%;
+    background: url('../../../../assets/onboarding/deco-quest-popup.png') center / 100% 100% no-repeat;
+    filter: drop-shadow(0 2px 5px $color-popup-shadow);
+  }
+}
+
+// 팝업 위쪽 탭 위 'QUEST' (피그마 x108, y34)
+.quest-popup-tag {
+  position: absolute;
+  top: 34px;
+  left: 108px;
+  width: 43px;
+  @include text-pixel-m;
+  color: $color-main-outline;
+}
+
+.quest-popup-title,
+.quest-popup-description {
+  margin: 0;
+}
+
+.quest-popup-title {
+  @include text-pixel-xl;
+  color: $color-main-outline;
+}
+
+.quest-popup-description {
+  @include text-pixel-l;
+  color: $color-main-brown-3;
+}

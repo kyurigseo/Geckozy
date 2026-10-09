@@ -8,40 +8,74 @@ $frame-width: 393px; // 피그마 모바일 프레임 너비
 
 // ===== Color =====
 // 메인컬러
+$color-main-brown: #492515; // 메인컬러/브라운
+$color-main-beige: #ffeccb; // 메인컬러/베이지
+$color-main-beige-2: #fff1da; // 메인컬러/베이지2
 $color-main-beige-3: #ffdcb9; // 메인컬러/베이지3
 $color-main-beige-4: #fdf7ee; // 메인컬러/베이지4
 $color-main-brown-2: #b47952; // 메인컬러/브라운2
 $color-main-brown-3: #daa576; // 메인컬러/브라운3
 $color-main-outline: #5b3524; // 메인컬러/글꼴 테두리
+$color-main-green: #c8f593; // 메인컬러/그린
+$color-main-green-2: #5b911c; // 메인컬러/그린2
+
+// 서브컬러
+$color-sub-beige: #ffc58d; // 서브컬러/베이지
+$color-sub-beige-2: #ffb66f; // 서브컬러/베이지2
+$color-sub-beige-3: #ff9834; // 서브컬러/베이지3
+$color-sub-green: #e8f6ca; // 서브컬러/그린
 
 // GrayScale
+$color-white: #ffffff; // GrayScale/White
+$color-black: #000000; // Label Color/Light/Primary
+$color-gray-200: #d9d2d4; // GrayScale/200
 $color-gray-400: #a89ea1; // GrayScale/400
+$color-gray-600: #7b7578; // GrayScale/600
 $color-gray-800: #5b5658; // GrayScale/800
 
 // 피그마 변수 없음 (이펙트 값)
 $color-button-shadow: #f9c593; // 픽셀 버튼 안쪽 그림자
+$color-dropdown-hover: rgba(0, 0, 0, 0.1); // 드롭다운 항목 hover
+$color-dim: rgba(0, 0, 0, 0.2); // 입력 중·팝업 화면 어둡게
+$color-panel-shadow: rgba(91, 53, 36, 0.3); // 탭·패널 위쪽 그림자
+$color-popup-shadow: rgba(0, 0, 0, 0.25); // 아이콘 그림자 (QUEST 팝업)
+$color-progress-shadow: #fc912a; // 진행바 채움 안쪽 그림자
+$color-select-shadow: #aaeb5d; // '선택' 버튼 안쪽 그림자
+$color-select-shadow-active: #84b64a; // '선택 해제' 버튼 안쪽 그림자
 
 // 로딩 점 — 기존 로딩 1·2.png 에셋에서 추출 (피그마 확인 후 정리)
 $color-brown-dark: #7c4c2d;
 $color-brown-light: #ddc1a8;
 
 // ===== Font =====
-// @font-face는 src/styles/fonts.scss. 픽셀 폰트 파일이 들어오기 전까지는 Pretendard로 표시됨
-$font-family-pixel: 'YoonA px Pixman', 'Pretendard', sans-serif;
-$font-family-andong: 'Andong Kkaturi', 'Pretendard', sans-serif; // 안동까투리
+// Pretendard는 src/styles/fonts.scss, 픽셀 폰트는 index.html의 Adobe Fonts 스크립트로 불러온다
+// (Adobe 폰트를 못 불러오면 Pretendard로 대신 표시)
+// 텍스트 스타일 조합은 _mixins.scss의 text-* 믹스인 사용
+$font-family-pixel: 'yoon-px-pixman', 'Pretendard', sans-serif; // 윤아픽스맨 (YoonA px Pixman)
+$font-family-andong: 'andong-katuri', 'Pretendard', sans-serif; // 안동까투리
 $font-family-pretendard: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
 $font-family-base: $font-family-pretendard;
 
 $font-weight-regular: 400;
 $font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
 
-// Pixel/L, Pixel/XL (letterSpacing -2%)
-$font-size-pixel-l: 15px;
-$font-size-pixel-xl: 20px;
-$line-height-pixel: 1.5;
-$letter-spacing-pixel: -0.02em;
+$font-size-caption: 12px; // Body/Others/Caption
+$font-size-body-s: 14px; // Body/S, Body/S-Bold
+$font-size-body-m: 15px; // Body/M-Medium, Body/M-Medium_Bold
+$font-size-body-m-bold: 16px; // Body/M-Bold, Body/M-Bold_Medium (Body/M-Bold는 피그마에서 Inter → Pretendard로 대체)
+$font-size-body-l: 20px; // Body/L, Body/L-Bold
+$font-size-title-s: 24px; // Title/S
+$font-size-title-m: 28px; // Title/M-Bold
+$font-size-pixel-2xl: 24px; // 피그마 스타일 없음 (로딩 '잠시만 기다려주세요!')
+$font-size-pixel-m: 13px; // Pixel/M
+$font-size-pixel-l: 15px; // Pixel/L
+$font-size-pixel-xl: 20px; // Pixel/XL
+$font-size-link: 13px; // 피그마 스타일 없음 (진입화면 '이메일 찾기' 링크, Medium)
+$font-size-dropdown: 16px; // 피그마 스타일 없음 (회원가입 이메일 도메인 '선택', Medium)
 
-// Pretendard 13 Medium (피그마 텍스트 스타일 없음, 진입화면 링크)
-$font-size-caption: 13px;
-$line-height-caption: 1.5;
-$letter-spacing-caption: -0.02em;
+$line-height-base: 1.5;
+$line-height-title: 1.4; // Title/S
+$letter-spacing-base: -0.02em; // 피그마 letterSpacing -2%
+$letter-spacing-loading: 0.15em; // 피그마 로딩 화면 문구 자간 15%

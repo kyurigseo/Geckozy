@@ -1,16 +1,17 @@
 @use '../../variables' as *;
+@use '../../mixins' as *;
 
-// 크기·간격·속도는 디자인 확정 후 조정
+// 피그마 로딩 점 (23x21 픽셀 원, 간격 11). 진한 점이 순서대로 이동
 .loading-dots {
   display: flex;
-  gap: 8px;
+  gap: 11px;
 }
 
 .loading-dots-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
+  width: 23px;
+  height: 21px;
   background-color: $color-brown-light;
+  @include pixel-corners((7px 3px 0px), (0px 3px 7px));
   animation: loading-dots-blink 0.9s infinite steps(1);
 }
 

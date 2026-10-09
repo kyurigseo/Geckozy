@@ -1,4 +1,5 @@
 @use 'sass:list';
+@use 'variables' as *;
 
 // 픽셀 아트 계단형 모서리를 clip-path로 만든다.
 // $xs, $ys: 좌상단 모서리 계단 좌표 (바깥 → 안쪽, $ys의 첫 값은 0, $xs의 마지막 값은 0).
@@ -43,3 +44,37 @@
 
   clip-path: polygon($polygon);
 }
+
+// ===== 텍스트 스타일 (피그마 텍스트 스타일 이름 기준) =====
+@mixin -text($family, $size, $weight) {
+  font-family: $family;
+  font-size: $size;
+  font-weight: $weight;
+  line-height: $line-height-base;
+  letter-spacing: $letter-spacing-base;
+}
+
+@mixin text-pixel-m { @include -text($font-family-pixel, $font-size-pixel-m, $font-weight-regular); } // Pixel/M
+@mixin text-pixel-l { @include -text($font-family-pixel, $font-size-pixel-l, $font-weight-regular); } // Pixel/L
+@mixin text-pixel-xl { @include -text($font-family-pixel, $font-size-pixel-xl, $font-weight-regular); } // Pixel/XL
+@mixin text-body-m-medium { @include -text($font-family-pretendard, $font-size-body-m, $font-weight-medium); } // Body/M-Medium
+@mixin text-body-m-medium-bold { @include -text($font-family-pretendard, $font-size-body-m, $font-weight-semibold); } // Body/M-Medium_Bold
+@mixin text-body-m-bold { @include -text($font-family-pretendard, $font-size-body-m-bold, $font-weight-semibold); } // Body/M-Bold
+@mixin text-body-m-bold-medium { @include -text($font-family-pretendard, $font-size-body-m-bold, $font-weight-medium); } // Body/M-Bold_Medium
+@mixin text-body-l { @include -text($font-family-pretendard, $font-size-body-l, $font-weight-regular); } // Body/L
+@mixin text-body-l-bold { @include -text($font-family-pretendard, $font-size-body-l, $font-weight-semibold); } // Body/L-Bold
+@mixin text-body-s { @include -text($font-family-pretendard, $font-size-body-s, $font-weight-medium); } // Body/S
+@mixin text-body-s-bold { @include -text($font-family-pretendard, $font-size-body-s, $font-weight-bold); } // Body/S-Bold
+@mixin text-title-s {
+  @include -text($font-family-pretendard, $font-size-title-s, $font-weight-regular);
+  line-height: $line-height-title;
+} // Title/S
+@mixin text-title-m-bold {
+  @include -text($font-family-pretendard, $font-size-title-m, $font-weight-semibold);
+  line-height: $line-height-title;
+} // Title/M-Bold
+@mixin text-caption { @include -text($font-family-pretendard, $font-size-caption, $font-weight-regular); } // Body/Others/Caption
+
+// 피그마 스타일 없는 텍스트
+@mixin text-link { @include -text($font-family-pretendard, $font-size-link, $font-weight-medium); }
+@mixin text-dropdown { @include -text($font-family-pretendard, $font-size-dropdown, $font-weight-medium); }
