@@ -20,7 +20,7 @@ const Nav = () => {
 
       <div className="bottom-nav-menu">
 
-        <button className={location.pathname.startsWith('/home') ? 'bottom-nav-item active' : 'bottom-nav-item'} onClick={() => navigate('/home')}>
+        <button className={location.pathname === '/' ? 'bottom-nav-item active' : 'bottom-nav-item'} onClick={() => navigate('/')}>
           <img src={homeIcon} alt="홈" />
         </button>
 

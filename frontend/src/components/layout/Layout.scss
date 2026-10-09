@@ -1,0 +1,14 @@
+.layout {
+  position: relative;
+  width: 393px;
+  height: 852px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.layout .bottom-nav {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  z-index: 100;
+}
