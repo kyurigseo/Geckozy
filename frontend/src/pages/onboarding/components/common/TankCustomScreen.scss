@@ -1,7 +1,7 @@
 @use '../../variables' as *;
 @use '../../mixins' as *;
 
-// 피그마 '사육장 커스텀'. 공통 틀은 common/CustomScreen, 카드는 common/ChoiceCard
+// 사육장 커스텀 화면 (온보딩·마이 공통). 공통 틀은 CustomScreen, 카드는 ChoiceCard
 // 사육장 화면은 진행바 줄이 가운데(left 23), 배지 79x74, 스피커 38x41 (left 314, top 169)
 .tank-custom {
   .custom-screen-progress {
@@ -16,6 +16,21 @@
   .custom-screen-sound {
     top: 169px;
     right: 41px;
+  }
+}
+
+// 마이: 진행바 줄이 없어서 무대가 58px 위로 (사육장 top 101, 탭 top 347, 패널 top 397)
+.tank-custom-compact {
+  .custom-screen-stage {
+    height: 397px;
+  }
+
+  .custom-screen-tabs {
+    top: 347px;
+  }
+
+  .tank-custom-preview {
+    top: -58px;
   }
 }
 

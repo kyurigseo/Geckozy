@@ -73,6 +73,14 @@
   @include -text($font-family-pretendard, $font-size-title-m, $font-weight-semibold);
   line-height: $line-height-title;
 } // Title/M-Bold
+@mixin text-title-pixel-l {
+  @include -text($font-family-andong, $font-size-title-pixel-l, $font-weight-regular);
+  line-height: $line-height-title;
+} // Title-Pixel/L
+@mixin text-title-pixel-xs {
+  @include -text($font-family-andong, $font-size-title-pixel-xs, $font-weight-regular);
+  line-height: $line-height-title;
+} // Title-Pixel/XS
 @mixin text-caption { @include -text($font-family-pretendard, $font-size-caption, $font-weight-regular); } // Body/Others/Caption
 
 // 피그마 스타일 없는 텍스트

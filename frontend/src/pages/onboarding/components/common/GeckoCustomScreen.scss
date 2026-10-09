@@ -1,7 +1,7 @@
 @use '../../variables' as *;
 @use '../../mixins' as *;
 
-// 피그마 '도마뱀 커스텀'. 공통 틀은 common/CustomScreen, 카드는 common/ChoiceCard
+// 도마뱀 커스텀 화면 (온보딩·마이 공통). 공통 틀은 CustomScreen, 카드는 ChoiceCard
 
 // 통나무 받침 (top 300, h148) + 도마뱀 미리보기 (top 194, 231x187)
 .gecko-custom-log {

@@ -107,10 +107,13 @@
     @include text-body-s;
   }
 
+  // 입력한 값은 굵게 (피그마 채워진 상태 Body/S-Bold), 안내 문구는 보통 굵기
   .onboarding-input-field {
+    @include text-body-s-bold;
     color: $color-main-outline;
 
     &::placeholder {
+      @include text-body-s;
       color: $color-sub-beige;
     }
   }

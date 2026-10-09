@@ -8,6 +8,7 @@ import './CustomScreen.scss'
 // 위쪽 무대(배경·진행바·배지·스피커·미리보기·탭)는 고정, 아래 패널 안에서만 스크롤한다.
 // stage: 미리보기 요소 (화면별 SCSS에서 절대 위치 지정)
 // badge: { image, label, onClick }, tabs: [{ key, label, icon, iconSize: [w, h] }]
+// progress·badge·onToggleSound는 선택 (마이 > 커스텀 화면에는 없음)
 const CustomScreen = ({
   className,
   title,
@@ -30,17 +31,23 @@ const CustomScreen = ({
       <div className="custom-screen-stage" style={{ backgroundImage: `url(${background})` }}>
         <OnboardingHeader title={title} onBack={onBack} />
 
-        <div className="custom-screen-progress">
-          <OnboardingProgress value={progress} />
-          <button type="button" className="custom-screen-badge" aria-label={badge.label} onClick={badge.onClick}>
-            <img src={badge.image} alt="" />
-          </button>
-        </div>
+        {(progress !== undefined || badge) && (
+          <div className="custom-screen-progress">
+            {progress !== undefined && <OnboardingProgress value={progress} />}
+            {badge && (
+              <button type="button" className="custom-screen-badge" aria-label={badge.label} onClick={badge.onClick}>
+                <img src={badge.image} alt="" />
+              </button>
+            )}
+          </div>
+        )}
         {notice && <p className="custom-screen-notice" role="alert">{notice}</p>}
 
-        <div className="custom-screen-sound">
-          <SoundToggle isOn={isSoundOn} onToggle={onToggleSound} size={soundSize} />
-        </div>
+        {onToggleSound && (
+          <div className="custom-screen-sound">
+            <SoundToggle isOn={isSoundOn} onToggle={onToggleSound} size={soundSize} />
+          </div>
+        )}
 
         {stage}
 

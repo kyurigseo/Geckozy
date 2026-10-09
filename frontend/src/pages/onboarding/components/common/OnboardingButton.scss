@@ -61,6 +61,35 @@
   }
 }
 
+// 작은 픽셀 버튼 (피그마 131x39). 계단 모서리를 가로 0.411배, 세로 0.632배로 줄인 값
+.onboarding-button-primary.onboarding-button-s {
+  height: 39px;
+  @include pixel-corners((5.62px 3.37px 2.25px 1.13px 0px), (0px 1.51px 3.01px 4.52px 6.03px));
+
+  &::before {
+    inset: 1.51px 1.12px;
+    @include pixel-corners((4.49px 2.25px 1.13px 0px), (0px 1.5px 3.01px 4.52px));
+  }
+
+  &::after {
+    top: 3.34px;
+    right: 3.21px;
+    bottom: 3.57px;
+    left: 3px;
+    @include pixel-corners((5.36px 3.21px 2.14px 1.07px 0px), (0px 1.25px 2.48px 3.72px 4.97px));
+  }
+
+  .onboarding-button-label {
+    top: 4.59px;
+    right: 4.28px;
+    bottom: 4.81px;
+    left: 4.08px;
+    box-shadow: inset -6px -6px 0 $color-button-shadow;
+    @include pixel-corners((4.28px 2.14px 1.07px 0px), (0px 1.23px 2.48px 3.72px));
+    @include text-pixel-l;
+  }
+}
+
 // 작은 채움 버튼 (회원가입 '중복확인')
 .onboarding-button-filled {
   flex-shrink: 0;

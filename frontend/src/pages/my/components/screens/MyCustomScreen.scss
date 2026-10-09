@@ -1,0 +1,11 @@
+@use '../../../onboarding/variables' as *;
+
+// 마이 > 도마뱀·사육장 커스텀 바깥 틀: 하단바 없는 전체 화면, 피그마 폭(393) 가운데 정렬
+.my-custom {
+  position: relative;
+  width: 100%;
+  max-width: $frame-width;
+  min-height: 100dvh;
+  margin: 0 auto;
+  overflow: hidden;
+}

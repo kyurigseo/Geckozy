@@ -1,0 +1,162 @@
+// 색·폰트 변수와 믹스인은 온보딩 것을 같이 쓴다
+// (팀 공통 styles/로 옮기면 경로만 바꾸면 됨)
+@use '../onboarding/variables' as *;
+@use '../onboarding/mixins' as *;
+
+// 피그마 '마이' (393 폭). Layout(393x852, 하단바 겹침) 안에서 이 화면만 스크롤한다
+// 배경: 마이탭 벽지 394x852를 세로로 이어 붙임
+.my-page {
+  height: 100%;
+  padding: 81px 21px 141px 22px; // 아래: 하단바(114) + 여백
+  overflow-y: auto;
+  background: url('../../assets/my/bg-my.png') center top / 394px 852px repeat-y;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+// ===== 프로필 =====
+.my-page-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+// 프로필 원 109x109 (top 81). 원 안에 도마뱀 윗부분이 보이게 (도마뱀 119x95, 원 기준 left 0 top 21)
+.my-page-avatar {
+  position: relative;
+  width: 109px;
+  height: 109px;
+}
+
+.my-page-avatar-circle {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border: 2px solid $color-main-brown-4;
+  border-radius: 50%;
+  background-color: $color-main-beige-4;
+
+  img {
+    position: absolute;
+    top: 19px; // 21 - 테두리 2
+    left: -2px;
+    width: 119px;
+    height: 95px;
+    max-width: none;
+    object-fit: contain;
+  }
+}
+
+// 오른쪽 위 나뭇잎 (원 기준 left 80, top 7)
+.my-page-avatar-leaf {
+  position: absolute;
+  top: 7px;
+  left: 80px;
+  width: 29px;
+  height: 20px;
+}
+
+// 이름 (Title-Pixel/L, 가운데 220.5) · 종 • 사육장 (가운데 254.5)
+.my-page-name {
+  min-height: 45px;
+  margin: 8px 0 0;
+  @include text-title-pixel-l;
+  color: $color-main-brown;
+}
+
+.my-page-info {
+  min-height: 23px;
+  margin: 0;
+  @include text-body-m-medium-bold;
+  color: $color-main-brown-4;
+}
+
+// ===== 메뉴 묶음 =====
+// 카드 350 폭, 베이지4, 테두리 브라운3. 제목 탭(119x35)은 카드 위쪽에 17px 걸침. 묶음 사이 42px
+.my-page-section {
+  position: relative;
+  margin-top: 42px; // 카드 사이 42px (제목 탭은 위로 17px 걸쳐 있음)
+
+  &:first-of-type {
+    margin-top: 37px; // 종·사육장 문구 ↔ 첫 카드(top 303)
+  }
+}
+
+.my-page-section-title {
+  position: absolute;
+  top: -17px;
+  left: -3px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 119px;
+  height: 35px;
+  margin: 0;
+  background: url('../../assets/my/tag-section.png') center / 100% 100% no-repeat;
+  @include text-pixel-l;
+  color: $color-main-brown;
+}
+
+.my-page-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin: 0;
+  padding: 32px 8px 16px 14px; // 카드 높이: 관리 224, 설정 177
+  border: 1.5px solid $color-main-brown-3;
+  border-radius: 10px;
+  background-color: $color-main-beige-4;
+  list-style: none;
+}
+
+// 센서 카드 높이 87
+.my-page-section:nth-of-type(2) .my-page-menu {
+  padding-bottom: 20px;
+}
+
+// 한 줄: 아이콘 칸 41 + 13 → 글자, 오른쪽 화살표(26x32) 또는 값
+.my-page-menu-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: none;
+  text-align: left;
+
+  &:is(button) {
+    cursor: pointer;
+  }
+}
+
+.my-page-menu-icon {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 41px;
+  margin-right: 13px;
+}
+
+.my-page-menu-label {
+  flex: 1;
+  @include text-body-m-bold-medium;
+  color: $color-main-brown;
+}
+
+.my-page-menu-chevron {
+  flex-shrink: 0;
+  width: 26px;
+  height: 32px;
+}
+
+.my-page-menu-value {
+  margin-right: 8px;
+  @include text-body-s;
+  color: $color-main-brown;
+}

@@ -1,0 +1,49 @@
+@use '../../../onboarding/variables' as *;
+@use '../../../onboarding/mixins' as *;
+
+.save-confirm {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.save-confirm-dim {
+  position: absolute;
+  inset: 0;
+  background-color: $color-dim;
+}
+
+// 팝업 367x176 (안쪽 여백 위 68, 좌 47, 우 48, 아래 29)
+.save-confirm-box {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  width: 367px;
+  max-width: calc(100% - 26px);
+  height: 176px;
+  padding: 68px 48px 29px 47px;
+  background: url('../../../../assets/my/bg-save-popup.png') center / 100% 100% no-repeat;
+}
+
+.save-confirm-title {
+  margin: 0;
+  @include text-title-pixel-xs;
+  color: $color-main-brown;
+  text-align: center;
+  white-space: nowrap;
+}
+
+// 예·아니오 131.6x39, 간격 9
+.save-confirm-buttons {
+  display: flex;
+  gap: 9px;
+
+  .onboarding-button-primary {
+    width: 131.6px;
+  }
+}
