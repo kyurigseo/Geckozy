@@ -18,13 +18,18 @@ import logoutIcon from '../../assets/my/icon-logout.png'
 import deleteIcon from '../../assets/my/icon-delete.png'
 import chevronIcon from '../../assets/my/icon-chevron-right.svg'
 
+import SaveConfirmPopup from './components/common/SaveConfirmPopup'
+
 import './MyPage.scss'
 
-const GECKO_IMAGES = { beige: geckoBeige, orange: geckoOrange, yellow: geckoYellow, green: geckoGreen, blue: geckoBlue }
+const GECKO_IMAGES = {
+  beige: geckoBeige,
+  orange: geckoOrange,
+  yellow: geckoYellow,
+  green: geckoGreen,
+  blue: geckoBlue
+}
 
-// 마이 탭 첫 화면 (피그마 '마이'). 프로필 + 메뉴 묶음(관리·센서·설정)
-// 담당: 첫 화면 전체 + 도마뱀 커스텀·사육장 커스텀. 그 외 메뉴 화면은 다른 팀원 담당이라 버튼만 둔다
-// icon: [이미지, 가로, 세로] (피그마 크기)
 const MENU_SECTIONS = [
   {
     key: 'manage',
@@ -32,43 +37,71 @@ const MENU_SECTIONS = [
     items: [
       { key: 'gecko-custom', label: '도마뱀 커스텀', icon: [geckoIcon, 39, 29], path: '/my/gecko-custom' },
       { key: 'tank-custom', label: '사육장 커스텀', icon: [tankIcon, 34, 29], path: '/my/tank-custom' },
-      { key: 'gecko-manage', label: '도마뱀 관리', icon: [documentIcon, 25, 27] }, // TODO: 다른 팀원 담당 화면 주소 정해지면 path 추가
-      { key: 'scrap', label: '스크랩', icon: [leafIcon, 29, 20] }, // TODO: 다른 팀원 담당
-    ],
+      { key: 'gecko-manage', label: '도마뱀 관리', icon: [documentIcon, 25, 27], path: '/my/lizard-manage' },
+      { key: 'scrap', label: '스크랩', icon: [leafIcon, 29, 20], path: '/my/scrap' }
+    ]
   },
   {
     key: 'sensor',
     title: '센서',
-    items: [{ key: 'sensor', label: '연결된 센서', icon: [sensorIcon, 34, 32] }], // TODO: 다른 팀원 담당
+    items: [
+      { key: 'sensor', label: '연결된 센서', icon: [sensorIcon, 34, 32], path: '/my/sensor' }
+    ]
   },
   {
     key: 'setting',
     title: '설정',
     items: [
       { key: 'version', label: '버전 정보', icon: [infoIcon, 26, 26], value: 'v1.0.0' },
-      { key: 'logout', label: '로그아웃', icon: [logoutIcon, 27, 25] }, // TODO: 다른 팀원 담당
-      { key: 'delete-account', label: '계정 삭제', icon: [deleteIcon, 26, 25] }, // TODO: 다른 팀원 담당
-    ],
-  },
+      { key: 'logout', label: '로그아웃', icon: [logoutIcon, 27, 25] },
+      { key: 'delete-account', label: '계정 삭제', icon: [deleteIcon, 26, 25] }
+    ]
+  }
 ]
 
 const MyPage = () => {
   const navigate = useNavigate()
   const [profile, setProfile] = useState(null)
+  const [confirmType, setConfirmType] = useState(null)
 
   useEffect(() => {
     let isCancelled = false
-    getMyProfile().then((data) => {
-      if (!isCancelled) setProfile(data)
-    })
+
+    getMyProfile()
+      .then((data) => {
+        if (!isCancelled) setProfile(data)
+      })
+      .catch(() => {
+        if (!isCancelled) setProfile(null)
+      })
+
     return () => {
       isCancelled = true
     }
   }, [])
 
   const handleMenuClick = (item) => {
+    if (item.key === 'logout' || item.key === 'delete-account') {
+      setConfirmType(item.key)
+      return
+    }
+
     if (item.path) navigate(item.path)
   }
+
+  const handleConfirm = () => {
+    if (confirmType === 'logout') {
+      setConfirmType(null)
+      navigate('/onboarding')
+      return
+    }
+
+    setConfirmType(null)
+  }
+
+  const confirmTitle = confirmType === 'logout'
+    ? '로그아웃 하시겠습니까?'
+    : '계정을 삭제하시겠습니까?'
 
   return (
     <section className="my-page">
@@ -89,8 +122,9 @@ const MyPage = () => {
           <ul className="my-page-menu">
             {section.items.map((item) => {
               const [icon, width, height] = item.icon
-              const isStatic = Boolean(item.value) // 버전 정보처럼 누를 곳이 없는 줄
+              const isStatic = Boolean(item.value)
               const Tag = isStatic ? 'div' : 'button'
+
               return (
                 <li key={item.key}>
                   <Tag
@@ -113,6 +147,16 @@ const MyPage = () => {
           </ul>
         </section>
       ))}
+
+      {confirmType && (
+        <SaveConfirmPopup
+          title={confirmType === 'logout' ? '로그아웃 하시겠습니까?' : '계정을 삭제하시겠습니까?'}
+          description={confirmType === 'delete-account' ? '삭제된 데이터는 복구가 불가능합니다.' : ''}
+          onConfirm={handleConfirm}
+          onDiscard={() => setConfirmType(null)}
+          onClose={() => setConfirmType(null)}
+        />
+      )}
     </section>
   )
 }

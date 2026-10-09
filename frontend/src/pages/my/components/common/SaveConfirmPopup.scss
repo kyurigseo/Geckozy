@@ -3,20 +3,25 @@
 
 .save-confirm {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 50%;
+  width: 393px;
+  height: 852px;
+  transform: translateX(-50%);
   z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
+  pointer-events: none;
 }
 
 .save-confirm-dim {
   position: absolute;
   inset: 0;
   background-color: $color-dim;
+  pointer-events: auto;
 }
 
-// 팝업 367x176 (안쪽 여백 위 68, 좌 47, 우 48, 아래 29)
 .save-confirm-box {
   position: relative;
   display: flex;
@@ -26,8 +31,10 @@
   width: 367px;
   max-width: calc(100% - 26px);
   height: 176px;
+  box-sizing: border-box;
   padding: 68px 48px 29px 47px;
   background: url('../../../../assets/my/bg-save-popup.png') center / 100% 100% no-repeat;
+  pointer-events: auto;
 }
 
 .save-confirm-title {
@@ -46,4 +53,16 @@
   .onboarding-button-primary {
     width: 131.6px;
   }
+}
+.save-confirm-description {
+  margin: -18px 0 -8px;
+  font-family: 'Pretendard', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 150%;
+  color: #B47952;
+  text-align: center;
+  white-space: nowrap;
+
+  
 }
