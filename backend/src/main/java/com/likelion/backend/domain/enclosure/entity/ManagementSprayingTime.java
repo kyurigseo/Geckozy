@@ -2,6 +2,7 @@ package com.likelion.backend.domain.enclosure.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import com.likelion.backend.domain.management.entity.ManagementSetting;
 
 import java.io.Serializable;
 
@@ -21,8 +22,9 @@ public class ManagementSprayingTime {
 
     public ManagementSprayingTime(ManagementSetting managementSetting, SprayingTime sprayingTime) {
         this.managementSetting = managementSetting;
-        this.id = new ManagementSprayingTimeId(managementSetting.getManagementSettingId(), sprayingTime);
-    }
+        this.id = new ManagementSprayingTimeId(
+                managementSetting.getId(), sprayingTime
+        );    }
 
     public enum SprayingTime {
         MORNING, DAY, EVENING, NIGHT

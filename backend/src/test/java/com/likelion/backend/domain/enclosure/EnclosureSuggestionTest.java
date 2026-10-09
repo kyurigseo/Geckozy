@@ -16,9 +16,11 @@ class EnclosureSuggestionTest {
 
     @BeforeEach
     void setUp() {
-        enclosureService = new EnclosureService(null, null, null, null, null, null);
+        enclosureService = new EnclosureService(
+                null, null, null, null, null,
+                null, null, null, null
+        );
     }
-
     @Test
     @DisplayName("3. 상황별 온도 관리 제안 - 행동 지침 및 센서 위치 면책 문구 반환 검증")
     void getTemperatureSuggestions_Success() {
