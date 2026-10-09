@@ -5,6 +5,10 @@ import Onboarding from "./pages/onboarding/Onboarding";
 import MyPage from "./pages/my/MyPage";
 import MyGeckoCustom from "./pages/my/components/screens/GeckoCustom";
 import MyTankCustom from "./pages/my/components/screens/TankCustom";
+import LizardManage from './pages/my/components/screens/LizardManage'
+import Scrap from './pages/my/components/screens/Scrap'
+import SensorManage from './pages/my/components/screens/SensorManage'
+
 
 import Guide from "./pages/Guide/Guide";
 import LizardInfo from "./pages/Guide/LizardInfo";
@@ -24,6 +28,9 @@ function App() {
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/my/gecko-custom" element={<MyGeckoCustom />} />
         <Route path="/my/tank-custom" element={<MyTankCustom />} />
+        <Route path="/my/lizard-manage" element={<LizardManage />} />
+        <Route path="/my/scrap" element={<Scrap />} />
+        <Route path="/my/sensor" element={<SensorManage />} />
 
         <Route path="/lizard-info" element={<LizardInfo />} />
         <Route path="/loading" element={<Loading />} />
