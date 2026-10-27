@@ -1,0 +1,433 @@
+// ─────────── 변수 ───────────
+$bg-green: #b9d4a0;
+$cream: #fff4dc;
+$paper: #fbf6ec;
+$brown: #5a3a28;
+$brown-line: #d9b88a;
+$pink: #f08a8a;
+$red: #e8505b;
+$leaf: #7fae4f;
+$ok-bg: #d4efb8;
+$ok-text: #4b8a2b;
+$warn-bg: #fbc9cf;
+$warn-text: #d6455a;
+
+$font: "Galmuri11", "DungGeunMo", "Pretendard", sans-serif; // 픽셀 느낌 폰트 (직접 설치)
+
+@mixin outline-text($color: $brown) {
+  text-shadow: -2px 0 $color, 2px 0 $color, 0 -2px $color, 0 2px $color,
+    -2px -2px $color, 2px 2px $color, -2px 2px $color, 2px -2px $color;
+}
+
+@mixin pixel-box($bg: $cream) {
+  background: $bg;
+  border: 3px solid $brown;
+  border-radius: 14px;
+  box-shadow: 0 3px 0 rgba($brown, 0.35);
+}
+
+button {
+  font-family: inherit;
+  color: inherit;
+  cursor: pointer;
+  border: 0;
+  background: none;
+  padding: 0;
+}
+
+   .stage__img--placeholder {
+     aspect-ratio: 1;
+     background: #d9c9a0;
+     border-radius: 16px;
+   }
+
+// ─────────── 화면 ───────────
+.home {
+  position: relative;
+  width: 100%;
+  max-width: 430px;
+  height: 100dvh;
+  margin: 0 auto;
+  overflow: hidden;
+  font-family: $font;
+  color: $brown;
+  background-image: url('../../assets/home/home_wallpaper.png');
+
+  &__scroll {
+    height: 100%;
+    overflow-y: auto;
+    padding: 16px 16px 120px; // 탭바 높이만큼 여유
+    -webkit-overflow-scrolling: touch;
+  }
+
+ &__date {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 0 0 0;
+
+  width: 141px;
+  height: 41px;
+  box-sizing: border-box;
+
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+
+  white-space: nowrap;
+
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 1.5;
+  letter-spacing: -0.02em;
+  color: #492515; 
+  }
+
+  &__greeting {
+    margin: 18px 0 14px;
+    font-size: 26px;
+    font-weight: 800;
+    color: #fff;
+    @include outline-text;
+
+    .accent {
+      color: #e6f2a8;
+    }
+  }
+
+  &__sprout {
+    width: 26px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+}
+
+// 사육장 선택
+.selector {
+  @include pixel-box;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 14px;
+  text-align: left;
+
+  img {
+    width: 22px;
+  }
+
+  span:first-of-type {
+    flex: 1;
+  }
+
+  em {
+    font-style: normal;
+    color: $pink;
+  }
+
+  &__arrow {
+    font-size: 22px;
+    line-height: 1;
+  }
+}
+
+// 사육장 일러스트
+.stage {
+  position: relative;
+  margin-top: 8px;
+
+  &__img {
+    display: block;
+    width: 100%;
+  }
+
+  &__sound {
+    position: absolute;
+    top: 6px;
+    right: 4px;
+    width: 52px;
+
+    img {
+      width: 100%;
+    }
+
+    &.is-off {
+      opacity: 0.4;
+    }
+  }
+}
+
+// 알림 핀 + 말풍선
+.pin {
+  position: absolute;
+  transform: translate(-50%, -50%);
+
+  &__dot {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
+    background: $red;
+    border: 3px solid #f6a0a6;
+    border-radius: 50%;
+    animation: bounce 1.6s ease-in-out infinite;
+  }
+
+  &__bubble {
+    @include pixel-box;
+    position: absolute;
+    bottom: 38px;
+    width: max-content;
+    max-width: 200px;
+    padding: 8px 12px;
+    text-align: center;
+    z-index: 2;
+
+    strong {
+      display: block;
+      font-size: 12px;
+    }
+
+    small {
+      font-size: 9px;
+      color: $pink;
+    }
+
+    &--left {
+      right: -10px;
+    }
+
+    &--right {
+      left: -10px;
+    }
+  }
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pin__dot {
+    animation: none;
+  }
+}
+
+// 하단 시트
+.sheet {
+  position: relative;
+  margin-top: -8px;
+  padding: 18px 14px 140px;
+  background: 
+    url("../../assets/home/background.png")top center;
+
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 12px;
+    font-size: 22px;
+    color: $pink;
+    @include outline-text;
+    text-shadow: -2px 0 #fff, 2px 0 #fff, 0 -2px #fff, 0 2px #fff;
+
+    img {
+      width: 22px;
+    }
+  }
+}
+
+.card {
+  background: #fffaf0;
+  border: 2px solid $brown-line;
+  border-radius: 16px;
+  padding: 14px;
+}
+
+// 오늘의 사육환경
+.summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+
+  &__leo {
+    width: 96px;
+    flex-shrink: 0;
+  }
+
+  h3 {
+    margin: 0 0 6px;
+    font-size: 15px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+}
+
+// 온도 / 습도
+.metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  text-align: left;
+  transition: transform 0.1s;
+  width: 159px;
+  height: 139px;
+
+
+  &:active {
+    transform: scale(0.97);
+  }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  &__label {
+    flex: 1;
+  }
+
+  &__chev {
+    display: grid;
+    place-items: center;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    font-size: 18px;
+    background: #f6e6c4;
+    border-radius: 50%;
+  }
+
+  &__value {
+    align-self: center;
+    font-size: 32px;
+    font-weight: 800;
+
+    span {
+      font-size: 20px;
+      margin-left: 2px;
+    }
+  }
+}
+
+.badge {
+  align-self: center;
+  min-width: 90px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  border-radius: 999px;
+
+  &--ok {
+    color: $ok-text;
+    background: $ok-bg;
+    border: 2px solid $leaf;
+  }
+
+  &--warn {
+    color: $warn-text;
+    background: $warn-bg;
+    border: 2px solid $pink;
+  }
+}
+
+// 환경 코치
+.coach {
+  h3 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 8px;
+    font-size: 15px;
+
+    img {
+      width: 20px;
+    }
+  }
+
+  p {
+    margin: 0 0 12px;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  &__btn {
+    @include pixel-box(#fdeccb);
+    display: block;
+    margin-left: auto;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+}
+
+// 하단 탭바
+.tabbar {
+  position: absolute;
+  z-index: 100; // 팝업(50) 위에 보이게
+  left: 8px;
+  right: 8px;
+  bottom: calc(8px + env(safe-area-inset-bottom));
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  padding: 10px 8px 12px;
+  background: #8a5a3a url("../assets/tabbar-soil.png") center / cover;
+  border: 3px solid $brown;
+  border-radius: 24px;
+
+  &__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    @include outline-text(#7a4a30);
+
+    img {
+      width: 52px;
+      height: 52px;
+      object-fit: contain;
+    }
+
+    &.is-active img {
+      width: 64px;
+      height: 64px;
+      margin-top: -22px; // 활성 탭 튀어나오게
+    }
+  }
+}

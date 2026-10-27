@@ -1,0 +1,322 @@
+$bg: #fdf8ee;
+$brown: #5a3a28;
+$brown-soft: #b07a50;
+$line: #f1d9b0;
+$line-strong: #d9b07a;
+$cream: #fff4dc;
+$ok-bg: #d4efb8;
+$ok-text: #4b8a2b;
+$font: "Galmuri11", "DungGeunMo", "Pretendard", sans-serif;
+
+.temp {
+  max-width: 430px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  font-family: $font;
+  color: $brown;
+  background: $bg;
+
+  // ── 헤더 ──
+  &__header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: grid;
+    grid-template-columns: 44px 1fr 44px;
+    align-items: center;
+    padding: 12px 16px;
+    background: $bg;
+
+    h1 {
+      grid-column: 2;
+      margin: 0;
+      font-size: 18px;
+      text-align: center;
+    }
+  }
+
+  &__back {
+    grid-column: 1;
+    grid-row: 1;
+    width: 36px;
+    height: 36px;
+    font-size: 24px;
+    line-height: 1;
+    color: $brown-soft;
+    background: #fbe3b5;
+    border: 2px solid $line-strong;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  // 네비바(떠 있음)에 마지막 내용이 가려지지 않게 하단 여백
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 4px 16px 140px;
+  }
+}
+
+// ── 공통 카드 ──
+.panel {
+  padding: 16px;
+  background: #fffaf0;
+  border: 2px solid $line;
+  border-radius: 20px;
+
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: 15px;
+  }
+
+  &--strong {
+    border-color: $line-strong;
+    box-shadow: 4px 4px 0 #f6dfb4;
+  }
+
+  &__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+}
+
+.badge {
+  display: inline-block;
+  padding: 6px 22px;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 999px;
+
+  &--ok {
+    color: $ok-text;
+    background: $ok-bg;
+    border: 2px solid #7fae4f;
+  }
+}
+
+// ── 현재 온도 ──
+.now {
+  text-align: center;
+
+  &__top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    text-align: left;
+
+    small {
+      font-size: 11px;
+      color: #aaa;
+    }
+  }
+
+  &__value {
+    margin: 6px 0 10px;
+    font-size: 34px;
+    font-weight: 800;
+  }
+}
+
+// ── 적정 온도 범위 ──
+.pill {
+  padding: 7px 12px;
+  font-family: inherit;
+  font-size: 11px;
+  color: $brown;
+  background: #fbe9c8;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.gauge {
+  position: relative;
+  height: 28px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #c9d9ee 0%, #d6e8c8 25%, #eaf0b8 50%, #f7e3b0 70%, #f6c9c9 100%);
+
+  // 22°C / 29°C 점선 구분선
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    border-left: 2px dotted #fff;
+  }
+  &::before { left: 31.6%; }
+  &::after { left: 68.4%; }
+
+  &__marker {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 26px;
+  }
+
+  &__labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    font-size: 11px;
+    color: $brown-soft;
+
+    b {
+      color: $brown;
+    }
+  }
+}
+
+// ── 차트 ──
+.chart-unit {
+  margin: 12px 0 0;
+  font-size: 10px;
+  color: $brown-soft;
+}
+
+.chart {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+
+  &__night { fill: #e3f0fb; }
+  &__zone { font-size: 9px; fill: #8db3dc; }
+  &__ok { fill: #e8f5cf;
+    &--night { fill: #d9efc6; }
+  }
+  &__grid { stroke: #ecdcc0; stroke-width: 0.5; stroke-dasharray: 2 3; }
+  &__guide { stroke: #7fae4f; stroke-width: 0.8; stroke-dasharray: 3 2; }
+  &__tick { font-size: 9px; fill: $brown-soft; }
+  &__bar { fill: #f9c58f; &.is-hot { fill: #f59a4a; } }
+  &__tip { fill: #fde7c4; stroke: #e8b979; stroke-width: 0.8; }
+  &__tip-text { font-size: 8px; fill: $brown; }
+}
+
+.legend {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 11px;
+
+  li { display: flex; align-items: center; gap: 6px; }
+  small { display: block; font-size: 9px; color: #aaa; }
+  i { display: block; width: 14px; height: 24px; border-radius: 4px; }
+  &__bar { background: #f9a95b; border-radius: 7px !important; }
+  &__ok { background: #e8f5cf; }
+  &__night { background: #e3f0fb; }
+}
+
+// ── 관리 팁 ──
+.tip {
+  padding: 18px 16px;
+  background: #eaf4d2;
+  border: 2px solid #7fae4f;
+  border-radius: 20px;
+  font-size: 12px;
+  line-height: 1.6;
+
+  h2 { margin: 0 0 12px; font-size: 15px; }
+  h3 { margin: 0 0 4px; font-size: 13px; }
+  h4 { margin: 0 0 6px; padding-left: 8px; font-size: 13px; border-left: 4px solid #7fae4f; }
+  p { margin: 0; color: #6b6b5a; }
+  hr { margin: 14px 0; border: 0; border-top: 2px dashed #7fae4f; }
+  ul { margin: 0; padding-left: 18px; color: #6b6b5a; }
+}
+
+// ── 팝업 ──
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50; // 네비바(100)보다 아래 → 디자인처럼 네비바는 팝업 위에 보임
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 16px 110px; // 아래쪽은 네비바 높이만큼 비워서 안 가려지게
+  background: rgba(60, 50, 40, 0.55);
+  animation: fade 0.15s ease-out;
+
+  &__panel {
+    width: 100%;
+    max-width: 398px;
+    max-height: 100%;
+    overflow-y: auto;
+    padding: 22px 20px 20px;
+    background: #fdf8ee;
+    border: 2px solid $line-strong;
+    border-radius: 24px;
+    animation: pop 0.18s ease-out;
+  }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    h2 { flex: 1; margin: 0; font-size: 17px; }
+  }
+
+  &__icon { font-size: 26px; }
+
+  &__close {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+    color: $brown-soft;
+    background: #fbe3b5;
+    border: 2px solid $line-strong;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  &__lead { margin: 16px 0; font-size: 13px; }
+
+  hr { margin: 16px 0; border: 0; border-top: 1px solid #e4dccd; }
+
+  &__sub { margin: 0 0 8px; font-size: 13px; }
+
+  &__list {
+    margin: 0 0 16px;
+    padding-left: 18px;
+    font-size: 11.5px;
+    line-height: 1.8;
+    color: #6b5d50;
+  }
+
+  &__note {
+    padding: 14px;
+    background: #fdeccb;
+    border-radius: 14px;
+    font-size: 12px;
+
+    strong { display: block; margin-bottom: 6px; }
+    p { margin: 0 0 8px; line-height: 1.6; }
+    small { font-size: 10px; color: #a89880; }
+  }
+}
+
+.range {
+  margin: 0;
+
+  > div { margin-bottom: 16px; }
+
+  dt { display: inline; font-size: 16px; font-weight: 800; }
+  dd { display: inline; float: right; margin: 0; font-size: 18px; font-weight: 800; color: $brown-soft; }
+  p { clear: both; margin: 6px 0 0; font-size: 11px; color: #aaa; }
+}
+
+@keyframes fade { from { opacity: 0; } }
+@keyframes pop { from { opacity: 0; transform: translateY(8px) scale(0.97); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .modal, .modal__panel { animation: none; }
+}

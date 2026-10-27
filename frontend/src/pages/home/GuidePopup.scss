@@ -1,0 +1,201 @@
+$brown: #5a3a28;
+$wood: #c98c5a;
+$wood-dark: #8a5a3a;
+$paper: #fdecd0;
+$font: "Galmuri11", "DungGeunMo", "Pretendard", sans-serif;
+
+.guide {
+  position: fixed;
+  inset: 0;
+  z-index: 50; // 네비바(100)보다 아래 → 디자인처럼 네비바는 팝업 위에 보임
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 16px 120px; // 네비바에 안 가려지게
+  font-family: $font;
+  color: $brown;
+  background: rgba(60, 60, 50, 0.55);
+  animation: guide-fade 0.15s ease-out;
+
+  &__panel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 330px;
+    min-height: 440px; // 페이지마다 높이가 달라도 팝업 크기는 일정하게
+    max-height: 100%;
+    padding: 28px 24px 18px;
+    background: $paper;
+    // 나무 액자 느낌: 바깥 나무 테두리 + 안쪽 얇은 선
+    border: 6px solid $wood;
+    border-radius: 6px;
+    box-shadow: inset 0 0 0 2px #f6c99b, 0 0 0 3px $wood-dark, 0 8px 18px rgba(0, 0, 0, 0.3);
+    animation: guide-pop 0.18s ease-out;
+    // 덩굴 장식 이미지를 쓴다면:
+    // &::before { content: ""; position: absolute; top: -20px; left: -20px; width: 90px; height: 90px; background: url("../assets/vine-corner.png") center / contain no-repeat; pointer-events: none; }
+  }
+
+  &__close {
+    position: absolute;
+    top: -14px;
+    right: -14px;
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+    font-weight: 800;
+    color: #fff;
+    background: #e8505b;
+    border: 3px solid #a82f3a;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  &__title {
+    margin: 4px 0 18px;
+    font-size: 20px;
+    text-align: center;
+  }
+
+  &__page {
+    flex: 1;
+    animation: guide-slide 0.2s ease-out;
+  }
+
+  &__hero {
+    display: block;
+    width: 88%;
+    margin: 0 auto 22px;
+  }
+
+  &__sub {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 12px;
+    font-size: 14px;
+
+    img {
+      width: 18px;
+    }
+  }
+
+  &__text {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.7;
+
+    strong {
+      font-weight: 800;
+    }
+  }
+
+  // 2페이지: 체크 리스트
+  &__checks {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    p {
+      margin: 0;
+      font-size: 11.5px;
+      font-weight: 700;
+      line-height: 1.5;
+    }
+  }
+
+  &__check {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    font-size: 14px;
+    font-weight: 800;
+    color: #fff;
+    background: #f5a85a;
+    border-radius: 50%;
+  }
+
+  // 3페이지: 주의 사항 + 스크랩
+  &__warn {
+    margin: 16px 0;
+    padding: 14px;
+    background: #f8d3a4;
+    border-radius: 12px;
+
+    h4 {
+      margin: 0 0 6px;
+      font-size: 13px;
+    }
+
+    p {
+      margin: 0;
+      font-size: 10.5px;
+      line-height: 1.6;
+    }
+  }
+
+  &__scrap {
+    display: block;
+    margin: 0 auto;
+    padding: 6px 28px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    color: $brown;
+    background: #fbe3b5;
+    border: 2px solid $wood-dark;
+    border-radius: 6px;
+    cursor: pointer;
+
+    &.is-on {
+      background: #f5a85a;
+      color: #fff;
+    }
+  }
+
+  // 하단 이전/다음
+  &__pager {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 16px;
+    font-size: 15px;
+    font-weight: 800;
+  }
+
+  &__arrow {
+    width: 30px;
+    height: 30px;
+    font-size: 20px;
+    line-height: 1;
+    color: $brown;
+    background: #fbe3b5;
+    border: 2px solid $wood-dark;
+    border-radius: 8px;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+  }
+}
+
+@keyframes guide-fade { from { opacity: 0; } }
+@keyframes guide-pop { from { opacity: 0; transform: translateY(8px) scale(0.97); } }
+@keyframes guide-slide { from { opacity: 0; transform: translateX(10px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .guide, .guide__panel, .guide__page { animation: none; }
+}
