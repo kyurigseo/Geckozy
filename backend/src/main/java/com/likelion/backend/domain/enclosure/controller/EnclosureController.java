@@ -6,6 +6,7 @@ import com.likelion.backend.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -66,5 +67,15 @@ public class EnclosureController {
     ) {
         EnclosureGuidebookRecommendationResponse response = enclosureService.getGuidebookRecommendations(enclosureId);
         return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<EnclosureResponseDto>> getEnclosure(
+            @RequestParam("lizardId") Long lizardId,
+            @AuthenticationPrincipal Long currentUserId // Security Context에서 현재 유저 ID 추출 (프로젝트 SecurityDetails 설정에 맞게 변경 가능)
+    ) {
+        EnclosureResponseDto response = enclosureService.getEnclosureByLizardId(lizardId, currentUserId);
+        return ResponseEntity.ok(ApiResponse.success("SUCCESS", response));
     }
 }

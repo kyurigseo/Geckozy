@@ -128,6 +128,23 @@ public class EnclosureService {
         );
     }
 
+    public EnclosureResponseDto getEnclosureByLizardId(Long lizardId, Long currentUserId) {
+        // 1. 도마뱀 존재 여부 확인
+        Lizard lizard = lizardRepository.findById(lizardId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 도마뱀입니다."));
+
+        // 2. 본인 소유 도마뱀인지 검증 (접근 권한 확인)
+        if (!lizard.getUser().getUserId().equals(currentUserId)) {
+            throw new IllegalArgumentException("본인 소유의 도마뱀 정보만 조회할 수 있습니다.");
+        }
+
+        // 3. 해당 도마뱀에 연결된 사육장 조회
+        Enclosure enclosure = enclosureRepository.findByLizard_LizardId(lizardId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 도마뱀에 등록된 사육장이 없습니다."));
+
+        return EnclosureResponseDto.from(enclosure);
+    }
+
     @Transactional(readOnly = true)
     public EnclosureTemperatureSuggestionResponse getTemperatureSuggestions(Long enclosureId) {
         return EnclosureTemperatureSuggestionResponse.builder()
