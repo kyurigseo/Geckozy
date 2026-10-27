@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -227,4 +228,59 @@ public class EnclosureService {
         if (current.compareTo(max) > 0) return "현재 온도가 적정 범주보다 높습니다. 통풍 및 환기를 실시해 주세요.";
         return String.format("현재 온도가 %s 적정 범위를 잘 유지하고 있습니다.", isDaytime ? "주간" : "야간");
     }
-}
+
+    @Transactional
+    public EnclosureUpdateResponseDto updateEnclosure(Long enclosureId, EnclosureUpdateRequestDto requestDto, Long currentUserId) {
+        // 1. 사육장 존재 및 소유권 확인
+        Enclosure enclosure = enclosureRepository.findById(enclosureId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사육장입니다."));
+
+        if (!enclosure.getLizard().getUser().getUserId().equals(currentUserId)) {
+            throw new IllegalArgumentException("본인 소유의 사육장만 수정할 수 있습니다.");
+        }
+
+        // 2. 기본 정보 수정 (Dirty Checking)
+        enclosure.update(
+                requestDto.getWidth(),
+                requestDto.getHeight(),
+                requestDto.getDepth(),
+                requestDto.getMaterial(),
+                requestDto.getVentilation(),
+                requestDto.getMaterialOther(),
+                requestDto.getWallDesign(),
+                requestDto.getVineDesign(),
+                requestDto.getFloorDesign(),
+                requestDto.getDecorationDesign(),
+                requestDto.getConcernDetail()
+        );
+
+        // 3. 기존 부속품(Components) 삭제 후 재등록
+        enclosureComponentRepository.deleteByEnclosureId(enclosureId);
+        if (requestDto.getComponents() != null && !requestDto.getComponents().isEmpty()) {
+            List<EnclosureComponent> newComponents = requestDto.getComponents().stream()
+                    .map(c -> EnclosureComponent.builder()
+                            .enclosure(enclosure)
+                            .componentCategory(c.getComponentCategory())
+                            .componentName(c.getComponentName())
+                            .build())
+                    .toList();
+            enclosureComponentRepository.saveAll(newComponents);
+        }
+
+        // 4. 기존 고민(Concerns) 삭제 후 재등록
+        enclosureConcernRepository.deleteByEnclosureId(enclosureId);
+        List<Long> updatedConcernIds = new ArrayList<>();
+        if (requestDto.getConcernIds() != null && !requestDto.getConcernIds().isEmpty()) {
+            for (Long concernId : requestDto.getConcernIds()) {
+                Concern concern = concernRepository.findById(concernId)
+                        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 고민 ID입니다: " + concernId));
+
+                EnclosureConcern enclosureConcern = new EnclosureConcern(enclosure, concern);
+                enclosureConcernRepository.save(enclosureConcern);
+                updatedConcernIds.add(concernId);
+            }
+        }
+
+        // 5. 수정 완료 응답 반환
+        return EnclosureUpdateResponseDto.of(enclosure, updatedConcernIds);
+    }}

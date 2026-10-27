@@ -3,6 +3,7 @@ package com.likelion.backend.domain.enclosure.controller;
 import com.likelion.backend.domain.enclosure.dto.*;
 import com.likelion.backend.domain.enclosure.service.EnclosureService;
 import com.likelion.backend.global.response.ApiResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -76,6 +77,17 @@ public class EnclosureController {
             @AuthenticationPrincipal Long currentUserId // Security Context에서 현재 유저 ID 추출 (프로젝트 SecurityDetails 설정에 맞게 변경 가능)
     ) {
         EnclosureResponseDto response = enclosureService.getEnclosureByLizardId(lizardId, currentUserId);
+        return ResponseEntity.ok(ApiResponse.success("SUCCESS", response));
+    }
+
+
+    @PatchMapping("/{enclosureId}")
+    public ResponseEntity<ApiResponse<EnclosureUpdateResponseDto>> updateEnclosure(
+            @PathVariable("enclosureId") Long enclosureId,
+            @Valid @RequestBody EnclosureUpdateRequestDto requestDto, // @Valid로 필수값 유효성 검증
+            @AuthenticationPrincipal Long currentUserId
+    ) {
+        EnclosureUpdateResponseDto response = enclosureService.updateEnclosure(enclosureId, requestDto, currentUserId);
         return ResponseEntity.ok(ApiResponse.success("SUCCESS", response));
     }
 }
