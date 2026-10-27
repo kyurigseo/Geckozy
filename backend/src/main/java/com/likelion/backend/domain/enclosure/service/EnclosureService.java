@@ -21,7 +21,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -642,6 +645,152 @@ public class EnclosureService {
             case "LOW" -> 3;
             default -> 4;
         };
+    }
+
+    public TemperatureHistoryResponseDto getTemperatureHistory(Long enclosureId, String dateStr, Long currentUserId) {
+        // 1. 사육장 및 소유권 검증
+        Enclosure enclosure = enclosureRepository.findById(enclosureId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사육장입니다."));
+
+        if (!enclosure.getLizard().getUser().getUserId().equals(currentUserId)) {
+            throw new IllegalArgumentException("본인 소유 사육장의 정보만 조회할 수 있습니다.");
+        }
+
+        // 2. 날짜 파싱 (미입력 시 오늘 날짜)
+        LocalDate targetDate = (dateStr != null && !dateStr.isBlank())
+                ? LocalDate.parse(dateStr)
+                : LocalDate.now();
+
+        LocalDateTime startOfDay = targetDate.atStartOfDay();
+        LocalDateTime endOfDay = targetDate.atTime(LocalTime.MAX);
+        LocalDateTime now = LocalDateTime.now();
+
+        // 조회 대상 종료 시간 (오늘일 경우 현재 시각 이후는 제외)
+        LocalDateTime queryEndTime = targetDate.equals(LocalDate.now()) && now.isBefore(endOfDay)
+                ? now
+                : endOfDay;
+
+        // 3. 센서 측정 데이터 조회
+        Optional<Sensor> sensorOpt = sensorRepository.findById(enclosureId);
+        List<TemperatureHistoryResponseDto.ActualTemperatureDto> actualList = new ArrayList<>();
+
+        if (sensorOpt.isPresent()) {
+            List<SensorMeasurement> measurements = sensorMeasurementRepository
+                    .findBySensor_SensorIdAndMeasuredAtBetweenOrderByMeasuredAtAsc(
+                            sensorOpt.get().getSensorId(), startOfDay, queryEndTime);
+
+            actualList = measurements.stream()
+                    .filter(m -> m.getTemperature() != null)
+                    .map(m -> TemperatureHistoryResponseDto.ActualTemperatureDto.builder()
+                            .measuredAt(m.getMeasuredAt().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+                            .value(m.getTemperature())
+                            .build())
+                    .toList();
+        }
+
+        // 4. 종별 참고 기준 온도 조회
+        Species species = enclosure.getLizard().getSpecies();
+        Optional<SpeciesEnvironmentStandard> standardOpt = speciesEnvironmentStandardRepository.findBySpecies_SpeciesId(species.getSpeciesId());
+
+        TemperatureHistoryResponseDto.ReferenceTemperatureDto reference = null;
+        if (standardOpt.isPresent()) {
+            SpeciesEnvironmentStandard std = standardOpt.get();
+            reference = TemperatureHistoryResponseDto.ReferenceTemperatureDto.builder()
+                    .dayMin(std.getDayTemperatureMin())
+                    .dayMax(std.getDayTemperatureMax())
+                    .nightMin(std.getNightTemperatureMin())
+                    .nightMax(std.getNightTemperatureMax())
+                    .build();
+        }
+
+        return TemperatureHistoryResponseDto.builder()
+                .date(targetDate.toString())
+                .actual(actualList)
+                .reference(reference)
+                .build();
+    }
+
+    public HumidityHistoryResponseDto getHumidityHistory(Long enclosureId, String dateStr, Long currentUserId) {
+        // 1. 사육장 및 소유권 검증 (404, 401 예외)
+        Enclosure enclosure = enclosureRepository.findById(enclosureId)
+                .orElseThrow(() -> new IllegalArgumentException("ENCLOSURE_NOT_FOUND"));
+
+        if (!enclosure.getLizard().getUser().getUserId().equals(currentUserId)) {
+            throw new IllegalArgumentException("UNAUTHORIZED");
+        }
+
+        // 2. 날짜 파싱 (미입력 시 오늘 날짜)
+        LocalDate targetDate = (dateStr != null && !dateStr.isBlank())
+                ? LocalDate.parse(dateStr)
+                : LocalDate.now();
+
+        LocalDateTime startOfDay = targetDate.atStartOfDay();
+        LocalDateTime endOfDay = targetDate.atTime(LocalTime.MAX);
+        LocalDateTime now = LocalDateTime.now();
+
+        // 오늘일 경우 현재 시각 이후의 데이터는 조회 대상 제외
+        LocalDateTime queryEndTime = targetDate.equals(LocalDate.now()) && now.isBefore(endOfDay)
+                ? now
+                : endOfDay;
+
+        // 3. 센서 측정 습도 데이터 조회
+        Optional<Sensor> sensorOpt = sensorRepository.findById(enclosureId);
+        List<HumidityHistoryResponseDto.ActualHumidityDto> actualList = new ArrayList<>();
+
+        if (sensorOpt.isPresent()) {
+            List<SensorMeasurement> measurements = sensorMeasurementRepository
+                    .findBySensor_SensorIdAndMeasuredAtBetweenOrderByMeasuredAtAsc(
+                            sensorOpt.get().getSensorId(), startOfDay, queryEndTime);
+
+            actualList = measurements.stream()
+                    .filter(m -> m.getHumidity() != null)
+                    .map(m -> HumidityHistoryResponseDto.ActualHumidityDto.builder()
+                            .measuredAt(m.getMeasuredAt().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+                            .value(m.getHumidity())
+                            .build())
+                    .toList();
+        }
+
+        // 4. 종별 권장 습도 사이클 매핑 (MORNING, DAY, NIGHT)
+        Species species = enclosure.getLizard().getSpecies();
+        Optional<SpeciesEnvironmentStandard> standardOpt = speciesEnvironmentStandardRepository.findBySpecies_SpeciesId(species.getSpeciesId());
+
+        List<HumidityHistoryResponseDto.RecommendedCycleDto> recommendedCycle = new ArrayList<>();
+
+        if (standardOpt.isPresent()) {
+            SpeciesEnvironmentStandard std = standardOpt.get();
+            BigDecimal min = std.getHumidityMin();
+            BigDecimal max = std.getHumidityMax();
+
+            if (min != null && max != null) {
+                // MORNING (아침 분무기 직후 습윤 구간)
+                recommendedCycle.add(HumidityHistoryResponseDto.RecommendedCycleDto.builder()
+                        .time("MORNING")
+                        .min(min.add(BigDecimal.valueOf(10))) // 예: 70.0
+                        .max(max)                             // 예: 80.0
+                        .build());
+
+                // DAY (낮건조/환기 구간)
+                recommendedCycle.add(HumidityHistoryResponseDto.RecommendedCycleDto.builder()
+                        .time("DAY")
+                        .min(min.subtract(BigDecimal.valueOf(10))) // 예: 50.0
+                        .max(max.subtract(BigDecimal.valueOf(15))) // 예: 65.0
+                        .build());
+
+                // NIGHT (야간 안정 구간)
+                recommendedCycle.add(HumidityHistoryResponseDto.RecommendedCycleDto.builder()
+                        .time("NIGHT")
+                        .min(min)                             // 예: 60.0
+                        .max(max.subtract(BigDecimal.valueOf(5)))  // 예: 75.0
+                        .build());
+            }
+        }
+
+        return HumidityHistoryResponseDto.builder()
+                .date(targetDate.toString())
+                .actual(actualList)
+                .recommendedCycle(recommendedCycle)
+                .build();
     }
 
 }

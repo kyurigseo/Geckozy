@@ -120,4 +120,24 @@ public class EnclosureController {
         String message = (response.getPrimaryAlert() == null) ? "NO_ALERT" : "SUCCESS";
         return ResponseEntity.ok(ApiResponse.success(message, response));
     }
+
+    @GetMapping("/{enclosureId}/temperatures/history")
+    public ResponseEntity<ApiResponse<TemperatureHistoryResponseDto>> getTemperatureHistory(
+            @PathVariable("enclosureId") Long enclosureId,
+            @RequestParam(value = "date", required = false) String date,
+            @AuthenticationPrincipal Long currentUserId
+    ) {
+        TemperatureHistoryResponseDto response = enclosureService.getTemperatureHistory(enclosureId, date, currentUserId);
+        return ResponseEntity.ok(ApiResponse.success("SUCCESS", response));
+    }
+
+    @GetMapping("/{enclosureId}/humidities/history")
+    public ResponseEntity<ApiResponse<HumidityHistoryResponseDto>> getHumidityHistory(
+            @PathVariable("enclosureId") Long enclosureId,
+            @RequestParam(value = "date", required = false) String date,
+            @AuthenticationPrincipal Long currentUserId
+    ) {
+        HumidityHistoryResponseDto response = enclosureService.getHumidityHistory(enclosureId, date, currentUserId);
+        return ResponseEntity.ok(ApiResponse.success("SUCCESS", response));
+    }
 }

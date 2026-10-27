@@ -3,6 +3,7 @@ package com.likelion.backend.domain.sensor.repository;
 import com.likelion.backend.domain.sensor.entity.SensorMeasurement;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,4 +13,6 @@ public interface SensorMeasurementRepository extends JpaRepository<SensorMeasure
 
     List<SensorMeasurement> findTop10BySensor_SensorIdOrderByMeasuredAtDesc(Long sensorId);
 
+    List<SensorMeasurement> findBySensor_SensorIdAndMeasuredAtBetweenOrderByMeasuredAtAsc(
+            Long sensorId, LocalDateTime start, LocalDateTime end);
 }
