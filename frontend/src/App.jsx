@@ -10,6 +10,7 @@ import Scrap from './pages/my/components/screens/Scrap'
 import SensorManage from './pages/my/components/screens/SensorManage'
 
 
+
 import Guide from "./pages/Guide/Guide";
 import LizardInfo from "./pages/Guide/LizardInfo";
 import Loading from "./pages/Guide/Loading";
@@ -20,6 +21,11 @@ import Step3 from "./pages/Guide/Step3";
 import Step4 from "./pages/Guide/Step4";
 import Step5 from "./pages/Guide/Step5";
 import LoadingFin from "./pages/Guide/Loading_fin";
+
+import Home from "./pages/home/Home";
+import Temperature from "./pages/home/Temperature";
+import Humidity from "./pages/home/Humidity";
+
 
 function App() {
   return (
@@ -37,6 +43,8 @@ function App() {
         <Route path="/guide/enclosure-check" element={<EnclosureCheck />} />
         <Route path="/loading-fin" element={<LoadingFin />} />
 
+    
+
         <Route element={<Layout />}>
           <Route path="/my" element={<MyPage />} />
           <Route path="/guide" element={<Guide />} />
@@ -45,6 +53,10 @@ function App() {
           <Route path="/guide/step3" element={<Step3 />} />
           <Route path="/guide/step4" element={<Step4 />} />
           <Route path="/guide/step5" element={<Step5 />} />
+
+          <Route path="/" element={<Home />} />
+          <Route path="/temperature" element={<Temperature />} />
+          <Route path="/humidity" element={<Humidity />} />
           <Route path="*" element={null} />
         </Route>
       </Routes>
