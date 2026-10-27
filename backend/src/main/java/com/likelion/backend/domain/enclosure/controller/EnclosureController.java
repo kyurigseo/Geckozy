@@ -38,13 +38,6 @@ public class EnclosureController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @GetMapping("/{enclosureId}/temperatures/status")
-    public ResponseEntity<ApiResponse<TemperatureStatusResponse>> getTemperatureStatus(
-            @PathVariable("enclosureId") Long enclosureId) {
-
-        TemperatureStatusResponse response = enclosureService.getTemperatureStatus(enclosureId);
-        return ResponseEntity.ok(ApiResponse.success(response));
-    }
 
     @GetMapping("/{enclosureId}/temperatures/suggestions")
     public ResponseEntity<ApiResponse<EnclosureTemperatureSuggestionResponse>> getTemperatureSuggestions(
