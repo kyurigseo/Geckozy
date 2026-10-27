@@ -108,4 +108,16 @@ public class EnclosureController {
         HumidityStatusResponseDto response = enclosureService.getHumidityStatus(enclosureId, currentUserId);
         return ResponseEntity.ok(ApiResponse.success("SUCCESS", response));
     }
+
+    @GetMapping("/{enclosureId}/alerts")
+    public ResponseEntity<ApiResponse<AlertResponseDto>> getEnclosureAlerts(
+            @PathVariable("enclosureId") Long enclosureId,
+            @AuthenticationPrincipal Long currentUserId
+    ) {
+        AlertResponseDto response = enclosureService.getEnclosureAlerts(enclosureId, currentUserId);
+
+        // 경고가 없으면 "NO_ALERT" 메세지 반환
+        String message = (response.getPrimaryAlert() == null) ? "NO_ALERT" : "SUCCESS";
+        return ResponseEntity.ok(ApiResponse.success(message, response));
+    }
 }

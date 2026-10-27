@@ -537,4 +537,111 @@ public class EnclosureService {
                 .displayMessage(displayMessage)
                 .build();
     }
+
+    public AlertResponseDto getEnclosureAlerts(Long enclosureId, Long currentUserId) {
+        // 1. 사육장 및 소유권 검증 (404, 401 처리)
+        Enclosure enclosure = enclosureRepository.findById(enclosureId)
+                .orElseThrow(() -> new IllegalArgumentException("ENCLOSURE_NOT_FOUND"));
+
+        if (!enclosure.getLizard().getUser().getUserId().equals(currentUserId)) {
+            throw new IllegalArgumentException("UNAUTHORIZED");
+        }
+
+        List<AlertResponseDto.AlertDetail> alerts = new ArrayList<>();
+
+        // 2. 센서 상태 점검 (DISCONNECTED 체크)
+        Optional<Sensor> sensorOpt = sensorRepository.findById(enclosureId);
+        if (sensorOpt.isPresent()) {
+            Sensor sensor = sensorOpt.get();
+            if ("DISCONNECTED".equals(sensor.getStatus().name())) {
+                alerts.add(AlertResponseDto.AlertDetail.builder()
+                        .code("COACH-003")
+                        .type("SENSOR_DISCONNECTED")
+                        .severity("MEDIUM")
+                        .message("센서 연결을 확인해주세요.")
+                        .detailType("SENSOR")
+                        .build());
+            }
+        }
+
+        // 3. 온도 상태 점검 (HIGH/LOW)
+        try {
+            TemperatureStatusResponseDto tempStatus = getTemperatureStatus(enclosureId, currentUserId);
+            if ("HIGH".equals(tempStatus.getStatus())) {
+                alerts.add(AlertResponseDto.AlertDetail.builder()
+                        .code("COACH-012")
+                        .type("HIGH_TEMPERATURE")
+                        .severity("HIGH")
+                        .message("현재 온도가 권장 범위보다 높아요.")
+                        .detailType("TEMPERATURE")
+                        .build());
+            } else if ("LOW".equals(tempStatus.getStatus())) {
+                alerts.add(AlertResponseDto.AlertDetail.builder()
+                        .code("COACH-011")
+                        .type("LOW_TEMPERATURE")
+                        .severity("HIGH")
+                        .message("현재 온도가 권장 범위보다 낮아요.")
+                        .detailType("TEMPERATURE")
+                        .build());
+            }
+        } catch (Exception ignored) {}
+
+        // 4. 습도 상태 점검 (HIGH/LOW)
+        try {
+            HumidityStatusResponseDto humidStatus = getHumidityStatus(enclosureId, currentUserId);
+            if (humidStatus.getStandardHumidity() != null && humidStatus.getCurrentHumidity() != null) {
+                BigDecimal current = humidStatus.getCurrentHumidity();
+                BigDecimal max = humidStatus.getStandardHumidity().getMax();
+                BigDecimal min = humidStatus.getStandardHumidity().getMin();
+
+                if (current.compareTo(max) > 0) {
+                    alerts.add(AlertResponseDto.AlertDetail.builder()
+                            .code("COACH-013")
+                            .type("HIGH_HUMIDITY")
+                            .severity("HIGH")
+                            .message("현재 습도가 권장 범위보다 높아요.")
+                            .detailType("HUMIDITY")
+                            .build());
+                } else if (current.compareTo(min) < 0) {
+                    alerts.add(AlertResponseDto.AlertDetail.builder()
+                            .code("COACH-014")
+                            .type("LOW_HUMIDITY")
+                            .severity("HIGH")
+                            .message("현재 습도가 권장 범위보다 낮아요.")
+                            .detailType("HUMIDITY")
+                            .build());
+                }
+            }
+        } catch (Exception ignored) {}
+
+        // 5. 경고가 없는 경우 (NO_ALERT)
+        if (alerts.isEmpty()) {
+            return AlertResponseDto.builder()
+                    .primaryAlert(null)
+                    .additionalAlerts(Collections.emptyList())
+                    .build();
+        }
+
+        // 6. 우선순위(Severity) 정렬: HIGH -> MEDIUM -> LOW
+        alerts.sort((a, b) -> getSeverityRank(a.getSeverity()) - getSeverityRank(b.getSeverity()));
+
+        // 7. Primary와 Additional 분리
+        AlertResponseDto.AlertDetail primaryAlert = alerts.get(0);
+        List<AlertResponseDto.AlertDetail> additionalAlerts = alerts.subList(1, alerts.size());
+
+        return AlertResponseDto.builder()
+                .primaryAlert(primaryAlert)
+                .additionalAlerts(additionalAlerts)
+                .build();
+    }
+
+    private int getSeverityRank(String severity) {
+        return switch (severity) {
+            case "HIGH" -> 1;
+            case "MEDIUM" -> 2;
+            case "LOW" -> 3;
+            default -> 4;
+        };
+    }
+
 }
