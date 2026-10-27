@@ -90,4 +90,13 @@ public class EnclosureController {
         EnclosureUpdateResponseDto response = enclosureService.updateEnclosure(enclosureId, requestDto, currentUserId);
         return ResponseEntity.ok(ApiResponse.success("SUCCESS", response));
     }
+
+    @GetMapping("/{enclosureId}/temperatures/status")
+    public ResponseEntity<ApiResponse<TemperatureStatusResponseDto>> getTemperatureStatus(
+            @PathVariable("enclosureId") Long enclosureId,
+            @AuthenticationPrincipal Long currentUserId
+    ) {
+        TemperatureStatusResponseDto response = enclosureService.getTemperatureStatus(enclosureId, currentUserId);
+        return ResponseEntity.ok(ApiResponse.success("SUCCESS", response));
+    }
 }

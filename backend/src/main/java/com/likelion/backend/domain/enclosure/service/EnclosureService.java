@@ -283,4 +283,133 @@ public class EnclosureService {
 
         // 5. 수정 완료 응답 반환
         return EnclosureUpdateResponseDto.of(enclosure, updatedConcernIds);
-    }}
+    }
+
+
+    public TemperatureStatusResponseDto getTemperatureStatus(Long enclosureId, Long currentUserId) {
+        // 1. 사육장 및 소유권 검증
+        Enclosure enclosure = enclosureRepository.findById(enclosureId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사육장입니다."));
+
+        if (!enclosure.getLizard().getUser().getUserId().equals(currentUserId)) {
+            throw new IllegalArgumentException("본인 소유 사육장의 정보만 조회할 수 있습니다.");
+        }
+
+        Lizard lizard = enclosure.getLizard();
+        Species species = lizard.getSpecies();
+
+        // 2. 센서 및 최신 측정 데이터 조회
+        Optional<Sensor> sensorOpt = sensorRepository.findById(enclosureId);
+        Optional<SensorMeasurement> measurementOpt = sensorOpt.flatMap(
+                sensor -> sensorMeasurementRepository.findTopBySensor_SensorIdOrderByMeasuredAtDesc(sensor.getSensorId())
+        );
+
+        // [예외 2 처리] 센서 미연결 또는 측정 데이터 부재
+        if (sensorOpt.isEmpty() || measurementOpt.isEmpty() || measurementOpt.get().getTemperature() == null) {
+            return TemperatureStatusResponseDto.builder()
+                    .enclosureId(enclosureId)
+                    .lizardName(lizard.getName())
+                    .speciesName(species.getName())
+                    .currentTemperature(null)
+                    .timeOfDay(null)
+                    .standardTemperature(null)
+                    .status("SENSOR_ERROR")
+                    .cautionText(null)
+                    .displayMessage("온도 센서가 연결되지 않았거나 측정 데이터를 수신할 수 없습니다.")
+                    .build();
+        }
+
+        BigDecimal currentTemp = measurementOpt.get().getTemperature();
+
+        // 3. 종별 환경 기준 조회
+        Optional<SpeciesEnvironmentStandard> standardOpt = speciesEnvironmentStandardRepository.findBySpecies_SpeciesId(species.getSpeciesId());
+
+        // 4. 주간/야간 시간 판정 (ManagementSettings 조명 시간 기준)
+        Optional<ManagementSetting> settingOpt = managementSettingRepository.findById(enclosureId);
+        String timeOfDay = determineTimeOfDay(settingOpt.orElse(null));
+
+        // [예외 1 처리] 종별 환경 기준이 등록되지 않은 경우
+        if (standardOpt.isEmpty()) {
+            return TemperatureStatusResponseDto.builder()
+                    .enclosureId(enclosureId)
+                    .lizardName(lizard.getName())
+                    .speciesName(species.getName())
+                    .currentTemperature(currentTemp)
+                    .timeOfDay(timeOfDay)
+                    .standardTemperature(null)
+                    .status("UNKNOWN")
+                    .cautionText(null)
+                    .displayMessage("등록된 종별 권장 온도 기준이 없어 수치만 표시되며, 상태 판정이 보류됩니다.")
+                    .build();
+        }
+
+        SpeciesEnvironmentStandard standard = standardOpt.get();
+        BigDecimal minTemp = "DAYTIME".equals(timeOfDay) ? standard.getDayTemperatureMin() : standard.getNightTemperatureMin();
+        BigDecimal maxTemp = "DAYTIME".equals(timeOfDay) ? standard.getDayTemperatureMax() : standard.getNightTemperatureMax();
+
+        // 기준 온도가 세팅되어 있지 않은 경우도 UNKNOWN 처리
+        if (minTemp == null || maxTemp == null) {
+            return TemperatureStatusResponseDto.builder()
+                    .enclosureId(enclosureId)
+                    .lizardName(lizard.getName())
+                    .speciesName(species.getName())
+                    .currentTemperature(currentTemp)
+                    .timeOfDay(timeOfDay)
+                    .standardTemperature(null)
+                    .status("UNKNOWN")
+                    .cautionText(standard.getTemperatureCaution())
+                    .displayMessage("등록된 종별 권장 온도 기준이 없어 수치만 표시되며, 상태 판정이 보류됩니다.")
+                    .build();
+        }
+
+        // 5. 온도 상태 판정 (OPTIMAL, HIGH, LOW)
+        String status;
+        String displayMessage;
+        String timeLabel = "DAYTIME".equals(timeOfDay) ? "주간" : "야간";
+
+        if (currentTemp.compareTo(minTemp) < 0) {
+            status = "LOW";
+            displayMessage = String.format("현재 온도가 %s 적정 범위보다 낮습니다.", timeLabel);
+        } else if (currentTemp.compareTo(maxTemp) > 0) {
+            status = "HIGH";
+            displayMessage = String.format("현재 온도가 %s 적정 범위보다 높습니다.", timeLabel);
+        } else {
+            status = "OPTIMAL";
+            displayMessage = String.format("현재 온도가 %s 적정 범위를 잘 유지하고 있습니다.", timeLabel);
+        }
+
+        return TemperatureStatusResponseDto.builder()
+                .enclosureId(enclosureId)
+                .lizardName(lizard.getName())
+                .speciesName(species.getName())
+                .currentTemperature(currentTemp)
+                .timeOfDay(timeOfDay)
+                .standardTemperature(TemperatureStatusResponseDto.StandardTemperature.builder()
+                        .min(minTemp)
+                        .max(maxTemp)
+                        .build())
+                .status(status)
+                .cautionText(standard.getTemperatureCaution())
+                .displayMessage(displayMessage)
+                .build();
+    }
+
+    // 주/야간 판정 헬퍼 메서드 (조명 시간 기준)
+    private String determineTimeOfDay(ManagementSetting setting) {
+        if (setting == null || setting.getLightingStartTime() == null || setting.getLightingEndTime() == null) {
+            LocalTime now = LocalTime.now();
+            return (now.isAfter(LocalTime.of(8, 0)) && now.isBefore(LocalTime.of(20, 0))) ? "DAYTIME" : "NIGHTTIME";
+        }
+
+        LocalTime now = LocalTime.now();
+        // 이미 LocalTime 타입이므로 .toLocalTime() 제거
+        LocalTime start = setting.getLightingStartTime();
+        LocalTime end = setting.getLightingEndTime();
+
+        if (start.isBefore(end)) {
+            return (now.isAfter(start) && now.isBefore(end)) ? "DAYTIME" : "NIGHTTIME";
+        } else { // 자정을 넘어가는 경우 (예: 22:00 ~ 06:00)
+            return (now.isAfter(start) || now.isBefore(end)) ? "DAYTIME" : "NIGHTTIME";
+        }
+    }
+}
