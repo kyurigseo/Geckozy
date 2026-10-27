@@ -793,4 +793,82 @@ public class EnclosureService {
                 .build();
     }
 
+    public EnvironmentSummaryResponseDto getEnvironmentSummary(Long enclosureId, String dateStr, Long currentUserId) {
+        // 1. 사육장 존재 및 소유권 검증 (404, 401)
+        Enclosure enclosure = enclosureRepository.findById(enclosureId)
+                .orElseThrow(() -> new IllegalArgumentException("ENCLOSURE_NOT_FOUND"));
+
+        if (!enclosure.getLizard().getUser().getUserId().equals(currentUserId)) {
+            throw new IllegalArgumentException("UNAUTHORIZED");
+        }
+
+        // 2. 날짜 파싱 (미입력 시 오늘 날짜)
+        LocalDate targetDate = (dateStr != null && !dateStr.isBlank())
+                ? LocalDate.parse(dateStr)
+                : LocalDate.now();
+
+        LocalDateTime startAt = targetDate.atStartOfDay();
+        LocalDateTime endOfDay = targetDate.atTime(LocalTime.MAX);
+        LocalDateTime now = LocalDateTime.now();
+
+        // 오늘일 경우 현재 시각까지만 분석
+        LocalDateTime endAt = targetDate.equals(LocalDate.now()) && now.isBefore(endOfDay)
+                ? now
+                : endOfDay;
+
+        // 3. 센서 및 0시~현재까지의 측정 데이터 조회
+        Optional<Sensor> sensorOpt = sensorRepository.findById(enclosureId);
+        List<SensorMeasurement> measurements = new ArrayList<>();
+
+        if (sensorOpt.isPresent()) {
+            measurements = sensorMeasurementRepository
+                    .findBySensor_SensorIdAndMeasuredAtBetweenOrderByMeasuredAtAsc(
+                            sensorOpt.get().getSensorId(), startAt, endAt);
+        }
+
+        int dataCount = measurements.size();
+        String startAtIso = startAt.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        String endAtIso = endAt.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+
+        // [예외 처리] 데이터가 3개 미만이면 데이터 부족 반환
+        if (dataCount < 3) {
+            return EnvironmentSummaryResponseDto.builder()
+                    .date(targetDate.toString())
+                    .dataCount(dataCount)
+                    .startAt(startAtIso)
+                    .endAt(endAtIso)
+                    .summary(null)
+                    .build();
+        }
+
+        // 4. 온도 & 습도 추이 동적 분석
+        SensorMeasurement first = measurements.get(0);
+        SensorMeasurement last = measurements.get(dataCount - 1);
+
+        String tempSummary = "온도는 안정적이었고";
+        if (first.getTemperature() != null && last.getTemperature() != null) {
+            double tempDiff = last.getTemperature().doubleValue() - first.getTemperature().doubleValue();
+            if (tempDiff > 1.5) tempSummary = "온도는 조금씩 올라갔고";
+            else if (tempDiff < -1.5) tempSummary = "온도는 조금씩 낮아졌고";
+        }
+
+        String humidSummary = "습도는 안정적으로 유지되고 있어요.";
+        if (first.getHumidity() != null && last.getHumidity() != null) {
+            double humidDiff = last.getHumidity().doubleValue() - first.getHumidity().doubleValue();
+            if (humidDiff > 3.0) humidSummary = "습도는 조금씩 높아지고 있어요.";
+            else if (humidDiff < -3.0) humidSummary = "습도는 조금씩 낮아지고 있어요.";
+        }
+
+        String timePeriodText = now.getHour() < 12 ? "오전 동안 " : "오늘 동안 ";
+        String fullSummary = timePeriodText + tempSummary + " " + humidSummary;
+
+        return EnvironmentSummaryResponseDto.builder()
+                .date(targetDate.toString())
+                .dataCount(dataCount)
+                .startAt(startAtIso)
+                .endAt(endAtIso)
+                .summary(fullSummary)
+                .build();
+    }
+
 }

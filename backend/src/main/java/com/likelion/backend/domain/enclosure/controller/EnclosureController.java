@@ -140,4 +140,17 @@ public class EnclosureController {
         HumidityHistoryResponseDto response = enclosureService.getHumidityHistory(enclosureId, date, currentUserId);
         return ResponseEntity.ok(ApiResponse.success("SUCCESS", response));
     }
+
+    @GetMapping("/{enclosureId}/environment/summary")
+    public ResponseEntity<ApiResponse<EnvironmentSummaryResponseDto>> getEnvironmentSummary(
+            @PathVariable("enclosureId") Long enclosureId,
+            @RequestParam(value = "date", required = false) String date,
+            @AuthenticationPrincipal Long currentUserId
+    ) {
+        EnvironmentSummaryResponseDto response = enclosureService.getEnvironmentSummary(enclosureId, date, currentUserId);
+
+        // 데이터가 부족하면 INSUFFICIENT_DATA 메시지 전달
+        String message = (response.getSummary() == null) ? "INSUFFICIENT_DATA" : "SUCCESS";
+        return ResponseEntity.ok(ApiResponse.success(message, response));
+    }
 }
