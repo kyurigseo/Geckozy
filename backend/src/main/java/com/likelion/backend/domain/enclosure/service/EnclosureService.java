@@ -412,4 +412,129 @@ public class EnclosureService {
             return (now.isAfter(start) || now.isBefore(end)) ? "DAYTIME" : "NIGHTTIME";
         }
     }
+
+    // EnclosureService.java 내부에 추가
+
+    public HumidityStatusResponseDto getHumidityStatus(Long enclosureId, Long currentUserId) {
+        // 1. 사육장 및 소유권 검증
+        Enclosure enclosure = enclosureRepository.findById(enclosureId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사육장입니다."));
+
+        if (!enclosure.getLizard().getUser().getUserId().equals(currentUserId)) {
+            throw new IllegalArgumentException("본인 소유 사육장의 정보만 조회할 수 있습니다.");
+        }
+
+        Lizard lizard = enclosure.getLizard();
+        Species species = lizard.getSpecies();
+
+        // 2. 센서 및 최근 측정 데이터 조회 (최대 10개)
+        Optional<Sensor> sensorOpt = sensorRepository.findById(enclosureId);
+        List<SensorMeasurement> measurements = sensorOpt
+                .map(sensor -> sensorMeasurementRepository.findTop10BySensor_SensorIdOrderByMeasuredAtDesc(sensor.getSensorId()))
+                .orElse(Collections.emptyList());
+
+        // [예외 3 처리] 센서 미연결 또는 측정 데이터가 아예 없는 경우
+        if (sensorOpt.isEmpty() || measurements.isEmpty() || measurements.get(0).getHumidity() == null) {
+            return HumidityStatusResponseDto.builder()
+                    .enclosureId(enclosureId)
+                    .lizardName(lizard.getName())
+                    .speciesName(species.getName())
+                    .currentHumidity(null)
+                    .standardHumidity(null)
+                    .humidityTrend(null)
+                    .trendDurationMinutes(null)
+                    .cycleStatus("SENSOR_ERROR")
+                    .cautionText(null)
+                    .displayMessage("습도 센서가 연결되지 않았거나 측정 데이터를 수신할 수 없습니다.")
+                    .build();
+        }
+
+        BigDecimal currentHumidity = measurements.get(0).getHumidity();
+        Optional<SpeciesEnvironmentStandard> standardOpt = speciesEnvironmentStandardRepository.findBySpecies_SpeciesId(species.getSpeciesId());
+
+        // 종별 기준 습도 DTO 생성
+        HumidityStatusResponseDto.StandardHumidity standardHumidity = null;
+        String cautionText = null;
+        if (standardOpt.isPresent()) {
+            SpeciesEnvironmentStandard std = standardOpt.get();
+            if (std.getHumidityMin() != null && std.getHumidityMax() != null) {
+                standardHumidity = HumidityStatusResponseDto.StandardHumidity.builder()
+                        .min(std.getHumidityMin())
+                        .max(std.getHumidityMax())
+                        .build();
+                cautionText = std.getHumidityCaution();
+            }
+        }
+
+        // [예외 1 처리] 최근 측정 데이터가 부족한 경우 (데이터 2개 미만)
+        if (measurements.size() < 2) {
+            return HumidityStatusResponseDto.builder()
+                    .enclosureId(enclosureId)
+                    .lizardName(lizard.getName())
+                    .speciesName(species.getName())
+                    .currentHumidity(currentHumidity)
+                    .standardHumidity(standardHumidity)
+                    .humidityTrend("UNKNOWN")
+                    .trendDurationMinutes(null)
+                    .cycleStatus("INSUFFICIENT_DATA")
+                    .cautionText(cautionText)
+                    .displayMessage("최근 측정 데이터가 부족하여 흐름 분석을 제외하고 현재 습도 수치만 제공합니다.")
+                    .build();
+        }
+
+        // 3. 습도 흐름(Trend) 및 지속 시간 계산
+        SensorMeasurement latest = measurements.get(0);
+        SensorMeasurement previous = measurements.get(1);
+
+        double diff = latest.getHumidity().doubleValue() - previous.getHumidity().doubleValue();
+        String humidityTrend;
+        String trendText;
+
+        if (diff > 1.0) {
+            humidityTrend = "RISING";
+            trendText = "상승하는";
+        } else if (diff < -1.0) {
+            humidityTrend = "FALLING";
+            trendText = "하락하는";
+        } else {
+            humidityTrend = "MAINTAINING";
+            trendText = "유지되는";
+        }
+
+        // 두 측정 시간 사이의 분(Minutes) 차이 계산
+        long minutesBetween = java.time.Duration.between(previous.getMeasuredAt(), latest.getMeasuredAt()).toMinutes();
+        int trendDurationMinutes = (int) Math.max(minutesBetween, 1);
+
+        // [예외 2 처리] 종별 권장 습도 기준이 없는 경우
+        if (standardHumidity == null) {
+            return HumidityStatusResponseDto.builder()
+                    .enclosureId(enclosureId)
+                    .lizardName(lizard.getName())
+                    .speciesName(species.getName())
+                    .currentHumidity(currentHumidity)
+                    .standardHumidity(null)
+                    .humidityTrend(humidityTrend)
+                    .trendDurationMinutes(trendDurationMinutes)
+                    .cycleStatus("UNKNOWN")
+                    .cautionText(null)
+                    .displayMessage("등록된 종별 권장 습도 기준이 없습니다.")
+                    .build();
+        }
+
+        // 4. 정상 습윤 사이클 응답 생성
+        String displayMessage = String.format("최근 분무 이후 습도가 %s 흐름이며, 적정 습윤 사이클 내에 있습니다.", trendText);
+
+        return HumidityStatusResponseDto.builder()
+                .enclosureId(enclosureId)
+                .lizardName(lizard.getName())
+                .speciesName(species.getName())
+                .currentHumidity(currentHumidity)
+                .standardHumidity(standardHumidity)
+                .humidityTrend(humidityTrend)
+                .trendDurationMinutes(trendDurationMinutes)
+                .cycleStatus("HUMID_CYCLE_NORMAL")
+                .cautionText(cautionText)
+                .displayMessage(displayMessage)
+                .build();
+    }
 }
