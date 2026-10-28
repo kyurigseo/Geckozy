@@ -16,6 +16,8 @@ import com.likelion.backend.domain.sensor.repository.SensorRepository;
 import com.likelion.backend.domain.species.entity.Species;
 import com.likelion.backend.domain.species.entity.SpeciesEnvironmentStandard;
 import com.likelion.backend.domain.species.repository.SpeciesEnvironmentStandardRepository;
+import com.likelion.backend.global.exception.BusinessException;
+import com.likelion.backend.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,7 +49,7 @@ public class EnclosureService {
 
     public EnclosureCreateResponse createEnclosure(EnclosureCreateRequest request) {
         Lizard lizard = lizardRepository.findByLizardIdAndDeletedAtIsNull(request.getLizardId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 도마뱀입니다. id=" + request.getLizardId()));
+                .orElseThrow(() -> new BusinessException(ErrorCode.LIZARD_NOT_FOUND));
 
         Enclosure savedEnclosure = enclosureRepository.save(request.toEntity(lizard));
 
@@ -62,7 +64,7 @@ public class EnclosureService {
         if (request.getConcernIds() != null) {
             request.getConcernIds().forEach(concernId -> {
                 Concern concern = concernRepository.findById(concernId)
-                        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 고민 항목입니다. id=" + concernId));
+                        .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_REQUEST));
                 enclosureConcernRepository.save(new EnclosureConcern(savedEnclosure, concern));
             });
         }
@@ -72,7 +74,7 @@ public class EnclosureService {
 
     public ManagementSettingResponse updateManagementSetting(Long enclosureId, ManagementSettingRequest request) {
         Enclosure enclosure = enclosureRepository.findById(enclosureId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사육장입니다. id=" + enclosureId));
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENCLOSURE_NOT_FOUND));
 
         ManagementSetting savedSetting = managementSettingRepository.save(request.toEntity(enclosure));
         return new ManagementSettingResponse(savedSetting.getId());
@@ -84,7 +86,7 @@ public class EnclosureService {
     @Transactional(readOnly = true)
     public TemperatureStatusResponse getTemperatureStatus(Long enclosureId) {
         Enclosure enclosure = enclosureRepository.findById(enclosureId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사육장입니다. id=" + enclosureId));
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENCLOSURE_NOT_FOUND));
 
         Lizard lizard = enclosure.getLizard();
         Species species = lizard.getSpecies();
@@ -135,16 +137,16 @@ public class EnclosureService {
     public EnclosureResponseDto getEnclosureByLizardId(Long lizardId, Long currentUserId) {
         // 1. 도마뱀 존재 여부 확인
         Lizard lizard = lizardRepository.findById(lizardId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 도마뱀입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.LIZARD_NOT_FOUND));
 
         // 2. 본인 소유 도마뱀인지 검증 (접근 권한 확인)
         if (!lizard.getUser().getUserId().equals(currentUserId)) {
-            throw new IllegalArgumentException("본인 소유의 도마뱀 정보만 조회할 수 있습니다.");
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
 
         // 3. 해당 도마뱀에 연결된 사육장 조회
         Enclosure enclosure = enclosureRepository.findByLizard_LizardId(lizardId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 도마뱀에 등록된 사육장이 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENCLOSURE_NOT_FOUND));
 
         return EnclosureResponseDto.from(enclosure);
     }
@@ -236,10 +238,10 @@ public class EnclosureService {
     public EnclosureUpdateResponseDto updateEnclosure(Long enclosureId, EnclosureUpdateRequestDto requestDto, Long currentUserId) {
         // 1. 사육장 존재 및 소유권 확인
         Enclosure enclosure = enclosureRepository.findById(enclosureId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사육장입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENCLOSURE_NOT_FOUND));
 
         if (!enclosure.getLizard().getUser().getUserId().equals(currentUserId)) {
-            throw new IllegalArgumentException("본인 소유의 사육장만 수정할 수 있습니다.");
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
 
         // 2. 기본 정보 수정 (Dirty Checking)
@@ -276,7 +278,7 @@ public class EnclosureService {
         if (requestDto.getConcernIds() != null && !requestDto.getConcernIds().isEmpty()) {
             for (Long concernId : requestDto.getConcernIds()) {
                 Concern concern = concernRepository.findById(concernId)
-                        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 고민 ID입니다: " + concernId));
+                        .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_REQUEST));
 
                 EnclosureConcern enclosureConcern = new EnclosureConcern(enclosure, concern);
                 enclosureConcernRepository.save(enclosureConcern);
@@ -292,10 +294,10 @@ public class EnclosureService {
     public TemperatureStatusResponseDto getTemperatureStatus(Long enclosureId, Long currentUserId) {
         // 1. 사육장 및 소유권 검증
         Enclosure enclosure = enclosureRepository.findById(enclosureId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사육장입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENCLOSURE_NOT_FOUND));
 
         if (!enclosure.getLizard().getUser().getUserId().equals(currentUserId)) {
-            throw new IllegalArgumentException("본인 소유 사육장의 정보만 조회할 수 있습니다.");
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
 
         Lizard lizard = enclosure.getLizard();
@@ -421,10 +423,10 @@ public class EnclosureService {
     public HumidityStatusResponseDto getHumidityStatus(Long enclosureId, Long currentUserId) {
         // 1. 사육장 및 소유권 검증
         Enclosure enclosure = enclosureRepository.findById(enclosureId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사육장입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENCLOSURE_NOT_FOUND));
 
         if (!enclosure.getLizard().getUser().getUserId().equals(currentUserId)) {
-            throw new IllegalArgumentException("본인 소유 사육장의 정보만 조회할 수 있습니다.");
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
 
         Lizard lizard = enclosure.getLizard();
@@ -544,10 +546,10 @@ public class EnclosureService {
     public AlertResponseDto getEnclosureAlerts(Long enclosureId, Long currentUserId) {
         // 1. 사육장 및 소유권 검증 (404, 401 처리)
         Enclosure enclosure = enclosureRepository.findById(enclosureId)
-                .orElseThrow(() -> new IllegalArgumentException("ENCLOSURE_NOT_FOUND"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENCLOSURE_NOT_FOUND));
 
         if (!enclosure.getLizard().getUser().getUserId().equals(currentUserId)) {
-            throw new IllegalArgumentException("UNAUTHORIZED");
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
 
         List<AlertResponseDto.AlertDetail> alerts = new ArrayList<>();
@@ -650,10 +652,10 @@ public class EnclosureService {
     public TemperatureHistoryResponseDto getTemperatureHistory(Long enclosureId, String dateStr, Long currentUserId) {
         // 1. 사육장 및 소유권 검증
         Enclosure enclosure = enclosureRepository.findById(enclosureId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사육장입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENCLOSURE_NOT_FOUND));
 
         if (!enclosure.getLizard().getUser().getUserId().equals(currentUserId)) {
-            throw new IllegalArgumentException("본인 소유 사육장의 정보만 조회할 수 있습니다.");
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
 
         // 2. 날짜 파싱 (미입력 시 오늘 날짜)
@@ -713,10 +715,10 @@ public class EnclosureService {
     public HumidityHistoryResponseDto getHumidityHistory(Long enclosureId, String dateStr, Long currentUserId) {
         // 1. 사육장 및 소유권 검증 (404, 401 예외)
         Enclosure enclosure = enclosureRepository.findById(enclosureId)
-                .orElseThrow(() -> new IllegalArgumentException("ENCLOSURE_NOT_FOUND"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENCLOSURE_NOT_FOUND));
 
         if (!enclosure.getLizard().getUser().getUserId().equals(currentUserId)) {
-            throw new IllegalArgumentException("UNAUTHORIZED");
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
 
         // 2. 날짜 파싱 (미입력 시 오늘 날짜)
@@ -796,10 +798,10 @@ public class EnclosureService {
     public EnvironmentSummaryResponseDto getEnvironmentSummary(Long enclosureId, String dateStr, Long currentUserId) {
         // 1. 사육장 존재 및 소유권 검증 (404, 401)
         Enclosure enclosure = enclosureRepository.findById(enclosureId)
-                .orElseThrow(() -> new IllegalArgumentException("ENCLOSURE_NOT_FOUND"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENCLOSURE_NOT_FOUND));
 
         if (!enclosure.getLizard().getUser().getUserId().equals(currentUserId)) {
-            throw new IllegalArgumentException("UNAUTHORIZED");
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
 
         // 2. 날짜 파싱 (미입력 시 오늘 날짜)
