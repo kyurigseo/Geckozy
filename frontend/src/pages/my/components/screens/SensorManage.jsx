@@ -7,6 +7,7 @@ import connectButton from '../../../../assets/my/새 센서 연결하기.svg'
 import graphIcon from '../../../../assets/my/그래프.svg'
 
 import './SensorManage.scss'
+import { useSound } from '../../../../sound/SoundProvider'
 
 const SENSORS = [
   { id: 1, name: '온습도 센서', tank: '사육장 1', battery: 82, updated: '2분 전' },
@@ -16,8 +17,10 @@ const SENSORS = [
 
 const SensorManage = () => {
   const navigate = useNavigate()
+  const { playSfx } = useSound()
 
   const handleConnect = () => {
+    playSfx('button')
     alert('새 센서 연결 기능은 추후 연동할 예정이에요.')
   }
 
