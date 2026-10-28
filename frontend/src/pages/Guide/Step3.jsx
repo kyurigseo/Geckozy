@@ -8,9 +8,11 @@ import back from '../../assets/guide/뒤로가기.svg'
 import sensorButton from '../../assets/guide/센서측정확인하기.svg'
 
 import './Step3.scss'
+import { useSound } from '../../sound/SoundProvider'
 
 const Step3 = () => {
   const navigate = useNavigate()
+  const { playSfx } = useSound()
   const [isSensorConnected, setIsSensorConnected] = useState(false)
 
   return (
@@ -100,7 +102,13 @@ const Step3 = () => {
             </div>
           </div>
 
-          <button className="step3-button" onClick={() => navigate('/guide/step4')}>
+          <button
+            className="step3-button"
+            onClick={() => {
+              playSfx('button')
+              navigate('/guide/step4')
+            }}
+          >
             <img src={sensorButton} alt="센서 측정 확인하기" />
           </button>
 

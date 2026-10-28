@@ -17,7 +17,8 @@ import title3 from '../../assets/guide/3단계 글씨.svg'
 import title4 from '../../assets/guide/4단계 글씨.svg'
 import title5 from '../../assets/guide/5단계 글씨.svg'
 
-import backgroundMusic from '../../assets/guide/배경음악.svg'
+import SoundToggle from '../onboarding/components/common/SoundToggle'
+import { useSound } from '../../sound/SoundProvider'
 
 import arrow from '../../assets/guide/arrow.svg'
 import arrowPressed from '../../assets/guide/arrow_pressed.svg'
@@ -32,20 +33,24 @@ import './Guide.scss'
 const Guide = () => {
   const [step, setStep] = useState(1)
   const [isModalOpen, setIsModalOpen] = useState(false) 
+  const { isSoundOn, toggleSound, playSfx } = useSound()
 
   const prevStep = () => {
     if (step > 1) {
+      playSfx('button')
       setStep(step - 1)
     }
   }
 
   const nextStep = () => {
     if (step < 5) {
+      playSfx('button')
       setStep(step + 1)
     }
   }
 
   const handleStart = () => {
+    playSfx('button')
     setIsModalOpen(true)
   }
 
@@ -127,7 +132,9 @@ const Guide = () => {
 
       </div>
 
-      <img className="guide-background-music" src={backgroundMusic} alt="배경음악" />
+      <div className="guide-background-music">
+        <SoundToggle isOn={isSoundOn} onToggle={toggleSound} />
+      </div>
 
       <button className="guide-start" onClick={handleStart}>
         <img className="start-normal" src={start} alt="Start" />

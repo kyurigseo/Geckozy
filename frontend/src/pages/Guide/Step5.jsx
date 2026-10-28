@@ -8,9 +8,11 @@ import completeButton from '../../assets/guide/준비완료.svg'
 import back from '../../assets/guide/뒤로가기.svg'
 
 import './Step5.scss'
+import { useSound } from '../../sound/SoundProvider'
 
 const Step5 = () => {
   const navigate = useNavigate()
+  const { playSfx } = useSound()
 
   const [checked, setChecked] = useState([
     false,
@@ -156,7 +158,10 @@ const Step5 = () => {
             <button
                 className="step5-button"
                 disabled={!isAllChecked}
-                onClick={() => navigate('/loading-fin')}
+                onClick={() => {
+                  playSfx('button')
+                  navigate('/loading-fin')
+                }}
             >
                 <img src={completeButton} alt="사육장 준비 완료" />
             </button>

@@ -8,9 +8,11 @@ import ventilationTitle from '../../assets/guide/환기 구조.svg'
 import complete from '../../assets/guide/완료버튼.svg'
 
 import './EnclosureInfo.scss'
+import { useSound } from '../../sound/SoundProvider'
 
 const EnclosureInfo = ({ onClose }) => {
   const navigate = useNavigate()
+  const { playSfx } = useSound()
 
   const [size, setSize] = useState({
     width: '',
@@ -87,7 +89,13 @@ const EnclosureInfo = ({ onClose }) => {
           </div>
         </section>
 
-        <button className="enclosure-complete" onClick={handleComplete}>
+        <button
+          className="enclosure-complete"
+          onClick={() => {
+            playSfx('button')
+            handleComplete()
+          }}
+        >
           <img src={complete} alt="완료" />
         </button>
 

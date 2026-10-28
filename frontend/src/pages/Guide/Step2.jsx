@@ -13,9 +13,11 @@ import checkTitle from '../../assets/guide/확인해주세요.svg'
 import completeButton from '../../assets/guide/완료버튼.svg'
 
 import './Step2.scss'
+import { useSound } from '../../sound/SoundProvider'
 
 const Step2 = () => {
   const navigate = useNavigate()
+  const { playSfx } = useSound()
   const [popup, setPopup] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [checked, setChecked] = useState([false, false, false, false, false])
@@ -105,7 +107,13 @@ const Step2 = () => {
             </p>
           </div>
 
-          <button className="step2-button" onClick={() => setIsModalOpen(true)}>
+          <button
+            className="step2-button"
+            onClick={() => {
+              playSfx('button')
+              setIsModalOpen(true)
+            }}
+          >
             <img className="button-normal" src={enclosureButton} alt="준비상태확인하기" />
           </button>
 
@@ -272,7 +280,10 @@ const Step2 = () => {
             <button
               className="preparation-complete"
               disabled={!isAllChecked}
-              onClick={() => navigate('/guide/step3')}
+              onClick={() => {
+                playSfx('button')
+                navigate('/guide/step3')
+              }}
             >
               <img src={completeButton} alt="완료" />
             </button>
