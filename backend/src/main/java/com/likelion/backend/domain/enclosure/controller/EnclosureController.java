@@ -20,7 +20,9 @@ public class EnclosureController {
     private final EnclosureService enclosureService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Map<String, Long>>> createEnclosure(@RequestBody EnclosureCreateRequest request) {
+    public ResponseEntity<ApiResponse<Map<String, Long>>> createEnclosure(
+            @Valid @RequestBody EnclosureCreateRequest request
+    ) {
         EnclosureCreateResponse response = enclosureService.createEnclosure(request);
         Map<String, Long> data = Map.of("enclosureId", response.getEnclosureId());
 
@@ -31,7 +33,7 @@ public class EnclosureController {
     @PutMapping("/{enclosureId}/management")
     public ResponseEntity<ApiResponse<ManagementSettingResponse>> updateManagementSetting(
             @PathVariable("enclosureId") Long enclosureId,
-            @RequestBody ManagementSettingRequest request) {
+            @Valid @RequestBody ManagementSettingRequest request) {
 
         ManagementSettingResponse response = enclosureService.updateManagementSetting(enclosureId, request);
 
