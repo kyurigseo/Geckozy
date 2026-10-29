@@ -22,6 +22,7 @@ import dropdownIcon from "../../assets/home/dropdown_icon.png"
 import careBtn from "../../assets/home/care_guide_btn.png"
 import darkRightBtn from "../../assets/home/darker_rightarrow_icon.png"
 
+
 const TERRARIUMS = [{ id: 1, pet: "레오", name: "1번 사육장", alerts: 2 }];
 
 const ALERTS = [
@@ -88,7 +89,7 @@ export default function Home() {
           <span>
             {petName} • {tankName} • <em>새 알림 {ALERTS.length}개</em>
           </span>
-          <span className="selector__arrow" aria-hidden="true"><img src={dropdownIcon} /></span>
+          <span className="selector__arrow" aria-hidden="true"><img src={dropdownIcon} className="selector__dropdown-icon" /></span>
         </button>
 
         {/* 사육장 일러스트 + 알림 핀 */}
@@ -174,7 +175,9 @@ export default function Home() {
                   {m.value}
                   <span>{m.unit}</span>
                 </div>
-                <span className={`badge badge--${m.tone}`}>{m.status}</span>
+                <span className={`badge badge--${m.tone}`}>
+                  <img src={m.statusIcon} alt="" className="badge__icon" />
+                  {m.status}</span>
               </button>
             ))}
           </div>

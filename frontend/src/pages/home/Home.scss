@@ -15,10 +15,6 @@ $font-katuri: "andong-katuri", sans-serif;
 $font-mamablock: "mamablock-210", sans-serif;
 
 
-@mixin outline-text($color: $brown) {
-  text-shadow: -2px 0 $color, 2px 0 $color, 0 -2px $color, 0 2px $color,
-    -2px -2px $color, 2px 2px $color, -2px 2px $color, 2px -2px $color;
-}
 
 
 
@@ -84,17 +80,19 @@ button {
     margin: 18px 0 14px;
     font-size: 26px;
     font-weight: 800;
-    color: #fff;
-    @include outline-text;
+    color: #FFECCB;
+    -webkit-text-stroke: 5px #5B3524;   
+    paint-order: stroke fill; 
 
     .accent {
-      color: #e6f2a8;
+      color: #C8F593;
     }
   }
 
   &__sprout {
-    width: 26px;
-    margin-left: 6px;
+    width: 29px;
+    height: 20px;
+    margin-left: 10px;
     vertical-align: middle;
   }
 }
@@ -116,7 +114,8 @@ button {
 
 
   img {
-    width: 22px;
+    width: 24px;
+    height: 16px;
   }
 
   span:first-of-type {
@@ -128,9 +127,10 @@ button {
     color: $pink;
   }
 
-  &__arrow {
-    font-size: 22px;
-    line-height: 1;
+
+  &__dropdown-icon {
+    width: 14px !important; 
+    height: 7px !important;
   }
 }
 
@@ -266,7 +266,7 @@ button {
     margin: 0 0 12px;
     font-size: 28px;
     color: #FFB8BD;
-    -webkit-text-stroke: 5px #5B3524;   // 테두리 두께와 색
+    -webkit-text-stroke: 5px #5B3524;   
     paint-order: stroke fill; 
    
 
@@ -308,7 +308,8 @@ button {
     color: #492515;
     font-weight: 400;
     line-height: 1.4;
-
+    margin: 0 0 18px;
+    
 
   }
 
@@ -409,20 +410,37 @@ button {
 }
 
 .badge {
+  display: inline-flex !important;
+  align-items: center !important;     
+  justify-content: center !important; 
+  gap: 10px;                          
+
+  width: auto;                      
+  height: 29px;                       
+  padding: 0 5px;                    
+  box-sizing: border-box;
   align-self: center;
-  min-width: 90px;
-  padding: 6px 12px;
+
+  font-family: 'Pretendard', sans-serif;
   font-size: 12px;
   font-weight: 700;
-  text-align: center;
-  border-radius: 999px;
-  font-family: Pretendard;
+  line-height: 1 !important;      
+  white-space: nowrap !important;     
+  border-radius: 100px;
 
+  &__icon {
+    width: 20px;                      
+    height: 18px;
+    object-fit: contain;
+    display: block;
+    margin: 0;
+    flex-shrink: 0;                  
+  }
 
   &--ok {
-    color: $ok-bg;
-    background: $ok-bg;
-    border: 2px solid $leaf;
+    color: #5B911C;
+    background: #C8F593;
+    border: 2px solid #5B911C;
   }
 
   &--warn {
@@ -431,6 +449,7 @@ button {
     border: 2px solid #FF646E;
   }
 }
+
 
 // 환경 코치
 .coach {
@@ -467,7 +486,7 @@ button {
     display:flex;
     margin-left: auto;
     padding: 8px 16px;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 700;
     background-image: url('../../assets/home/care_guide_btn.png');
     width: 137px;
@@ -476,6 +495,7 @@ button {
     align-items: center;
     gap: 15px;
     font-family: Pretendard, serif;
+
 
   }
 }
@@ -502,7 +522,6 @@ button {
     font-size: 12px;
     font-weight: 700;
     color: #fff;
-    @include outline-text(#7a4a30);
 
     img {
       width: 52px;
