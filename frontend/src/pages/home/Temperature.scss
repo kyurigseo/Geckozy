@@ -1,322 +1,565 @@
-$bg: #fdf8ee;
-$brown: #5a3a28;
-$brown-soft: #b07a50;
-$line: #f1d9b0;
-$line-strong: #d9b07a;
-$cream: #fff4dc;
-$ok-bg: #d4efb8;
-$ok-text: #4b8a2b;
-$font: "Galmuri11", "DungGeunMo", "Pretendard", sans-serif;
+// 변수 정의 (프로젝트 내 공통 SCSS 변수가 있다면 import 경로로 변경 가능)
+$brown: #492515;
+$brown-line: #DAA576;
+$paper-bg: #FDF7EE;
+$paper-shadow: #FFECCB;
+$green-bg: #EAF7D9;
+$green-border: #7FAEC4; // 또는 #7fae4f
+$ok-bg: #C8F593;
+$ok-text: #5B911C;
 
-.temp {
+.temperature-page {
+  /* Home 레이아웃 컨테이너와 1:1 동일한 구조 */
+  position: relative;
+  width: 100%;
   max-width: 430px;
-  min-height: 100dvh;
+  height: 100dvh;          // 뷰포트 높이 고정
   margin: 0 auto;
-  font-family: $font;
+  overflow: hidden;        // 외부 스크롤 방지
+  background-color: #F8F3EA;
+  font-family: 'Pretendard', sans-serif;
   color: $brown;
-  background: $bg;
+  box-sizing: border-box;
 
-  // ── 헤더 ──
-  &__header {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    display: grid;
-    grid-template-columns: 44px 1fr 44px;
+  /* 스크롤 전용 영역 (Home의 __scroll과 동일) */
+  &__scroll {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;      // 내부 오버플로우 스크롤 활성화
+    padding: 0 16px 200px; // 탭바 높이만큼 하단 여백 확보
+    -webkit-overflow-scrolling: touch;
+    box-sizing: border-box;
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 8px;
+  }
+}
+
+/* ----------------------------------
+ * 헤더 영역
+ * ---------------------------------- */
+.header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 52px;
+
+  &__back {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    display: flex;
     align-items: center;
-    padding: 12px 16px;
-    background: $bg;
+    justify-content: center;
+    background: #FFE8C7;
+    border-radius: 50%;
+    border: 1px solid #EAD1B0;
+    cursor: pointer;
 
-    h1 {
-      grid-column: 2;
-      margin: 0;
-      font-size: 18px;
-      text-align: center;
+    img {
+      width: 16px;
+      height: 16px;
+      object-fit: contain;
     }
   }
 
-  &__back {
-    grid-column: 1;
-    grid-row: 1;
-    width: 36px;
-    height: 36px;
-    font-size: 24px;
-    line-height: 1;
-    color: $brown-soft;
-    background: #fbe3b5;
-    border: 2px solid $line-strong;
-    border-radius: 50%;
-    cursor: pointer;
-  }
-
-  // 네비바(떠 있음)에 마지막 내용이 가려지지 않게 하단 여백
-  &__body {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    padding: 4px 16px 140px;
+  &__title {
+    font-size: 20px;
+    font-weight: 800;
+    margin: 0;
+    color: $brown;
   }
 }
 
-// ── 공통 카드 ──
-.panel {
-  padding: 16px;
-  background: #fffaf0;
-  border: 2px solid $line;
+/* ----------------------------------
+ * 카드 공통 스타일
+ * ---------------------------------- */
+.card {
+  background: $paper-bg;
+  border: 2px solid $brown-line;
   border-radius: 20px;
+  padding: 16px;
+  box-shadow: inset -4px -4px 0 0 $paper-shadow;
+  box-sizing: border-box;
 
-  h2 {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 0;
-    font-size: 15px;
-  }
-
-  &--strong {
-    border-color: $line-strong;
-    box-shadow: 4px 4px 0 #f6dfb4;
-  }
-
-  &__top {
+  &__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 8px;
-    margin-bottom: 18px;
+    margin-bottom: 12px;
+
+    &--space {
+      align-items: flex-start;
+    }
+  }
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 16px;
+    font-weight: 800;
+    margin: 0;
+    color: $brown;
+
+    .icon {
+      width: 22px;
+      height: 22px;
+      object-fit: contain;
+    }
+  }
+
+  &__subtext {
+    font-size: 11px;
+    color: #A38C7E;
+  }
+
+  // 가이드 카드 (초록 배경)
+  &--guide {
+    background: #EAF7D9;
+    border-color: #83B752;
+    box-shadow: none;
+
+    .card__title {
+      color: #2D4C0F;
+    }
   }
 }
 
+/* ----------------------------------
+ * 1. 현재 온도
+ * ---------------------------------- */
+.current-temp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+
+  &__value {
+    font-size: 40px;
+    font-weight: 800;
+    color: $brown;
+    line-height: 1;
+
+    span {
+      font-size: 32px;
+      margin-left: 2px;
+    }
+  }
+}
+
+/* 뱃지 스타일 */
 .badge {
-  display: inline-block;
-  padding: 6px 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: auto;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 100px;
   font-size: 12px;
   font-weight: 700;
-  border-radius: 999px;
+  line-height: 1;
+  white-space: nowrap;
+  box-sizing: border-box;
+
+  &__icon {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
 
   &--ok {
     color: $ok-text;
     background: $ok-bg;
-    border: 2px solid #7fae4f;
+    border: 2px solid #83B752;
+  }
+
+  &--warn {
+    color: #D64353;
+    background: #FFD2D7;
+    border: 2px solid #E26976;
   }
 }
 
-// ── 현재 온도 ──
-.now {
-  text-align: center;
-
-  &__top {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    text-align: left;
-
-    small {
-      font-size: 11px;
-      color: #aaa;
-    }
-  }
-
-  &__value {
-    margin: 6px 0 10px;
-    font-size: 34px;
-    font-weight: 800;
-  }
-}
-
-// ── 적정 온도 범위 ──
-.pill {
-  padding: 7px 12px;
-  font-family: inherit;
+/* ----------------------------------
+ * 2. 적정 온도 범위
+ * ---------------------------------- */
+.info-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: #FFEAC8;
+  border: 1px solid #E3C29F;
+  border-radius: 100px;
   font-size: 11px;
-  color: $brown;
-  background: #fbe9c8;
-  border: 0;
-  border-radius: 999px;
+  font-weight: 700;
+  color: #8C5F3A;
   cursor: pointer;
+
+  img {
+    width: 13px;
+    height: 13px;
+    object-fit: contain;
+  }
 }
 
-.gauge {
-  position: relative;
+.range-bar-container {
+  margin-top: 12px;
+}
+
+.range-bar {
+  display: flex;
   height: 28px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #c9d9ee 0%, #d6e8c8 25%, #eaf0b8 50%, #f7e3b0 70%, #f6c9c9 100%);
+  border-radius: 14px;
+  position: relative;
+  border: 1.5px solid #D8C3AC;
 
-  // 22°C / 29°C 점선 구분선
-  &::before,
-  &::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    border-left: 2px dotted #fff;
+  &__section {
+    position: relative;
+
+    &--low { flex: 1; background: #CBE5F6; border-radius: 12px 0 0 12px; }
+    &--ok { flex: 2; background: #D5F3B5; }
+    &--warn { flex: 1; background: #FFE8B0; }
+    &--high { flex: 1; background: #FFC9CE; border-radius: 0 12px 12px 0; }
   }
-  &::before { left: 31.6%; }
-  &::after { left: 68.4%; }
 
-  &__marker {
+  &__character {
     position: absolute;
     top: 50%;
+    left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 26px;
+    width: 26px;
+    height: 26px;
+    object-fit: contain;
   }
 
   &__labels {
     display: flex;
     justify-content: space-between;
-    margin-top: 10px;
+    margin-top: 8px;
     font-size: 11px;
-    color: $brown-soft;
+    color: #8C7363;
+    font-weight: 600;
+  }
 
-    b {
-      color: $brown;
+  &__mark {
+    color: $brown;
+    font-weight: 800;
+  }
+}
+
+/* ----------------------------------
+ * 3. 오늘의 온도 변화 차트
+ * ---------------------------------- */
+.chart-area {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chart-placeholder {
+  position: relative;
+  height: 170px;
+  background: #FFFDF9;
+  border: 1px dashed #D3C2B0;
+  border-radius: 12px;
+  padding: 10px;
+  box-sizing: border-box;
+
+  &__unit {
+    font-size: 11px;
+    color: #9E8B7D;
+  }
+
+  &__bg {
+    position: relative;
+    height: 110px;
+    margin-top: 4px;
+  }
+
+  &__night {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 25%;
+    background: #E8F4FC;
+    opacity: 0.7;
+    display: flex;
+    justify-content: center;
+    padding-top: 4px;
+    font-size: 10px;
+    color: #6C92B5;
+
+    &--left { left: 0; }
+    &--right { right: 0; }
+  }
+
+  &__tooltip {
+    position: absolute;
+    top: 25%;
+    left: 38%;
+    background: #FFE8CC;
+    border: 1px solid #E0B88A;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #D66D28;
+    white-space: nowrap;
+  }
+
+  &__x-axis {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: #A18D80;
+    margin-top: 4px;
+  }
+}
+
+.chart-legend {
+  display: flex;
+  justify-content: space-around;
+  font-size: 11px;
+  color: #6E5849;
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    small { font-size: 9px; color: #9C8879; }
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+
+    &--orange { background: #FF9E4A; }
+    &--green { background: #C8F593; border: 1px solid #83B752; }
+    &--blue { background: #D9EEFB; }
+  }
+}
+
+/* ----------------------------------
+ * 4. 관리 가이드 내용
+ * ---------------------------------- */
+.guide-content {
+  color: #2D4C0F;
+
+  h3 {
+    font-size: 14px;
+    font-weight: 800;
+    margin: 0 0 6px;
+  }
+
+  p {
+    font-size: 12px;
+    line-height: 1.5;
+    margin: 0 0 10px;
+    opacity: 0.9;
+  }
+
+  &__line {
+    border: 0;
+    border-top: 1px dashed #A3D271;
+    margin: 10px 0;
+  }
+
+  h4 {
+    font-size: 12px;
+    font-weight: 700;
+    margin: 0 0 6px;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 16px;
+    font-size: 11px;
+    line-height: 1.6;
+
+    li {
+      margin-bottom: 2px;
     }
   }
 }
 
-// ── 차트 ──
-.chart-unit {
-  margin: 12px 0 0;
-  font-size: 10px;
-  color: $brown-soft;
-}
-
-.chart {
-  width: 100%;
-  height: auto;
-  overflow: visible;
-
-  &__night { fill: #e3f0fb; }
-  &__zone { font-size: 9px; fill: #8db3dc; }
-  &__ok { fill: #e8f5cf;
-    &--night { fill: #d9efc6; }
-  }
-  &__grid { stroke: #ecdcc0; stroke-width: 0.5; stroke-dasharray: 2 3; }
-  &__guide { stroke: #7fae4f; stroke-width: 0.8; stroke-dasharray: 3 2; }
-  &__tick { font-size: 9px; fill: $brown-soft; }
-  &__bar { fill: #f9c58f; &.is-hot { fill: #f59a4a; } }
-  &__tip { fill: #fde7c4; stroke: #e8b979; stroke-width: 0.8; }
-  &__tip-text { font-size: 8px; fill: $brown; }
-}
-
-.legend {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  margin: 14px 0 0;
-  padding: 0;
-  list-style: none;
-  font-size: 11px;
-
-  li { display: flex; align-items: center; gap: 6px; }
-  small { display: block; font-size: 9px; color: #aaa; }
-  i { display: block; width: 14px; height: 24px; border-radius: 4px; }
-  &__bar { background: #f9a95b; border-radius: 7px !important; }
-  &__ok { background: #e8f5cf; }
-  &__night { background: #e3f0fb; }
-}
-
-// ── 관리 팁 ──
-.tip {
-  padding: 18px 16px;
-  background: #eaf4d2;
-  border: 2px solid #7fae4f;
-  border-radius: 20px;
-  font-size: 12px;
-  line-height: 1.6;
-
-  h2 { margin: 0 0 12px; font-size: 15px; }
-  h3 { margin: 0 0 4px; font-size: 13px; }
-  h4 { margin: 0 0 6px; padding-left: 8px; font-size: 13px; border-left: 4px solid #7fae4f; }
-  p { margin: 0; color: #6b6b5a; }
-  hr { margin: 14px 0; border: 0; border-top: 2px dashed #7fae4f; }
-  ul { margin: 0; padding-left: 18px; color: #6b6b5a; }
-}
-
-// ── 팝업 ──
-.modal {
+/* ----------------------------------
+ * 모달 팝업 (기준 보기)
+ * ---------------------------------- */
+.modal-overlay {
   position: fixed;
-  inset: 0;
-  z-index: 50; // 네비바(100)보다 아래 → 디자인처럼 네비바는 팝업 위에 보임
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 16px 16px 110px; // 아래쪽은 네비바 높이만큼 비워서 안 가려지게
-  background: rgba(60, 50, 40, 0.55);
-  animation: fade 0.15s ease-out;
+  z-index: 9999;
+  padding: 20px;
+}
 
-  &__panel {
-    width: 100%;
-    max-width: 398px;
-    max-height: 100%;
-    overflow-y: auto;
-    padding: 22px 20px 20px;
-    background: #fdf8ee;
-    border: 2px solid $line-strong;
-    border-radius: 24px;
-    animation: pop 0.18s ease-out;
-  }
-
-  &__head {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-
-    h2 { flex: 1; margin: 0; font-size: 17px; }
-  }
-
-  &__icon { font-size: 26px; }
+.modal-content {
+  position: relative;
+  width: 100%;
+  max-width: 350px;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: #FFFBF5;
+  border: 2px solid #E8C198;
+  border-radius: 20px;
+  padding: 20px 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  box-sizing: border-box;
 
   &__close {
-    width: 36px;
-    height: 36px;
-    font-size: 16px;
-    color: $brown-soft;
-    background: #fbe3b5;
-    border: 2px solid $line-strong;
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 28px;
+    height: 28px;
+    background: #FFE8C7;
     border-radius: 50%;
+    border: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
+
+    img {
+      width: 12px;
+      height: 12px;
+      object-fit: contain;
+    }
   }
 
-  &__lead { margin: 16px 0; font-size: 13px; }
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
 
-  hr { margin: 16px 0; border: 0; border-top: 1px solid #e4dccd; }
+    img {
+      width: 22px;
+      height: 22px;
+      object-fit: contain;
+    }
 
-  &__sub { margin: 0 0 8px; font-size: 13px; }
+    h2 {
+      font-size: 17px;
+      font-weight: 800;
+      color: $brown;
+      margin: 0;
+    }
+  }
 
-  &__list {
+  &__sub {
+    font-size: 11px;
+    color: #7A6353;
     margin: 0 0 16px;
-    padding-left: 18px;
-    font-size: 11.5px;
-    line-height: 1.8;
-    color: #6b5d50;
+  }
+}
+
+.modal-info-group {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.modal-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  &__label {
+    flex: 1;
+
+    h3 {
+      font-size: 15px;
+      font-weight: 800;
+      color: $brown;
+      margin: 0 0 2px;
+    }
+
+    p {
+      font-size: 10px;
+      color: #8C7363;
+      margin: 0;
+      line-height: 1.4;
+    }
   }
 
-  &__note {
-    padding: 14px;
-    background: #fdeccb;
-    border-radius: 14px;
+  &__value {
+    font-size: 16px;
+    font-weight: 800;
+    color: #C25B2A;
+    white-space: nowrap;
+    margin-left: 10px;
+  }
+}
+
+.modal-warning {
+  border-top: 1px solid #F0DFCC;
+  padding-top: 12px;
+  margin-bottom: 14px;
+
+  h4 {
     font-size: 12px;
+    font-weight: 700;
+    color: #6E5544;
+    margin: 0 0 6px;
+  }
 
-    strong { display: block; margin-bottom: 6px; }
-    p { margin: 0 0 8px; line-height: 1.6; }
-    small { font-size: 10px; color: #a89880; }
+  ul {
+    margin: 0;
+    padding-left: 14px;
+    font-size: 10px;
+    color: #7A6353;
+    line-height: 1.5;
+
+    li {
+      margin-bottom: 2px;
+    }
   }
 }
 
-.range {
-  margin: 0;
+.modal-notice {
+  background: #FFF3DD;
+  border-radius: 10px;
+  padding: 10px;
 
-  > div { margin-bottom: 16px; }
+  p {
+    font-size: 10px;
+    color: #735338;
+    line-height: 1.4;
+    margin: 0 0 6px;
 
-  dt { display: inline; font-size: 16px; font-weight: 800; }
-  dd { display: inline; float: right; margin: 0; font-size: 18px; font-weight: 800; color: $brown-soft; }
-  p { clear: both; margin: 6px 0 0; font-size: 11px; color: #aaa; }
-}
+    strong {
+      color: $brown;
+    }
+  }
 
-@keyframes fade { from { opacity: 0; } }
-@keyframes pop { from { opacity: 0; transform: translateY(8px) scale(0.97); } }
-
-@media (prefers-reduced-motion: reduce) {
-  .modal, .modal__panel { animation: none; }
+  small {
+    display: block;
+    font-size: 9px;
+    color: #A38C7A;
+  }
 }
