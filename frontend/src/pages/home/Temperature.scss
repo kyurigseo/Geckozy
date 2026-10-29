@@ -1,0 +1,565 @@
+// 변수 정의 (프로젝트 내 공통 SCSS 변수가 있다면 import 경로로 변경 가능)
+$brown: #492515;
+$brown-line: #DAA576;
+$paper-bg: #FDF7EE;
+$paper-shadow: #FFECCB;
+$green-bg: #EAF7D9;
+$green-border: #7FAEC4; // 또는 #7fae4f
+$ok-bg: #C8F593;
+$ok-text: #5B911C;
+
+.temperature-page {
+  /* Home 레이아웃 컨테이너와 1:1 동일한 구조 */
+  position: relative;
+  width: 100%;
+  max-width: 430px;
+  height: 100dvh;          // 뷰포트 높이 고정
+  margin: 0 auto;
+  overflow: hidden;        // 외부 스크롤 방지
+  background-color: #F8F3EA;
+  font-family: 'Pretendard', sans-serif;
+  color: $brown;
+  box-sizing: border-box;
+
+  /* 스크롤 전용 영역 (Home의 __scroll과 동일) */
+  &__scroll {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;      // 내부 오버플로우 스크롤 활성화
+    padding: 0 16px 200px; // 탭바 높이만큼 하단 여백 확보
+    -webkit-overflow-scrolling: touch;
+    box-sizing: border-box;
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 8px;
+  }
+}
+
+/* ----------------------------------
+ * 헤더 영역
+ * ---------------------------------- */
+.header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 52px;
+
+  &__back {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #FFE8C7;
+    border-radius: 50%;
+    border: 1px solid #EAD1B0;
+    cursor: pointer;
+
+    img {
+      width: 16px;
+      height: 16px;
+      object-fit: contain;
+    }
+  }
+
+  &__title {
+    font-size: 20px;
+    font-weight: 800;
+    margin: 0;
+    color: $brown;
+  }
+}
+
+/* ----------------------------------
+ * 카드 공통 스타일
+ * ---------------------------------- */
+.card {
+  background: $paper-bg;
+  border: 2px solid $brown-line;
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: inset -4px -4px 0 0 $paper-shadow;
+  box-sizing: border-box;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+
+    &--space {
+      align-items: flex-start;
+    }
+  }
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 16px;
+    font-weight: 800;
+    margin: 0;
+    color: $brown;
+
+    .icon {
+      width: 22px;
+      height: 22px;
+      object-fit: contain;
+    }
+  }
+
+  &__subtext {
+    font-size: 11px;
+    color: #A38C7E;
+  }
+
+  // 가이드 카드 (초록 배경)
+  &--guide {
+    background: #EAF7D9;
+    border-color: #83B752;
+    box-shadow: none;
+
+    .card__title {
+      color: #2D4C0F;
+    }
+  }
+}
+
+/* ----------------------------------
+ * 1. 현재 온도
+ * ---------------------------------- */
+.current-temp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+
+  &__value {
+    font-size: 40px;
+    font-weight: 800;
+    color: $brown;
+    line-height: 1;
+
+    span {
+      font-size: 32px;
+      margin-left: 2px;
+    }
+  }
+}
+
+/* 뱃지 스타일 */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: auto;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  box-sizing: border-box;
+
+  &__icon {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+
+  &--ok {
+    color: $ok-text;
+    background: $ok-bg;
+    border: 2px solid #83B752;
+  }
+
+  &--warn {
+    color: #D64353;
+    background: #FFD2D7;
+    border: 2px solid #E26976;
+  }
+}
+
+/* ----------------------------------
+ * 2. 적정 온도 범위
+ * ---------------------------------- */
+.info-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: #FFEAC8;
+  border: 1px solid #E3C29F;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #8C5F3A;
+  cursor: pointer;
+
+  img {
+    width: 13px;
+    height: 13px;
+    object-fit: contain;
+  }
+}
+
+.range-bar-container {
+  margin-top: 12px;
+}
+
+.range-bar {
+  display: flex;
+  height: 28px;
+  border-radius: 14px;
+  position: relative;
+  border: 1.5px solid #D8C3AC;
+
+  &__section {
+    position: relative;
+
+    &--low { flex: 1; background: #CBE5F6; border-radius: 12px 0 0 12px; }
+    &--ok { flex: 2; background: #D5F3B5; }
+    &--warn { flex: 1; background: #FFE8B0; }
+    &--high { flex: 1; background: #FFC9CE; border-radius: 0 12px 12px 0; }
+  }
+
+  &__character {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 26px;
+    height: 26px;
+    object-fit: contain;
+  }
+
+  &__labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 11px;
+    color: #8C7363;
+    font-weight: 600;
+  }
+
+  &__mark {
+    color: $brown;
+    font-weight: 800;
+  }
+}
+
+/* ----------------------------------
+ * 3. 오늘의 온도 변화 차트
+ * ---------------------------------- */
+.chart-area {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chart-placeholder {
+  position: relative;
+  height: 170px;
+  background: #FFFDF9;
+  border: 1px dashed #D3C2B0;
+  border-radius: 12px;
+  padding: 10px;
+  box-sizing: border-box;
+
+  &__unit {
+    font-size: 11px;
+    color: #9E8B7D;
+  }
+
+  &__bg {
+    position: relative;
+    height: 110px;
+    margin-top: 4px;
+  }
+
+  &__night {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 25%;
+    background: #E8F4FC;
+    opacity: 0.7;
+    display: flex;
+    justify-content: center;
+    padding-top: 4px;
+    font-size: 10px;
+    color: #6C92B5;
+
+    &--left { left: 0; }
+    &--right { right: 0; }
+  }
+
+  &__tooltip {
+    position: absolute;
+    top: 25%;
+    left: 38%;
+    background: #FFE8CC;
+    border: 1px solid #E0B88A;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #D66D28;
+    white-space: nowrap;
+  }
+
+  &__x-axis {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: #A18D80;
+    margin-top: 4px;
+  }
+}
+
+.chart-legend {
+  display: flex;
+  justify-content: space-around;
+  font-size: 11px;
+  color: #6E5849;
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    small { font-size: 9px; color: #9C8879; }
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+
+    &--orange { background: #FF9E4A; }
+    &--green { background: #C8F593; border: 1px solid #83B752; }
+    &--blue { background: #D9EEFB; }
+  }
+}
+
+/* ----------------------------------
+ * 4. 관리 가이드 내용
+ * ---------------------------------- */
+.guide-content {
+  color: #2D4C0F;
+
+  h3 {
+    font-size: 14px;
+    font-weight: 800;
+    margin: 0 0 6px;
+  }
+
+  p {
+    font-size: 12px;
+    line-height: 1.5;
+    margin: 0 0 10px;
+    opacity: 0.9;
+  }
+
+  &__line {
+    border: 0;
+    border-top: 1px dashed #A3D271;
+    margin: 10px 0;
+  }
+
+  h4 {
+    font-size: 12px;
+    font-weight: 700;
+    margin: 0 0 6px;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 16px;
+    font-size: 11px;
+    line-height: 1.6;
+
+    li {
+      margin-bottom: 2px;
+    }
+  }
+}
+
+/* ----------------------------------
+ * 모달 팝업 (기준 보기)
+ * ---------------------------------- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.modal-content {
+  position: relative;
+  width: 100%;
+  max-width: 350px;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: #FFFBF5;
+  border: 2px solid #E8C198;
+  border-radius: 20px;
+  padding: 20px 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  box-sizing: border-box;
+
+  &__close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 28px;
+    height: 28px;
+    background: #FFE8C7;
+    border-radius: 50%;
+    border: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+
+    img {
+      width: 12px;
+      height: 12px;
+      object-fit: contain;
+    }
+  }
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+
+    img {
+      width: 22px;
+      height: 22px;
+      object-fit: contain;
+    }
+
+    h2 {
+      font-size: 17px;
+      font-weight: 800;
+      color: $brown;
+      margin: 0;
+    }
+  }
+
+  &__sub {
+    font-size: 11px;
+    color: #7A6353;
+    margin: 0 0 16px;
+  }
+}
+
+.modal-info-group {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.modal-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  &__label {
+    flex: 1;
+
+    h3 {
+      font-size: 15px;
+      font-weight: 800;
+      color: $brown;
+      margin: 0 0 2px;
+    }
+
+    p {
+      font-size: 10px;
+      color: #8C7363;
+      margin: 0;
+      line-height: 1.4;
+    }
+  }
+
+  &__value {
+    font-size: 16px;
+    font-weight: 800;
+    color: #C25B2A;
+    white-space: nowrap;
+    margin-left: 10px;
+  }
+}
+
+.modal-warning {
+  border-top: 1px solid #F0DFCC;
+  padding-top: 12px;
+  margin-bottom: 14px;
+
+  h4 {
+    font-size: 12px;
+    font-weight: 700;
+    color: #6E5544;
+    margin: 0 0 6px;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 14px;
+    font-size: 10px;
+    color: #7A6353;
+    line-height: 1.5;
+
+    li {
+      margin-bottom: 2px;
+    }
+  }
+}
+
+.modal-notice {
+  background: #FFF3DD;
+  border-radius: 10px;
+  padding: 10px;
+
+  p {
+    font-size: 10px;
+    color: #735338;
+    line-height: 1.4;
+    margin: 0 0 6px;
+
+    strong {
+      color: $brown;
+    }
+  }
+
+  small {
+    display: block;
+    font-size: 9px;
+    color: #A38C7A;
+  }
+}
