@@ -1,10 +1,31 @@
-$brown: #492515;
-$brown-line: #DAA576;
-$paper-bg: #FDF7EE;
-$paper-shadow: #FFECCB;
-$green-bg: #EAF7D9;
-$green-border: #83B752;
+// ─────────── 팔레트 (피그마 Color) ───────────
+$brown-1: #492515;
+$brown-3: #DAA576;
+$beige-1: #FFECCB;
+$beige-3: #FFDCB9;
+$beige-4: #FDF7EE;
+$pink-1: #FFB8BD;
+$green-1: #C8F593;
+$green-2: #5B911C;
+$sub-green: #E8F6CA;
+$sub-blue: #E8F2F7;
+$blue-2: #6BC4FF;
+$alert-red: #FF646E;
+$red-2: #C73F48;
+$orange: #FF9834;
+$text-sub: #8C7363; // 보조 글자색 (팔레트에 없어서 임의 값)
 
+$font-katuri: "andong-katuri", sans-serif;
+$font-mamablock: "mamablock-210", sans-serif;
+
+// ─────────── 박스 크기 (여기 숫자만 바꾸면 돼요) ───────────
+$card-w: 344px;
+$h-current: 137px;
+$h-cycle: 129px;
+$h-chart: 321px;
+$h-guide-min: 289px; // 가이드는 글이 길어질 수 있어서 min-height로 둬요
+
+// 모든 스타일을 .humidity-page 안에 넣어서 Home.scss, Temperature.scss와 섞이지 않게 해요
 .humidity-page {
   position: relative;
   width: 100%;
@@ -12,452 +33,466 @@ $green-border: #83B752;
   height: 100dvh;
   margin: 0 auto;
   overflow: hidden;
-  background-color: #F8F3EA;
-  font-family: 'Pretendard', sans-serif;
-  color: $brown;
+  background-color: $beige-4;
+  font-family: "Pretendard", sans-serif;
+  color: $brown-1;
   box-sizing: border-box;
 
   &__scroll {
     width: 100%;
     height: 100%;
     overflow-y: auto;
-    padding: 0 16px 180px;
-    -webkit-overflow-scrolling: touch;
+    padding: 0 16px 140px; // 아래: 하단 네비에 가려지지 않게
     box-sizing: border-box;
+    -webkit-overflow-scrolling: touch;
   }
 
   &__content {
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: 16px;
     margin-top: 8px;
   }
-}
 
-/* ----------------------------------
- * 헤더
- * ---------------------------------- */
-.header {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 52px;
-
-  &__back {
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 36px;
-    height: 36px;
+  // ─────────── 헤더 ───────────
+  .header {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #FFE8C7;
-    border-radius: 50%;
-    border: 1px solid #EAD1B0;
-    cursor: pointer;
+    height: 52px;
 
-    img {
-      width: 16px;
-      height: 16px;
-      object-fit: contain;
+    &__back {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: $beige-1;
+      border: 2px solid $beige-3;
+      border-radius: 50%;
+
+      img {
+        width: 16px;
+        height: 16px;
+        object-fit: contain;
+      }
+    }
+
+    &__title {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+      line-height: 1.5;
+      color: $brown-1;
     }
   }
 
-  &__title {
-    font-size: 20px;
-    font-weight: 800;
-    margin: 0;
-    color: $brown;
-  }
-}
-
-/* ----------------------------------
- * 카드 공통
- * ---------------------------------- */
-.card {
-  background: $paper-bg;
-  border: 2px solid $brown-line;
-  border-radius: 20px;
-  padding: 16px;
-  box-shadow: inset -4px -4px 0 0 $paper-shadow;
-  box-sizing: border-box;
-
-  &__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-  }
-
-  &__title {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 16px;
-    font-weight: 800;
-    margin: 0;
-    color: $brown;
-
-    .icon {
-      width: 22px;
-      height: 22px;
-      object-fit: contain;
-    }
-  }
-
-  &__subtext {
-    font-size: 11px;
-    color: #A38C7E;
-  }
-
-  &--guide {
-    background: $green-bg;
-    border-color: $green-border;
+  // ─────────── 카드 공통 ───────────
+  .card {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: $card-w;
+    padding: 16px;
+    background: $beige-4;
+    border: 2px solid $beige-3;
+    border-radius: 20px;
     box-shadow: none;
 
-    .card__title {
-      color: #2D4C0F;
+    &__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+
+      &--space {
+        align-items: flex-start;
+      }
+    }
+
+    &__title {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin: 0;
+      font-family: $font-katuri;
+      font-size: 18px;
+      font-weight: 400;
+      line-height: 1.4;
+      color: $brown-1;
+
+      .icon {
+        display: block;
+        width: auto;
+        height: 24px;
+        object-fit: contain;
+      }
+    }
+
+    &__subtext {
+      font-size: 12px;
+      font-weight: 500;
+      color: #A89EA1;
+    }
+
+    // 습윤 사이클 설명 문단
+    &__text {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #6E5849;
+
+      strong {
+        font-weight: 700;
+        color: $brown-1;
+      }
+    }
+
+    // 박스마다 따로 꾸미는 곳 (피그마: 첫 박스만 진한 테두리 + 안쪽 그림자)
+    &--current {
+      height: $h-current;
+      display: flex;
+      flex-direction: column;
+      border-color: $brown-3;
+      box-shadow: inset -10px -10px 0 0 $beige-1;
+    }
+
+    &--cycle {
+      height: $h-cycle;
+    }
+
+    &--chart {
+      height: $h-chart;
+    }
+
+    &--guide {
+      min-height: $h-guide-min;
+      background: $sub-green;
+      border-color: $green-2;
     }
   }
-}
 
-/* ----------------------------------
- * 1. 현재 습도
- * ---------------------------------- */
-.current-humid {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 0;
-
-  &__value {
-    font-size: 40px;
-    font-weight: 800;
-    color: $brown;
-    line-height: 1;
-
-    span {
-      font-size: 32px;
-      margin-left: 2px;
-    }
-  }
-}
-
-/* 뱃지 */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  width: auto;
-  height: 28px;
-  padding: 0 10px;
-  border-radius: 100px;
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1;
-  white-space: nowrap;
-  box-sizing: border-box;
-
-  &__icon {
-    width: 18px;
-    height: 18px;
-    object-fit: contain;
-    flex-shrink: 0;
-  }
-
-  &--warn {
-    color: #D64353;
-    background: #FFD2D7;
-    border: 2px solid #E26976;
-  }
-}
-
-/* ----------------------------------
- * 2. 습윤 사이클 카드 요약
- * ---------------------------------- */
-.cycle-summary {
-  &__btn {
+  // ─────────── 1. 현재 습도 ───────────
+  .current-humidity {
+    flex: 1;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 2px;
-    background: none;
-    border: 0;
-    font-size: 11px;
-    font-weight: 700;
-    color: #A1856F;
-    cursor: pointer;
+    justify-content: center;
+    gap: 8px;
 
-    img {
-      width: 12px;
-      height: 12px;
+    &__value {
+      font-family: $font-mamablock;
+      font-size: 35px;
+      font-weight: 400;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      color: $brown-1;
+
+      span {
+        margin-left: 2px;
+      }
+    }
+  }
+
+  // 뱃지 (Home.scss의 .badge 값이 섞이지 않게 min-width, align-self도 초기화)
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    box-sizing: border-box;
+    min-width: 0;
+    align-self: auto;
+    height: 28px;
+    padding: 0 12px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+
+    &__icon {
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
       object-fit: contain;
     }
+
+    &--ok {
+      color: $green-2;
+      background: $green-1;
+      border: 2px solid $green-2;
+    }
+
+    &--warn {
+      color: $red-2;
+      background: $pink-1;
+      border: 2px solid $alert-red;
+    }
   }
 
-  &__desc {
+  // ─────────── 2. 습윤 사이클이란? ───────────
+  .link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
     font-size: 12px;
+    font-weight: 600;
     line-height: 1.5;
-    color: #6E5341;
-    margin: 0;
-  }
-}
+    color: $brown-1;
 
-/* ----------------------------------
- * 3. 오늘의 습도 변화 차트
- * ---------------------------------- */
-.chart-area {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.chart-placeholder {
-  position: relative;
-  height: 170px;
-  background: #FFFDF9;
-  border: 1px dashed #D3C2B0;
-  border-radius: 12px;
-  padding: 10px;
-  box-sizing: border-box;
-
-  &__unit {
-    font-size: 11px;
-    color: #9E8B7D;
+    span {
+      font-size: 16px;
+      line-height: 1;
+    }
   }
 
-  &__bg {
+  // ─────────── 3. 오늘의 습도 변화 ───────────
+  .chart {
     position: relative;
-    height: 110px;
-    margin-top: 4px;
+
+    &__unit {
+      position: absolute;
+      top: 0;
+      left: 0;
+      font-size: 11px;
+      color: $text-sub;
+    }
+
+    &__svg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
   }
 
-  &__tag {
-    position: absolute;
-    font-size: 9px;
-    padding: 2px 4px;
-    border-radius: 4px;
-
-    &.tag--night-1, &.tag--night-2 {
-      background: #E8F4FC;
-      color: #6C92B5;
-    }
-    &.tag--night-1 { left: 0; top: 0; }
-    &.tag--night-2 { right: 0; top: 0; }
-
-    &.tag--spray-1, &.tag--spray-2 {
-      background: #E1F8C8;
-      color: #558A1B;
-    }
-    &.tag--spray-1 { left: 28%; top: 0; }
-    &.tag--spray-2 { right: 28%; top: 0; }
-  }
-
-  &__x-axis {
+  .chart-legend {
     display: flex;
     justify-content: space-between;
-    font-size: 10px;
-    color: #A18D80;
-    margin-top: 4px;
-  }
-}
-
-.chart-legend {
-  display: flex;
-  justify-content: space-around;
-  font-size: 11px;
-  color: #6E5849;
-
-  &__item {
-    display: flex;
     align-items: center;
-    gap: 4px;
-
-    small { font-size: 9px; color: #9C8879; }
-  }
-
-  .dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-
-    &--blue { background: #51B5FF; }
-    &--green { background: #83B752; }
-  }
-
-  .line {
-    width: 14px;
-    height: 2px;
-
-    &--orange { background: #FF9E4A; }
-  }
-}
-
-/* ----------------------------------
- * 4. 관리 가이드 내용
- * ---------------------------------- */
-.guide-content {
-  color: #2D4C0F;
-
-  h3 {
-    font-size: 14px;
-    font-weight: 800;
-    margin: 0 0 6px;
-  }
-
-  p {
-    font-size: 12px;
-    line-height: 1.5;
-    margin: 0 0 10px;
-    opacity: 0.9;
-  }
-
-  &__line {
-    border: 0;
-    border-top: 1px dashed #A3D271;
-    margin: 10px 0;
-  }
-
-  h4 {
-    font-size: 12px;
-    font-weight: 700;
-    margin: 0 0 6px;
-  }
-
-  ul {
-    margin: 0;
-    padding-left: 16px;
+    margin-top: 12px;
     font-size: 11px;
-    line-height: 1.6;
+    line-height: 1.3;
+    color: #6E5849;
 
-    li {
-      margin-bottom: 2px;
+    &__item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      small {
+        font-size: 9px;
+        color: #9C8879;
+      }
+    }
+
+    .dot {
+      position: relative;
+      flex-shrink: 0;
+      width: 18px;
+      height: 28px;
+      border-radius: 9px;
+
+      &--blue { background: $blue-2; }
+      &--green { background: $sub-green; }
+
+      // 올바른 습윤 사이클: 연한 복숭아색 칸 가운데에 주황 점선
+      &--cycle {
+        background: $beige-3;
+
+        &::after {
+          content: "";
+          position: absolute;
+          top: 4px;
+          bottom: 4px;
+          left: 50%;
+          border-left: 1.5px dashed $orange;
+          transform: translateX(-50%);
+        }
+      }
     }
   }
-}
 
-/* ----------------------------------
- * 습윤 사이클 모달 팝업
- * ---------------------------------- */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(2px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  padding: 20px;
-}
+  // ─────────── 4. 관리 가이드 ───────────
+  .guide-content {
+    color: $brown-1;
 
-.modal-content {
-  position: relative;
-  width: 100%;
-  max-width: 350px;
-  max-height: 85vh;
-  overflow-y: auto;
-  background: #FFFBF5;
-  border: 2px solid #E8C198;
-  border-radius: 20px;
-  padding: 20px 16px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-  box-sizing: border-box;
+    h3 {
+      margin: 0 0 6px;
+      font-size: 14px;
+      font-weight: 800;
+      line-height: 1.5;
+    }
 
-  &__close {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    width: 28px;
-    height: 28px;
-    background: #FFE8C7;
-    border-radius: 50%;
-    border: 0;
+    p {
+      margin: 0 0 12px;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #6E5849;
+    }
+
+    &__line {
+      margin: 12px 0;
+      border: 0;
+      border-top: 1px dashed #A3D271;
+    }
+
+    h4 {
+      margin: 0 0 8px;
+      padding-left: 8px;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.5;
+      border-left: 4px solid $green-2;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 11px;
+      line-height: 1.6;
+      color: #6E5849;
+
+      li {
+        margin-bottom: 2px;
+      }
+    }
+  }
+
+  // ─────────── 모달 (습윤 사이클이 왜 중요한가요?) ───────────
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(2px);
+  }
 
-    img {
-      width: 12px;
-      height: 12px;
-      object-fit: contain;
+  .modal-content {
+    position: relative;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 350px;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 20px 16px;
+    background: $beige-4;
+    border: 2px solid $brown-3;
+    border-radius: 20px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+
+    &__close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: $beige-1;
+      border-radius: 50%;
+
+      img {
+        width: 12px;
+        height: 12px;
+        object-fit: contain;
+      }
+    }
+
+    &__title {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+      padding-right: 36px;
+
+      img {
+        width: 22px;
+        height: 22px;
+        object-fit: contain;
+      }
+
+      h2 {
+        margin: 0;
+        font-family: $font-katuri;
+        font-size: 17px;
+        font-weight: 400;
+        line-height: 1.4;
+        color: $brown-1;
+      }
+    }
+
+    &__sub {
+      margin: 0 0 16px;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #6E5849;
     }
   }
 
-  &__title {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 8px;
-    padding-right: 28px;
+  // 분무 → 습도 상승 → 서서히 건조 → 다음 분무
+  .modal-flow {
+    padding: 12px;
+    background: #FFF3DD;
+    border-radius: 10px;
 
-    img {
-      width: 22px;
-      height: 22px;
-      object-fit: contain;
-    }
-
-    h2 {
-      font-size: 16px;
+    &__title {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 12px;
       font-weight: 800;
-      color: $brown;
-      margin: 0;
+      color: $brown-1;
     }
-  }
 
-  &__sub {
-    font-size: 12px;
-    line-height: 1.5;
-    color: #6E5341;
-    margin: 0 0 16px;
-  }
-}
+    &__steps {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 4px;
+      margin: 0 0 10px;
+      padding: 0;
+      list-style: none;
 
-.modal-cycle-box {
-  background: #FFEECF;
-  border-radius: 14px;
-  padding: 12px;
+      li {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
 
-  h4 {
-    font-size: 12px;
-    font-weight: 800;
-    color: #C65A20;
-    margin: 0 0 8px;
+      span {
+        padding: 4px 8px;
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 1.3;
+        color: $brown-1;
+        background: $beige-4;
+        border: 1px solid $beige-3;
+        border-radius: 100px;
+      }
 
-    &::before {
-      content: '| ';
+      em {
+        font-size: 11px;
+        font-style: normal;
+        color: $text-sub;
+      }
     }
-  }
 
-  .modal-cycle-flow {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 11px;
-    font-weight: 800;
-    color: $brown;
-    background: #FFFDF9;
-    padding: 8px 10px;
-    border-radius: 8px;
-    margin-bottom: 8px;
-
-    .arrow {
-      color: #DDA271;
+    &__desc {
+      display: block;
+      font-size: 10px;
+      line-height: 1.5;
+      color: #735338;
     }
-  }
-
-  &__sub {
-    font-size: 10px;
-    color: #8C705C;
-    line-height: 1.4;
-    margin: 0;
   }
 }
