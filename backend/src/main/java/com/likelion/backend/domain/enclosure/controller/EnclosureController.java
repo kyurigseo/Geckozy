@@ -7,7 +7,6 @@ import com.likelion.backend.domain.enclosure.dto.crud.EnclosureUpdateResponse;
 import com.likelion.backend.domain.enclosure.dto.environment.*;
 import com.likelion.backend.domain.enclosure.dto.suggestion.*;
 import com.likelion.backend.domain.enclosure.service.EnclosureService;
-import com.likelion.backend.domain.enclosure.service.EnclosureTemperatureService;
 import com.likelion.backend.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -155,13 +154,11 @@ public class EnclosureController {
         return ResponseEntity.ok(ApiResponse.success(message, response));
     }
 
-    private final EnclosureTemperatureService enclosureTemperatureService;
-
     @GetMapping("/{enclosureId}/temperatures/patterns")
     public ApiResponse<TemperaturePatternResponse> getTemperaturePattern(
             @PathVariable("enclosureId") Long enclosureId
     ) {
-        TemperaturePatternResponse response = enclosureTemperatureService.getTemperaturePattern(enclosureId);
+        TemperaturePatternResponse response = enclosureService.getTemperaturePattern(enclosureId);
         return ApiResponse.success(response);
     }
 }
