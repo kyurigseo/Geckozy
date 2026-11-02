@@ -2,7 +2,12 @@ package com.likelion.backend.domain.enclosure.service;
 
 import com.likelion.backend.domain.concern.entity.Concern;
 import com.likelion.backend.domain.concern.repository.ConcernRepository;
-import com.likelion.backend.domain.enclosure.dto.*;
+import com.likelion.backend.domain.enclosure.dto.crud.EnclosureCreateRequest;
+import com.likelion.backend.domain.enclosure.dto.crud.EnclosureCreateResponse;
+import com.likelion.backend.domain.enclosure.dto.crud.EnclosureUpdateRequest;
+import com.likelion.backend.domain.enclosure.dto.crud.EnclosureUpdateResponse;
+import com.likelion.backend.domain.enclosure.dto.environment.*;
+import com.likelion.backend.domain.enclosure.dto.suggestion.*;
 import com.likelion.backend.domain.enclosure.entity.*;
 import com.likelion.backend.domain.enclosure.repository.*;
 import com.likelion.backend.domain.lizard.entity.Lizard;
@@ -106,8 +111,8 @@ public class EnclosureService {
 
         BigDecimal currentTemp = measurementOpt.get().getTemperature();
         boolean isDaytime = checkIsDaytime(enclosureId);
-        TemperatureStatusResponse.TimeOfDay timeOfDay = isDaytime 
-                ? TemperatureStatusResponse.TimeOfDay.DAYTIME 
+        TemperatureStatusResponse.TimeOfDay timeOfDay = isDaytime
+                ? TemperatureStatusResponse.TimeOfDay.DAYTIME
                 : TemperatureStatusResponse.TimeOfDay.NIGHTTIME;
 
         // 2. 종별 적정 온도 기준 조회
@@ -124,17 +129,25 @@ public class EnclosureService {
             return TemperatureStatusResponse.ofUnknown(enclosureId, lizard.getName(), species.getName(), currentTemp, timeOfDay, standard.getTemperatureCaution());
         }
 
-        // 3. 온도 상태 판정
+        TemperatureStatusResponse.StandardTemperature standardTemp = TemperatureStatusResponse.StandardTemperature.builder()
+                .min(minTemp)
+                .max(maxTemp)
+                .build();
+
+        // 3. 온도 상태 판정 및 응답 반환
         return TemperatureStatusResponse.of(
-                enclosureId, lizard.getName(), species.getName(), currentTemp, timeOfDay,
-                new StandardTemperatureDto(minTemp, maxTemp),
+                enclosureId,
+                lizard.getName(),
+                species.getName(),
+                currentTemp,
+                timeOfDay,
+                standardTemp,
                 determineStatus(currentTemp, minTemp, maxTemp),
                 standard.getTemperatureCaution(),
                 generateDisplayMessage(currentTemp, minTemp, maxTemp, isDaytime)
         );
     }
-
-    public EnclosureResponseDto getEnclosureByLizardId(Long lizardId, Long currentUserId) {
+    public EnclosureResponse getEnclosureByLizardId(Long lizardId, Long currentUserId) {
         // 1. 도마뱀 존재 여부 확인
         Lizard lizard = lizardRepository.findById(lizardId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.LIZARD_NOT_FOUND));
@@ -148,7 +161,7 @@ public class EnclosureService {
         Enclosure enclosure = enclosureRepository.findByLizard_LizardId(lizardId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENCLOSURE_NOT_FOUND));
 
-        return EnclosureResponseDto.from(enclosure);
+        return EnclosureResponse.from(enclosure);
     }
 
     @Transactional(readOnly = true)
@@ -235,7 +248,7 @@ public class EnclosureService {
     }
 
     @Transactional
-    public EnclosureUpdateResponseDto updateEnclosure(Long enclosureId, EnclosureUpdateRequestDto requestDto, Long currentUserId) {
+    public EnclosureUpdateResponse updateEnclosure(Long enclosureId, EnclosureUpdateRequest requestDto, Long currentUserId) {
         // 1. 사육장 존재 및 소유권 확인
         Enclosure enclosure = enclosureRepository.findById(enclosureId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENCLOSURE_NOT_FOUND));
@@ -287,11 +300,11 @@ public class EnclosureService {
         }
 
         // 5. 수정 완료 응답 반환
-        return EnclosureUpdateResponseDto.of(enclosure, updatedConcernIds);
+        return EnclosureUpdateResponse.of(enclosure, updatedConcernIds);
     }
 
 
-    public TemperatureStatusResponseDto getTemperatureStatus(Long enclosureId, Long currentUserId) {
+    public TemperatureStatusResponse getTemperatureStatus(Long enclosureId, Long currentUserId) {
         // 1. 사육장 및 소유권 검증
         Enclosure enclosure = enclosureRepository.findById(enclosureId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENCLOSURE_NOT_FOUND));
@@ -303,25 +316,19 @@ public class EnclosureService {
         Lizard lizard = enclosure.getLizard();
         Species species = lizard.getSpecies();
 
-        // 2. 센서 및 최신 측정 데이터 조회
-        Optional<Sensor> sensorOpt = sensorRepository.findById(enclosureId);
+        // 2. 센서 및 최신 측정 데이터 조회 (Enclosure PK 필드명 id 기준)
+        Optional<Sensor> sensorOpt = sensorRepository.findByEnclosure_Id(enclosureId);
         Optional<SensorMeasurement> measurementOpt = sensorOpt.flatMap(
                 sensor -> sensorMeasurementRepository.findTopBySensor_SensorIdOrderByMeasuredAtDesc(sensor.getSensorId())
         );
 
-        // [예외 2 처리] 센서 미연결 또는 측정 데이터 부재
+        // [예외 2 처리] 센서 미연결 또는 측정 데이터 부재 -> 정적 팩토리 메서드 사용
         if (sensorOpt.isEmpty() || measurementOpt.isEmpty() || measurementOpt.get().getTemperature() == null) {
-            return TemperatureStatusResponseDto.builder()
-                    .enclosureId(enclosureId)
-                    .lizardName(lizard.getName())
-                    .speciesName(species.getName())
-                    .currentTemperature(null)
-                    .timeOfDay(null)
-                    .standardTemperature(null)
-                    .status("SENSOR_ERROR")
-                    .cautionText(null)
-                    .displayMessage("온도 센서가 연결되지 않았거나 측정 데이터를 수신할 수 없습니다.")
-                    .build();
+            return TemperatureStatusResponse.ofSensorError(
+                    enclosureId,
+                    lizard.getName(),
+                    species.getName()
+            );
         }
 
         BigDecimal currentTemp = measurementOpt.get().getTemperature();
@@ -329,76 +336,79 @@ public class EnclosureService {
         // 3. 종별 환경 기준 조회
         Optional<SpeciesEnvironmentStandard> standardOpt = speciesEnvironmentStandardRepository.findBySpecies_SpeciesId(species.getSpeciesId());
 
-        // 4. 주간/야간 시간 판정 (ManagementSettings 조명 시간 기준)
+        // 4. 주간/야간 시간 판정 (Enum으로 변환)
         Optional<ManagementSetting> settingOpt = managementSettingRepository.findById(enclosureId);
-        String timeOfDay = determineTimeOfDay(settingOpt.orElse(null));
+        String timeOfDayStr = determineTimeOfDay(settingOpt.orElse(null)); // 기존 메서드가 String 반환 시
+        TemperatureStatusResponse.TimeOfDay timeOfDay = "DAYTIME".equals(timeOfDayStr)
+                ? TemperatureStatusResponse.TimeOfDay.DAYTIME
+                : TemperatureStatusResponse.TimeOfDay.NIGHTTIME;
 
-        // [예외 1 처리] 종별 환경 기준이 등록되지 않은 경우
+        // [예외 1 처리] 종별 환경 기준이 등록되지 않은 경우 -> 정적 팩토리 메서드 사용
         if (standardOpt.isEmpty()) {
-            return TemperatureStatusResponseDto.builder()
-                    .enclosureId(enclosureId)
-                    .lizardName(lizard.getName())
-                    .speciesName(species.getName())
-                    .currentTemperature(currentTemp)
-                    .timeOfDay(timeOfDay)
-                    .standardTemperature(null)
-                    .status("UNKNOWN")
-                    .cautionText(null)
-                    .displayMessage("등록된 종별 권장 온도 기준이 없어 수치만 표시되며, 상태 판정이 보류됩니다.")
-                    .build();
+            return TemperatureStatusResponse.ofUnknown(
+                    enclosureId,
+                    lizard.getName(),
+                    species.getName(),
+                    currentTemp,
+                    timeOfDay,
+                    null
+            );
         }
 
         SpeciesEnvironmentStandard standard = standardOpt.get();
-        BigDecimal minTemp = "DAYTIME".equals(timeOfDay) ? standard.getDayTemperatureMin() : standard.getNightTemperatureMin();
-        BigDecimal maxTemp = "DAYTIME".equals(timeOfDay) ? standard.getDayTemperatureMax() : standard.getNightTemperatureMax();
+        BigDecimal minTemp = (timeOfDay == TemperatureStatusResponse.TimeOfDay.DAYTIME)
+                ? standard.getDayTemperatureMin()
+                : standard.getNightTemperatureMin();
+        BigDecimal maxTemp = (timeOfDay == TemperatureStatusResponse.TimeOfDay.DAYTIME)
+                ? standard.getDayTemperatureMax()
+                : standard.getNightTemperatureMax();
 
         // 기준 온도가 세팅되어 있지 않은 경우도 UNKNOWN 처리
         if (minTemp == null || maxTemp == null) {
-            return TemperatureStatusResponseDto.builder()
-                    .enclosureId(enclosureId)
-                    .lizardName(lizard.getName())
-                    .speciesName(species.getName())
-                    .currentTemperature(currentTemp)
-                    .timeOfDay(timeOfDay)
-                    .standardTemperature(null)
-                    .status("UNKNOWN")
-                    .cautionText(standard.getTemperatureCaution())
-                    .displayMessage("등록된 종별 권장 온도 기준이 없어 수치만 표시되며, 상태 판정이 보류됩니다.")
-                    .build();
+            return TemperatureStatusResponse.ofUnknown(
+                    enclosureId,
+                    lizard.getName(),
+                    species.getName(),
+                    currentTemp,
+                    timeOfDay,
+                    standard.getTemperatureCaution()
+            );
         }
 
-        // 5. 온도 상태 판정 (OPTIMAL, HIGH, LOW)
-        String status;
+        // 5. 온도 상태 판정 (OPTIMAL, HIGH, LOW) - Enum 및 팩토리 메서드 활용
+        TemperatureStatusResponse.Status status;
         String displayMessage;
-        String timeLabel = "DAYTIME".equals(timeOfDay) ? "주간" : "야간";
+        String timeLabel = (timeOfDay == TemperatureStatusResponse.TimeOfDay.DAYTIME) ? "주간" : "야간";
 
         if (currentTemp.compareTo(minTemp) < 0) {
-            status = "LOW";
+            status = TemperatureStatusResponse.Status.LOW;
             displayMessage = String.format("현재 온도가 %s 적정 범위보다 낮습니다.", timeLabel);
         } else if (currentTemp.compareTo(maxTemp) > 0) {
-            status = "HIGH";
+            status = TemperatureStatusResponse.Status.HIGH;
             displayMessage = String.format("현재 온도가 %s 적정 범위보다 높습니다.", timeLabel);
         } else {
-            status = "OPTIMAL";
+            status = TemperatureStatusResponse.Status.OPTIMAL;
             displayMessage = String.format("현재 온도가 %s 적정 범위를 잘 유지하고 있습니다.", timeLabel);
         }
 
-        return TemperatureStatusResponseDto.builder()
-                .enclosureId(enclosureId)
-                .lizardName(lizard.getName())
-                .speciesName(species.getName())
-                .currentTemperature(currentTemp)
-                .timeOfDay(timeOfDay)
-                .standardTemperature(TemperatureStatusResponseDto.StandardTemperature.builder()
-                        .min(minTemp)
-                        .max(maxTemp)
-                        .build())
-                .status(status)
-                .cautionText(standard.getTemperatureCaution())
-                .displayMessage(displayMessage)
+        // 6. DTO 생성 반환
+        TemperatureStatusResponse.StandardTemperature standardTemp = TemperatureStatusResponse.StandardTemperature.builder()
+                .min(minTemp)
+                .max(maxTemp)
                 .build();
-    }
 
+        return TemperatureStatusResponse.of(
+                enclosureId,
+                lizard.getName(),
+                species.getName(),
+                currentTemp,
+                timeOfDay,
+                standardTemp,
+                status,
+                standard.getTemperatureCaution(),
+                displayMessage
+        );
+    }
     // 주/야간 판정 헬퍼 메서드 (조명 시간 기준)
     private String determineTimeOfDay(ManagementSetting setting) {
         if (setting == null || setting.getLightingStartTime() == null || setting.getLightingEndTime() == null) {
@@ -420,7 +430,7 @@ public class EnclosureService {
 
     // EnclosureService.java 내부에 추가
 
-    public HumidityStatusResponseDto getHumidityStatus(Long enclosureId, Long currentUserId) {
+    public HumidityStatusResponse getHumidityStatus(Long enclosureId, Long currentUserId) {
         // 1. 사육장 및 소유권 검증
         Enclosure enclosure = enclosureRepository.findById(enclosureId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENCLOSURE_NOT_FOUND));
@@ -440,7 +450,7 @@ public class EnclosureService {
 
         // [예외 3 처리] 센서 미연결 또는 측정 데이터가 아예 없는 경우
         if (sensorOpt.isEmpty() || measurements.isEmpty() || measurements.get(0).getHumidity() == null) {
-            return HumidityStatusResponseDto.builder()
+            return HumidityStatusResponse.builder()
                     .enclosureId(enclosureId)
                     .lizardName(lizard.getName())
                     .speciesName(species.getName())
@@ -458,12 +468,12 @@ public class EnclosureService {
         Optional<SpeciesEnvironmentStandard> standardOpt = speciesEnvironmentStandardRepository.findBySpecies_SpeciesId(species.getSpeciesId());
 
         // 종별 기준 습도 DTO 생성
-        HumidityStatusResponseDto.StandardHumidity standardHumidity = null;
+        HumidityStatusResponse.StandardHumidity standardHumidity = null;
         String cautionText = null;
         if (standardOpt.isPresent()) {
             SpeciesEnvironmentStandard std = standardOpt.get();
             if (std.getHumidityMin() != null && std.getHumidityMax() != null) {
-                standardHumidity = HumidityStatusResponseDto.StandardHumidity.builder()
+                standardHumidity = HumidityStatusResponse.StandardHumidity.builder()
                         .min(std.getHumidityMin())
                         .max(std.getHumidityMax())
                         .build();
@@ -473,7 +483,7 @@ public class EnclosureService {
 
         // [예외 1 처리] 최근 측정 데이터가 부족한 경우 (데이터 2개 미만)
         if (measurements.size() < 2) {
-            return HumidityStatusResponseDto.builder()
+            return HumidityStatusResponse.builder()
                     .enclosureId(enclosureId)
                     .lizardName(lizard.getName())
                     .speciesName(species.getName())
@@ -512,7 +522,7 @@ public class EnclosureService {
 
         // [예외 2 처리] 종별 권장 습도 기준이 없는 경우
         if (standardHumidity == null) {
-            return HumidityStatusResponseDto.builder()
+            return HumidityStatusResponse.builder()
                     .enclosureId(enclosureId)
                     .lizardName(lizard.getName())
                     .speciesName(species.getName())
@@ -529,7 +539,7 @@ public class EnclosureService {
         // 4. 정상 습윤 사이클 응답 생성
         String displayMessage = String.format("최근 분무 이후 습도가 %s 흐름이며, 적정 습윤 사이클 내에 있습니다.", trendText);
 
-        return HumidityStatusResponseDto.builder()
+        return HumidityStatusResponse.builder()
                 .enclosureId(enclosureId)
                 .lizardName(lizard.getName())
                 .speciesName(species.getName())
@@ -543,7 +553,7 @@ public class EnclosureService {
                 .build();
     }
 
-    public AlertResponseDto getEnclosureAlerts(Long enclosureId, Long currentUserId) {
+    public AlertResponse getEnclosureAlerts(Long enclosureId, Long currentUserId) {
         // 1. 사육장 및 소유권 검증 (404, 401 처리)
         Enclosure enclosure = enclosureRepository.findById(enclosureId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENCLOSURE_NOT_FOUND));
@@ -552,14 +562,14 @@ public class EnclosureService {
             throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
 
-        List<AlertResponseDto.AlertDetail> alerts = new ArrayList<>();
+        List<AlertResponse.AlertDetail> alerts = new ArrayList<>();
 
         // 2. 센서 상태 점검 (DISCONNECTED 체크)
         Optional<Sensor> sensorOpt = sensorRepository.findById(enclosureId);
         if (sensorOpt.isPresent()) {
             Sensor sensor = sensorOpt.get();
             if ("DISCONNECTED".equals(sensor.getStatus().name())) {
-                alerts.add(AlertResponseDto.AlertDetail.builder()
+                alerts.add(AlertResponse.AlertDetail.builder()
                         .code("COACH-003")
                         .type("SENSOR_DISCONNECTED")
                         .severity("MEDIUM")
@@ -571,9 +581,9 @@ public class EnclosureService {
 
         // 3. 온도 상태 점검 (HIGH/LOW)
         try {
-            TemperatureStatusResponseDto tempStatus = getTemperatureStatus(enclosureId, currentUserId);
+            TemperatureStatusResponse tempStatus = getTemperatureStatus(enclosureId, currentUserId);
             if ("HIGH".equals(tempStatus.getStatus())) {
-                alerts.add(AlertResponseDto.AlertDetail.builder()
+                alerts.add(AlertResponse.AlertDetail.builder()
                         .code("COACH-012")
                         .type("HIGH_TEMPERATURE")
                         .severity("HIGH")
@@ -581,7 +591,7 @@ public class EnclosureService {
                         .detailType("TEMPERATURE")
                         .build());
             } else if ("LOW".equals(tempStatus.getStatus())) {
-                alerts.add(AlertResponseDto.AlertDetail.builder()
+                alerts.add(AlertResponse.AlertDetail.builder()
                         .code("COACH-011")
                         .type("LOW_TEMPERATURE")
                         .severity("HIGH")
@@ -593,14 +603,14 @@ public class EnclosureService {
 
         // 4. 습도 상태 점검 (HIGH/LOW)
         try {
-            HumidityStatusResponseDto humidStatus = getHumidityStatus(enclosureId, currentUserId);
+            HumidityStatusResponse humidStatus = getHumidityStatus(enclosureId, currentUserId);
             if (humidStatus.getStandardHumidity() != null && humidStatus.getCurrentHumidity() != null) {
                 BigDecimal current = humidStatus.getCurrentHumidity();
                 BigDecimal max = humidStatus.getStandardHumidity().getMax();
                 BigDecimal min = humidStatus.getStandardHumidity().getMin();
 
                 if (current.compareTo(max) > 0) {
-                    alerts.add(AlertResponseDto.AlertDetail.builder()
+                    alerts.add(AlertResponse.AlertDetail.builder()
                             .code("COACH-013")
                             .type("HIGH_HUMIDITY")
                             .severity("HIGH")
@@ -608,7 +618,7 @@ public class EnclosureService {
                             .detailType("HUMIDITY")
                             .build());
                 } else if (current.compareTo(min) < 0) {
-                    alerts.add(AlertResponseDto.AlertDetail.builder()
+                    alerts.add(AlertResponse.AlertDetail.builder()
                             .code("COACH-014")
                             .type("LOW_HUMIDITY")
                             .severity("HIGH")
@@ -621,7 +631,7 @@ public class EnclosureService {
 
         // 5. 경고가 없는 경우 (NO_ALERT)
         if (alerts.isEmpty()) {
-            return AlertResponseDto.builder()
+            return AlertResponse.builder()
                     .primaryAlert(null)
                     .additionalAlerts(Collections.emptyList())
                     .build();
@@ -631,10 +641,10 @@ public class EnclosureService {
         alerts.sort((a, b) -> getSeverityRank(a.getSeverity()) - getSeverityRank(b.getSeverity()));
 
         // 7. Primary와 Additional 분리
-        AlertResponseDto.AlertDetail primaryAlert = alerts.get(0);
-        List<AlertResponseDto.AlertDetail> additionalAlerts = alerts.subList(1, alerts.size());
+        AlertResponse.AlertDetail primaryAlert = alerts.get(0);
+        List<AlertResponse.AlertDetail> additionalAlerts = alerts.subList(1, alerts.size());
 
-        return AlertResponseDto.builder()
+        return AlertResponse.builder()
                 .primaryAlert(primaryAlert)
                 .additionalAlerts(additionalAlerts)
                 .build();
@@ -649,7 +659,7 @@ public class EnclosureService {
         };
     }
 
-    public TemperatureHistoryResponseDto getTemperatureHistory(Long enclosureId, String dateStr, Long currentUserId) {
+    public TemperatureHistoryResponse getTemperatureHistory(Long enclosureId, String dateStr, Long currentUserId) {
         // 1. 사육장 및 소유권 검증
         Enclosure enclosure = enclosureRepository.findById(enclosureId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENCLOSURE_NOT_FOUND));
@@ -674,7 +684,7 @@ public class EnclosureService {
 
         // 3. 센서 측정 데이터 조회
         Optional<Sensor> sensorOpt = sensorRepository.findById(enclosureId);
-        List<TemperatureHistoryResponseDto.ActualTemperatureDto> actualList = new ArrayList<>();
+        List<TemperatureHistoryResponse.ActualTemperatureDto> actualList = new ArrayList<>();
 
         if (sensorOpt.isPresent()) {
             List<SensorMeasurement> measurements = sensorMeasurementRepository
@@ -683,7 +693,7 @@ public class EnclosureService {
 
             actualList = measurements.stream()
                     .filter(m -> m.getTemperature() != null)
-                    .map(m -> TemperatureHistoryResponseDto.ActualTemperatureDto.builder()
+                    .map(m -> TemperatureHistoryResponse.ActualTemperatureDto.builder()
                             .measuredAt(m.getMeasuredAt().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
                             .value(m.getTemperature())
                             .build())
@@ -694,10 +704,10 @@ public class EnclosureService {
         Species species = enclosure.getLizard().getSpecies();
         Optional<SpeciesEnvironmentStandard> standardOpt = speciesEnvironmentStandardRepository.findBySpecies_SpeciesId(species.getSpeciesId());
 
-        TemperatureHistoryResponseDto.ReferenceTemperatureDto reference = null;
+        TemperatureHistoryResponse.ReferenceTemperatureDto reference = null;
         if (standardOpt.isPresent()) {
             SpeciesEnvironmentStandard std = standardOpt.get();
-            reference = TemperatureHistoryResponseDto.ReferenceTemperatureDto.builder()
+            reference = TemperatureHistoryResponse.ReferenceTemperatureDto.builder()
                     .dayMin(std.getDayTemperatureMin())
                     .dayMax(std.getDayTemperatureMax())
                     .nightMin(std.getNightTemperatureMin())
@@ -705,14 +715,14 @@ public class EnclosureService {
                     .build();
         }
 
-        return TemperatureHistoryResponseDto.builder()
+        return TemperatureHistoryResponse.builder()
                 .date(targetDate.toString())
                 .actual(actualList)
                 .reference(reference)
                 .build();
     }
 
-    public HumidityHistoryResponseDto getHumidityHistory(Long enclosureId, String dateStr, Long currentUserId) {
+    public HumidityHistoryResponse getHumidityHistory(Long enclosureId, String dateStr, Long currentUserId) {
         // 1. 사육장 및 소유권 검증 (404, 401 예외)
         Enclosure enclosure = enclosureRepository.findById(enclosureId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENCLOSURE_NOT_FOUND));
@@ -737,7 +747,7 @@ public class EnclosureService {
 
         // 3. 센서 측정 습도 데이터 조회
         Optional<Sensor> sensorOpt = sensorRepository.findById(enclosureId);
-        List<HumidityHistoryResponseDto.ActualHumidityDto> actualList = new ArrayList<>();
+        List<HumidityHistoryResponse.ActualHumidityDto> actualList = new ArrayList<>();
 
         if (sensorOpt.isPresent()) {
             List<SensorMeasurement> measurements = sensorMeasurementRepository
@@ -746,7 +756,7 @@ public class EnclosureService {
 
             actualList = measurements.stream()
                     .filter(m -> m.getHumidity() != null)
-                    .map(m -> HumidityHistoryResponseDto.ActualHumidityDto.builder()
+                    .map(m -> HumidityHistoryResponse.ActualHumidityDto.builder()
                             .measuredAt(m.getMeasuredAt().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
                             .value(m.getHumidity())
                             .build())
@@ -757,7 +767,7 @@ public class EnclosureService {
         Species species = enclosure.getLizard().getSpecies();
         Optional<SpeciesEnvironmentStandard> standardOpt = speciesEnvironmentStandardRepository.findBySpecies_SpeciesId(species.getSpeciesId());
 
-        List<HumidityHistoryResponseDto.RecommendedCycleDto> recommendedCycle = new ArrayList<>();
+        List<HumidityHistoryResponse.RecommendedCycleDto> recommendedCycle = new ArrayList<>();
 
         if (standardOpt.isPresent()) {
             SpeciesEnvironmentStandard std = standardOpt.get();
@@ -766,21 +776,21 @@ public class EnclosureService {
 
             if (min != null && max != null) {
                 // MORNING (아침 분무기 직후 습윤 구간)
-                recommendedCycle.add(HumidityHistoryResponseDto.RecommendedCycleDto.builder()
+                recommendedCycle.add(HumidityHistoryResponse.RecommendedCycleDto.builder()
                         .time("MORNING")
                         .min(min.add(BigDecimal.valueOf(10))) // 예: 70.0
                         .max(max)                             // 예: 80.0
                         .build());
 
                 // DAY (낮건조/환기 구간)
-                recommendedCycle.add(HumidityHistoryResponseDto.RecommendedCycleDto.builder()
+                recommendedCycle.add(HumidityHistoryResponse.RecommendedCycleDto.builder()
                         .time("DAY")
                         .min(min.subtract(BigDecimal.valueOf(10))) // 예: 50.0
                         .max(max.subtract(BigDecimal.valueOf(15))) // 예: 65.0
                         .build());
 
                 // NIGHT (야간 안정 구간)
-                recommendedCycle.add(HumidityHistoryResponseDto.RecommendedCycleDto.builder()
+                recommendedCycle.add(HumidityHistoryResponse.RecommendedCycleDto.builder()
                         .time("NIGHT")
                         .min(min)                             // 예: 60.0
                         .max(max.subtract(BigDecimal.valueOf(5)))  // 예: 75.0
@@ -788,14 +798,14 @@ public class EnclosureService {
             }
         }
 
-        return HumidityHistoryResponseDto.builder()
+        return HumidityHistoryResponse.builder()
                 .date(targetDate.toString())
                 .actual(actualList)
                 .recommendedCycle(recommendedCycle)
                 .build();
     }
 
-    public EnvironmentSummaryResponseDto getEnvironmentSummary(Long enclosureId, String dateStr, Long currentUserId) {
+    public EnvironmentSummaryResponse getEnvironmentSummary(Long enclosureId, String dateStr, Long currentUserId) {
         // 1. 사육장 존재 및 소유권 검증 (404, 401)
         Enclosure enclosure = enclosureRepository.findById(enclosureId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENCLOSURE_NOT_FOUND));
@@ -834,7 +844,7 @@ public class EnclosureService {
 
         // [예외 처리] 데이터가 3개 미만이면 데이터 부족 반환
         if (dataCount < 3) {
-            return EnvironmentSummaryResponseDto.builder()
+            return EnvironmentSummaryResponse.builder()
                     .date(targetDate.toString())
                     .dataCount(dataCount)
                     .startAt(startAtIso)
@@ -864,7 +874,7 @@ public class EnclosureService {
         String timePeriodText = now.getHour() < 12 ? "오전 동안 " : "오늘 동안 ";
         String fullSummary = timePeriodText + tempSummary + " " + humidSummary;
 
-        return EnvironmentSummaryResponseDto.builder()
+        return EnvironmentSummaryResponse.builder()
                 .date(targetDate.toString())
                 .dataCount(dataCount)
                 .startAt(startAtIso)

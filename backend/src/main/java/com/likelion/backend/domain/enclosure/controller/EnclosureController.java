@@ -1,10 +1,14 @@
 package com.likelion.backend.domain.enclosure.controller;
 
-import com.likelion.backend.domain.enclosure.dto.*;
+import com.likelion.backend.domain.enclosure.dto.crud.EnclosureCreateRequest;
+import com.likelion.backend.domain.enclosure.dto.crud.EnclosureCreateResponse;
+import com.likelion.backend.domain.enclosure.dto.crud.EnclosureUpdateRequest;
+import com.likelion.backend.domain.enclosure.dto.crud.EnclosureUpdateResponse;
+import com.likelion.backend.domain.enclosure.dto.environment.*;
+import com.likelion.backend.domain.enclosure.dto.suggestion.*;
 import com.likelion.backend.domain.enclosure.service.EnclosureService;
 import com.likelion.backend.domain.enclosure.service.EnclosureTemperatureService;
 import com.likelion.backend.global.response.ApiResponse;
-import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -69,49 +73,49 @@ public class EnclosureController {
 
 
     @GetMapping
-    public ResponseEntity<ApiResponse<EnclosureResponseDto>> getEnclosure(
+    public ResponseEntity<ApiResponse<EnclosureResponse>> getEnclosure(
             @RequestParam("lizardId") Long lizardId,
             @AuthenticationPrincipal Long currentUserId // Security Context에서 현재 유저 ID 추출 (프로젝트 SecurityDetails 설정에 맞게 변경 가능)
     ) {
-        EnclosureResponseDto response = enclosureService.getEnclosureByLizardId(lizardId, currentUserId);
+        EnclosureResponse response = enclosureService.getEnclosureByLizardId(lizardId, currentUserId);
         return ResponseEntity.ok(ApiResponse.success("SUCCESS", response));
     }
 
 
     @PatchMapping("/{enclosureId}")
-    public ResponseEntity<ApiResponse<EnclosureUpdateResponseDto>> updateEnclosure(
+    public ResponseEntity<ApiResponse<EnclosureUpdateResponse>> updateEnclosure(
             @PathVariable("enclosureId") Long enclosureId,
-            @Valid @RequestBody EnclosureUpdateRequestDto requestDto, // @Valid로 필수값 유효성 검증
+            @Valid @RequestBody EnclosureUpdateRequest requestDto, // @Valid로 필수값 유효성 검증
             @AuthenticationPrincipal Long currentUserId
     ) {
-        EnclosureUpdateResponseDto response = enclosureService.updateEnclosure(enclosureId, requestDto, currentUserId);
+        EnclosureUpdateResponse response = enclosureService.updateEnclosure(enclosureId, requestDto, currentUserId);
         return ResponseEntity.ok(ApiResponse.success("SUCCESS", response));
     }
 
     @GetMapping("/{enclosureId}/temperatures/status")
-    public ResponseEntity<ApiResponse<TemperatureStatusResponseDto>> getTemperatureStatus(
+    public ResponseEntity<ApiResponse<TemperatureStatusResponse>> getTemperatureStatus(
             @PathVariable("enclosureId") Long enclosureId,
             @AuthenticationPrincipal Long currentUserId
     ) {
-        TemperatureStatusResponseDto response = enclosureService.getTemperatureStatus(enclosureId, currentUserId);
+        TemperatureStatusResponse response = enclosureService.getTemperatureStatus(enclosureId, currentUserId);
         return ResponseEntity.ok(ApiResponse.success("SUCCESS", response));
     }
 
     @GetMapping("/{enclosureId}/humidities/status")
-    public ResponseEntity<ApiResponse<HumidityStatusResponseDto>> getHumidityStatus(
+    public ResponseEntity<ApiResponse<HumidityStatusResponse>> getHumidityStatus(
             @PathVariable("enclosureId") Long enclosureId,
             @AuthenticationPrincipal Long currentUserId
     ) {
-        HumidityStatusResponseDto response = enclosureService.getHumidityStatus(enclosureId, currentUserId);
+        HumidityStatusResponse response = enclosureService.getHumidityStatus(enclosureId, currentUserId);
         return ResponseEntity.ok(ApiResponse.success("SUCCESS", response));
     }
 
     @GetMapping("/{enclosureId}/alerts")
-    public ResponseEntity<ApiResponse<AlertResponseDto>> getEnclosureAlerts(
+    public ResponseEntity<ApiResponse<AlertResponse>> getEnclosureAlerts(
             @PathVariable("enclosureId") Long enclosureId,
             @AuthenticationPrincipal Long currentUserId
     ) {
-        AlertResponseDto response = enclosureService.getEnclosureAlerts(enclosureId, currentUserId);
+        AlertResponse response = enclosureService.getEnclosureAlerts(enclosureId, currentUserId);
 
         // 경고가 없으면 "NO_ALERT" 메세지 반환
         String message = (response.getPrimaryAlert() == null) ? "NO_ALERT" : "SUCCESS";
@@ -119,32 +123,32 @@ public class EnclosureController {
     }
 
     @GetMapping("/{enclosureId}/temperatures/history")
-    public ResponseEntity<ApiResponse<TemperatureHistoryResponseDto>> getTemperatureHistory(
+    public ResponseEntity<ApiResponse<TemperatureHistoryResponse>> getTemperatureHistory(
             @PathVariable("enclosureId") Long enclosureId,
             @RequestParam(value = "date", required = false) String date,
             @AuthenticationPrincipal Long currentUserId
     ) {
-        TemperatureHistoryResponseDto response = enclosureService.getTemperatureHistory(enclosureId, date, currentUserId);
+        TemperatureHistoryResponse response = enclosureService.getTemperatureHistory(enclosureId, date, currentUserId);
         return ResponseEntity.ok(ApiResponse.success("SUCCESS", response));
     }
 
     @GetMapping("/{enclosureId}/humidities/history")
-    public ResponseEntity<ApiResponse<HumidityHistoryResponseDto>> getHumidityHistory(
+    public ResponseEntity<ApiResponse<HumidityHistoryResponse>> getHumidityHistory(
             @PathVariable("enclosureId") Long enclosureId,
             @RequestParam(value = "date", required = false) String date,
             @AuthenticationPrincipal Long currentUserId
     ) {
-        HumidityHistoryResponseDto response = enclosureService.getHumidityHistory(enclosureId, date, currentUserId);
+        HumidityHistoryResponse response = enclosureService.getHumidityHistory(enclosureId, date, currentUserId);
         return ResponseEntity.ok(ApiResponse.success("SUCCESS", response));
     }
 
     @GetMapping("/{enclosureId}/environment/summary")
-    public ResponseEntity<ApiResponse<EnvironmentSummaryResponseDto>> getEnvironmentSummary(
+    public ResponseEntity<ApiResponse<EnvironmentSummaryResponse>> getEnvironmentSummary(
             @PathVariable("enclosureId") Long enclosureId,
             @RequestParam(value = "date", required = false) String date,
             @AuthenticationPrincipal Long currentUserId
     ) {
-        EnvironmentSummaryResponseDto response = enclosureService.getEnvironmentSummary(enclosureId, date, currentUserId);
+        EnvironmentSummaryResponse response = enclosureService.getEnvironmentSummary(enclosureId, date, currentUserId);
 
         // 데이터가 부족하면 INSUFFICIENT_DATA 메시지 전달
         String message = (response.getSummary() == null) ? "INSUFFICIENT_DATA" : "SUCCESS";

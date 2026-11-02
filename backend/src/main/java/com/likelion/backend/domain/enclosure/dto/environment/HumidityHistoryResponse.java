@@ -1,4 +1,4 @@
-package com.likelion.backend.domain.enclosure.dto;
+package com.likelion.backend.domain.enclosure.dto.environment;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -8,7 +8,7 @@ import java.util.List;
 
 @Getter
 @Builder
-public class HumidityHistoryResponseDto {
+public class HumidityHistoryResponse {
 
     private String date;
     private List<ActualHumidityDto> actual;

@@ -1,4 +1,4 @@
-package com.likelion.backend.domain.enclosure.dto;
+package com.likelion.backend.domain.enclosure.dto.crud;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

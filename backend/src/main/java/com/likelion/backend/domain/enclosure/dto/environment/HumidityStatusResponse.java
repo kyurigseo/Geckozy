@@ -1,4 +1,4 @@
-package com.likelion.backend.domain.enclosure.dto;
+package com.likelion.backend.domain.enclosure.dto.environment;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 @Getter
 @Builder
-public class HumidityStatusResponseDto {
+public class HumidityStatusResponse {
 
     private Long enclosureId;
     private String lizardName;

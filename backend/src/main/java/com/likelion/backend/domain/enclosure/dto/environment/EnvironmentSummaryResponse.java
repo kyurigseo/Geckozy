@@ -1,11 +1,11 @@
-package com.likelion.backend.domain.enclosure.dto;
+package com.likelion.backend.domain.enclosure.dto.environment;
 
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 @Builder
-public class EnvironmentSummaryResponseDto {
+public class EnvironmentSummaryResponse {
 
     private String date;
     private Integer dataCount;

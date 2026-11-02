@@ -1,15 +1,14 @@
-package com.likelion.backend.domain.enclosure.dto;
+package com.likelion.backend.domain.enclosure.dto.environment;
 
 import com.likelion.backend.domain.enclosure.entity.Enclosure;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @Getter
 @Builder
-public class EnclosureUpdateResponseDto {
+public class EnclosureResponse {
     private Long enclosureId;
     private BigDecimal width;
     private BigDecimal height;
@@ -22,10 +21,9 @@ public class EnclosureUpdateResponseDto {
     private String floorDesign;
     private String decorationDesign;
     private String concernDetail;
-    private List<Long> concernIds;
 
-    public static EnclosureUpdateResponseDto of(Enclosure enclosure, List<Long> concernIds) {
-        return EnclosureUpdateResponseDto.builder()
+    public static EnclosureResponse from(Enclosure enclosure) {
+        return EnclosureResponse.builder()
                 .enclosureId(enclosure.getId())
                 .width(enclosure.getWidth())
                 .height(enclosure.getHeight())
@@ -38,7 +36,6 @@ public class EnclosureUpdateResponseDto {
                 .floorDesign(enclosure.getFloorDesign())
                 .decorationDesign(enclosure.getDecorationDesign())
                 .concernDetail(enclosure.getConcernDetail())
-                .concernIds(concernIds)
                 .build();
     }
 }

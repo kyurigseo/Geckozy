@@ -1,4 +1,4 @@
-package com.likelion.backend.domain.enclosure.dto;
+package com.likelion.backend.domain.enclosure.dto.crud;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import java.util.List;
 
 @Getter
 @NoArgsConstructor
-public class EnclosureUpdateRequestDto {
+public class EnclosureUpdateRequest {
 
     @NotNull(message = "사육장 가로 크기는 필수입니다.")
     private BigDecimal width;

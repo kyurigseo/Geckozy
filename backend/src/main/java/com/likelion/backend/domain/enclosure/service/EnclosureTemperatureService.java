@@ -1,6 +1,6 @@
 package com.likelion.backend.domain.enclosure.service;
 
-import com.likelion.backend.domain.enclosure.dto.TemperaturePatternResponse;
+import com.likelion.backend.domain.enclosure.dto.environment.TemperaturePatternResponse;
 import com.likelion.backend.domain.enclosure.entity.Enclosure;
 import com.likelion.backend.domain.enclosure.enums.PatternStatus;
 import com.likelion.backend.domain.enclosure.enums.TemperatureTrend;

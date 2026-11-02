@@ -1,4 +1,4 @@
-package com.likelion.backend.domain.enclosure.dto;
+package com.likelion.backend.domain.enclosure.dto.environment;
 
 import com.likelion.backend.domain.enclosure.enums.PatternStatus;
 import com.likelion.backend.domain.enclosure.enums.TemperatureTrend;

@@ -1,4 +1,4 @@
-package com.likelion.backend.domain.enclosure.dto;
+package com.likelion.backend.domain.enclosure.dto.suggestion;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.likelion.backend.domain.enclosure.entity.Enclosure;
