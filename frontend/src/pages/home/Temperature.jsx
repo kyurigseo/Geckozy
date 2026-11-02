@@ -418,7 +418,7 @@ export default function Temperature() {
               <p>
                 <strong>본 서비스는 하나의 센서에서 측정된 온도를 기준으로 안내해요.</strong>
                 <br />
-                사육장 내 위치에 따라 온도가 다를 수 있으므로, 위 정보는 참고용으로 활용해 주세요.
+                사육장 내 위치에 따라 온도가 다를 수 있으므로,<br/> 위 정보는 참고용으로 활용해 주세요.
               </p>
               <small>출처 : ReptiFiles, RSPCA, PetMD</small>
             </div>

@@ -441,9 +441,10 @@ $h-guide-min: 258px;
       padding-right: 36px;
 
       img {
-        width: 22px;
-        height: 22px;
+        width: 19px;
+        height: 29px;
         object-fit: contain;
+        margin-right: 10px;
       }
 
       h2 {
@@ -458,9 +459,12 @@ $h-guide-min: 258px;
 
     &__sub {
       margin: 0 0 16px;
-      font-size: 11px;
+      font-size: 14px;
       line-height: 1.5;
-      color: $text-sub;
+      color: #5B5658;
+      font-weight: 500;
+      margin-top: 20px;
+      margin-bottom: 18px;
     }
   }
 
@@ -470,58 +474,64 @@ $h-guide-min: 258px;
     gap: 14px;
     margin-bottom: 16px;
   }
-
-  .modal-info-item {
+.modal-info-item {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
 
     &__label {
       flex: 1;
+      min-width: 0; // 👈 1. 텍스트 요소가 레이아웃을 밀어내지 않도록 방지
 
       h3 {
         margin: 0 0 2px;
-        font-size: 15px;
-        font-weight: 800;
+        font-size: 20px;
+        font-weight: 600;
         line-height: 1.4;
-        color: $brown-1;
+        color: #492515;
+        margin-bottom: 5px;
       }
 
       p {
         margin: 0;
-        font-size: 10px;
-        line-height: 1.4;
-        color: $text-sub;
+        font-size: 11.5px;      
+        font-weight: 500;
+        line-height: 1.3;
+        white-space: nowrap;     
+        color: #A89EA1;
       }
     }
 
     &__value {
-      margin-left: 10px;
-      font-size: 16px;
-      font-weight: 800;
+      flex-shrink: 0;            
+      margin-left: 8px;         
+      font-size: 20px;
+      font-weight: 600;
       white-space: nowrap;
-      color: #C25B2A;
+      color: #B47952;
     }
   }
-
   .modal-warning {
-    margin-bottom: 14px;
-    padding-top: 12px;
-    border-top: 1px solid #F0DFCC;
+    margin-bottom: 18px;
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid #D9D2D4;
 
     h4 {
       margin: 0 0 6px;
-      font-size: 12px;
-      font-weight: 700;
-      color: #6E5544;
+      font-size: 14px;
+      font-weight: 500;
+      color: #5B5658;
+      margin-bottom: 8px;
     }
 
     ul {
       margin: 0;
       padding-left: 14px;
-      font-size: 10px;
+      font-size: 12px;
       line-height: 1.5;
-      color: #7A6353;
+      color: #7B7578;
+      font-weight: 500;
 
       li {
         margin-bottom: 2px;
@@ -531,24 +541,29 @@ $h-guide-min: 258px;
 
   .modal-notice {
     padding: 10px;
-    background: #FFF3DD;
+    background:#FFECCB;
     border-radius: 10px;
 
     p {
       margin: 0 0 6px;
-      font-size: 10px;
-      line-height: 1.4;
-      color: #735338;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #5B3524;
+      font-weight: 500;
 
       strong {
-        color: $brown-1;
+        color: #5B3524;
+        font-weight: 600;
+        font-size: 12px;
+        line-height: 1.5;
       }
     }
 
     small {
       display: block;
-      font-size: 9px;
-      color: #A38C7A;
+      font-size: 10px;
+      color: #7B7578;
+      font-weight: 400;
     }
   }
 }
