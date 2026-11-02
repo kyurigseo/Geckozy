@@ -2,7 +2,9 @@ package com.likelion.backend.domain.enclosure.controller;
 
 import com.likelion.backend.domain.enclosure.dto.*;
 import com.likelion.backend.domain.enclosure.service.EnclosureService;
+import com.likelion.backend.domain.enclosure.service.EnclosureTemperatureService;
 import com.likelion.backend.global.response.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -147,5 +149,15 @@ public class EnclosureController {
         // 데이터가 부족하면 INSUFFICIENT_DATA 메시지 전달
         String message = (response.getSummary() == null) ? "INSUFFICIENT_DATA" : "SUCCESS";
         return ResponseEntity.ok(ApiResponse.success(message, response));
+    }
+
+    private final EnclosureTemperatureService enclosureTemperatureService;
+
+    @GetMapping("/{enclosureId}/temperatures/patterns")
+    public ApiResponse<TemperaturePatternResponse> getTemperaturePattern(
+            @PathVariable("enclosureId") Long enclosureId
+    ) {
+        TemperaturePatternResponse response = enclosureTemperatureService.getTemperaturePattern(enclosureId);
+        return ApiResponse.success(response);
     }
 }
