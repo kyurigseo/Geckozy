@@ -10,7 +10,6 @@ import closeBtn from "../../assets/home/close_btn.png";
 import humidityIcon from "../../assets/home/humid_icon.png";
 import warnIcon from "../../assets/home/warning_icon.png";
 
-
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const fetchHumidity = async () => {
@@ -43,11 +42,10 @@ const fetchHumidity = async () => {
   };
 };
 
-// ─────────── 기준값 (임의 기준이에요. 팀에서 정한 기준이 있으면 바꿔주세요) ───────────
-const HIGH = 70; // 이 값 이상이면 '높은 습도'
-const LOW = 40; // 이 값 미만이면 '건조'
-const HIGH_STREAK = 4; // 최근 측정값 몇 개가 연속으로 높으면 '높은 습도가 계속됨'
-const NIGHT = [[0, 6], [20, 24]]; // 야간 구간 (시)
+const HIGH = 70; 
+const LOW = 40; 
+const HIGH_STREAK = 4; 
+const NIGHT = [[0, 6], [20, 24]]; 
 
 const GUIDES = {
   high: {
@@ -78,7 +76,6 @@ const GUIDES = {
 
 const FLOW_STEPS = ["분무", "습도 상승", "서서히 건조", "다음 분무"];
 
-// ─────────── 계산 함수 ───────────
 const getStatus = (current, measured) => {
   const recent = measured.slice(-HIGH_STREAK);
   const stuckHigh = recent.length === HIGH_STREAK && recent.every((p) => p.v >= HIGH);
@@ -93,18 +90,15 @@ const formatTime = (iso) => {
   return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 };
 
-// ─────────── 오늘의 습도 변화 그래프 ───────────
-// 데이터(measured, ideal, sprayZones)만 바뀌면 점, 곡선, 분무 구간이 자동으로 다시 그려져요
 function HumidityChart({ measured, ideal, sprayZones }) {
-  const W = 320;
-  const H = 190;
-  const PAD = { l: 34, r: 6, t: 8, b: 22 };
+  const W = 360;
+  const H = 200;
+  const PAD = { l: 36, r: 16, t: 24, b: 24 };
   const plotH = H - PAD.t - PAD.b;
 
   const x = (h) => PAD.l + (h / 24) * (W - PAD.l - PAD.r);
   const y = (v) => PAD.t + ((100 - v) / 100) * plotH;
 
-  // 점들을 부드러운 곡선(Catmull-Rom → Bezier)으로 연결
   const smoothPath = (points) => {
     const p = points.map(({ h, v }) => [x(h), y(v)]);
     let d = `M ${p[0][0]} ${p[0][1]}`;
@@ -124,44 +118,82 @@ function HumidityChart({ measured, ideal, sprayZones }) {
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="chart__svg" role="img" aria-label="오늘의 습도 변화 그래프" style={{ width: "100%", height: "auto" }}>
-      {/* 야간 구간 */}
+      {/* 야간 구간 배경 */}
       {NIGHT.map(([a, b]) => (
         <g key={`night-${a}`}>
           <rect x={x(a)} y={PAD.t} width={x(b) - x(a)} height={plotH} fill="#E8F2F7" />
-          <text x={(x(a) + x(b)) / 2} y={PAD.t + 11} textAnchor="middle" fontSize="8" fill="#8FA9BD">
+          <text x={(x(a) + x(b)) / 2} y={PAD.t + 15} textAnchor="middle" fontSize="11" fontWeight="600" fill="#94B9D0" letterSpacing="-0.02em">
             야간 구간
           </text>
         </g>
       ))}
 
-      {/* 권장 분무 시간 */}
+      {/* 분무 구간 배경 */}
       {sprayZones.map(([a, b]) => (
         <g key={`spray-${a}`}>
           <rect x={x(a)} y={PAD.t} width={x(b) - x(a)} height={plotH} fill="#E8F6CA" />
-          <text x={(x(a) + x(b)) / 2} y={PAD.t + 11} textAnchor="middle" fontSize="8" fill="#5B911C">
+          <text x={(x(a) + x(b)) / 2} y={PAD.t + 15} textAnchor="middle" fontSize="11" fontWeight="600" fill="#5B911C" letterSpacing="-0.02em">
             분무
           </text>
         </g>
       ))}
 
-      {/* 가로 격자 + y축 눈금 */}
+      {/* y축 가로 격자 점선 */}
       {[0, 20, 40, 60, 80, 100].map((v) => (
-        <g key={v}>
-          <line x1={PAD.l} x2={W - PAD.r} y1={y(v)} y2={y(v)} stroke="#E6D9C6" strokeWidth="0.5" strokeDasharray="2 2" />
-          <text x={PAD.l - 6} y={y(v) + 3} textAnchor="end" fontSize="9" fill="#492515">
-            {v}
-          </text>
-        </g>
+        <line 
+          key={`grid-${v}`} 
+          x1={PAD.l} 
+          x2={W - PAD.r} 
+          y1={y(v)} 
+          y2={y(v)} 
+          stroke="#D1C2AF" 
+          strokeWidth="1" 
+          strokeDasharray="2 2" 
+        />
       ))}
 
-      {/* x축 눈금 */}
+      {/* x축 & y축 기준 실선 (TempChart와 완벽 일치) */}
+      <line x1={PAD.l} x2={PAD.l} y1={PAD.t} y2={H - PAD.b} stroke="#D1C2AF" strokeWidth="1" />
+      <line x1={PAD.l} x2={W - PAD.r} y1={H - PAD.b} y2={H - PAD.b} stroke="#D1C2AF" strokeWidth="1" />
+
+      {/* y축 단위 % (최상단 눈금 위 위치) */}
+      <text x={PAD.l - 12} y={PAD.t - 10} textAnchor="start" fontSize="12" fontWeight="600" fill="#B38A68" letterSpacing="-0.02em">
+        %
+      </text>
+
+      {/* y축 눈금 숫자 */}
+      {[0, 20, 40, 60, 80, 100].map((v) => (
+        <text 
+          key={`ytick-${v}`} 
+          x={PAD.l - 8} 
+          y={y(v) + 4} 
+          textAnchor="end" 
+          fontSize="12" 
+          fontWeight="600" 
+          fill="#B38A68" 
+          letterSpacing="-0.02em"
+        >
+          {v}
+        </text>
+      ))}
+
+      {/* x축 시간 눈금 */}
       {[0, 6, 12, 18, 24].map((h) => (
-        <text key={h} x={x(h)} y={H - 6} textAnchor={h === 0 ? "start" : h === 24 ? "end" : "middle"} fontSize="9" fill="#492515">
+        <text 
+          key={h} 
+          x={x(h)} 
+          y={H - 4} 
+          textAnchor={h === 0 ? "start" : h === 24 ? "end" : "middle"} 
+          fontSize="12" 
+          fontWeight="600" 
+          fill="#B38A68" 
+          letterSpacing="-0.02em"
+        >
           {h}시
         </text>
       ))}
 
-      {/* 올바른 습윤 사이클: 굵은 연한 선(글로우) + 주황 점선 */}
+      {/* 곡선 & 측정 점 */}
       {idealPath && (
         <>
           <path d={idealPath} fill="none" stroke="#FFDCB9" strokeWidth="8" strokeLinecap="round" opacity="0.8" />
@@ -169,7 +201,6 @@ function HumidityChart({ measured, ideal, sprayZones }) {
         </>
       )}
 
-      {/* 실제 측정값 */}
       {measured.map(({ h, v }) => (
         <circle key={h} cx={x(h)} cy={y(v)} r="3.4" fill="#6BC4FF" />
       ))}
@@ -177,7 +208,6 @@ function HumidityChart({ measured, ideal, sprayZones }) {
   );
 }
 
-// ─────────── 화면 ───────────
 export default function Humidity() {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
@@ -193,7 +223,6 @@ export default function Humidity() {
     };
   }, []);
 
-  // 모달: ESC로 닫기 + 떠 있는 동안 뒤 화면 스크롤 잠금
   useEffect(() => {
     if (!showWhyModal) return undefined;
     const onKey = (e) => e.key === "Escape" && setShowWhyModal(false);
@@ -222,7 +251,6 @@ export default function Humidity() {
         </header>
 
         <main className="humidity-page__content">
-          {/* 1. 현재 습도 */}
           <section className="card card--current">
             <div className="card__header">
               <h2 className="card__title">
@@ -243,7 +271,6 @@ export default function Humidity() {
             </div>
           </section>
 
-          {/* 2. 습윤 사이클이란? */}
           <section className="card card--cycle">
             <div className="card__header card__header--space">
               <h2 className="card__title">
@@ -259,7 +286,6 @@ export default function Humidity() {
             </p>
           </section>
 
-          {/* 3. 오늘의 습도 변화 */}
           <section className="card card--chart">
             <div className="card__header">
               <h2 className="card__title">
@@ -268,7 +294,6 @@ export default function Humidity() {
             </div>
 
             <div className="chart">
-              <div className="chart__unit">%</div>
               <HumidityChart measured={data.measured} ideal={data.ideal} sprayZones={data.sprayZones} />
             </div>
 
@@ -292,7 +317,6 @@ export default function Humidity() {
             </div>
           </section>
 
-          {/* 4. 관리 가이드 (습도 상태에 따라 문구가 바뀌어요) */}
           <section className="card card--guide">
             <div className="card__header">
               <h2 className="card__title">
