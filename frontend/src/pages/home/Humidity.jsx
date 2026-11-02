@@ -317,7 +317,6 @@ export default function Humidity() {
         </main>
       </div>
 
-      {/* 습윤 사이클이 왜 중요한가요? 모달 */}
       {showWhyModal && (
         <div className="modal-overlay" onClick={() => setShowWhyModal(false)}>
           <div className="modal-content" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
@@ -345,7 +344,7 @@ export default function Humidity() {
                 ))}
               </ol>
               <small className="modal-flow__desc">
-                습도가 계속 높게 유지되거나 너무 빠르게 낮아진다면 환기 상태, 분무량, 실내 환경을 함께 확인해보세요.
+                습도가 계속 높게 유지되거나 너무 빠르게 낮아진다면 환기 상태,<br/> 분무량, 실내 환경을 함께 확인해보세요.
               </small>
             </div>
           </div>

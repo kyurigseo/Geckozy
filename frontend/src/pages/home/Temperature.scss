@@ -481,7 +481,7 @@ $h-guide-min: 258px;
 
     &__label {
       flex: 1;
-      min-width: 0; // 👈 1. 텍스트 요소가 레이아웃을 밀어내지 않도록 방지
+      min-width: 0; 
 
       h3 {
         margin: 0 0 2px;
