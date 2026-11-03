@@ -4,7 +4,7 @@ $wood-dark: #8a5a3a;
 $paper: #fdecd0;
 $font: "Galmuri11", "DungGeunMo", "Pretendard", sans-serif;
 
-.guide {
+.guide-popup {
   position: fixed;
   inset: 0;
   z-index: 50; // 네비바(100)보다 아래 → 디자인처럼 네비바는 팝업 위에 보임
@@ -15,7 +15,7 @@ $font: "Galmuri11", "DungGeunMo", "Pretendard", sans-serif;
   font-family: $font;
   color: $brown;
   background: rgba(60, 60, 50, 0.55);
-  animation: guide-fade 0.15s ease-out;
+  animation: guide-popup-fade 0.15s ease-out;
 
   &__panel {
     position: relative;
@@ -31,7 +31,7 @@ $font: "Galmuri11", "DungGeunMo", "Pretendard", sans-serif;
     border: 6px solid $wood;
     border-radius: 6px;
     box-shadow: inset 0 0 0 2px #f6c99b, 0 0 0 3px $wood-dark, 0 8px 18px rgba(0, 0, 0, 0.3);
-    animation: guide-pop 0.18s ease-out;
+    animation: guide-popup-pop 0.18s ease-out;
     // 덩굴 장식 이미지를 쓴다면:
     // &::before { content: ""; position: absolute; top: -20px; left: -20px; width: 90px; height: 90px; background: url("../assets/vine-corner.png") center / contain no-repeat; pointer-events: none; }
   }
@@ -59,7 +59,7 @@ $font: "Galmuri11", "DungGeunMo", "Pretendard", sans-serif;
 
   &__page {
     flex: 1;
-    animation: guide-slide 0.2s ease-out;
+    animation: guide-popup-slide 0.2s ease-out;
   }
 
   &__hero {
@@ -192,10 +192,10 @@ $font: "Galmuri11", "DungGeunMo", "Pretendard", sans-serif;
   }
 }
 
-@keyframes guide-fade { from { opacity: 0; } }
-@keyframes guide-pop { from { opacity: 0; transform: translateY(8px) scale(0.97); } }
-@keyframes guide-slide { from { opacity: 0; transform: translateX(10px); } }
+@keyframes guide-popup-fade { from { opacity: 0; } }
+@keyframes guide-popup-pop { from { opacity: 0; transform: translateY(8px) scale(0.97); } }
+@keyframes guide-popup-slide { from { opacity: 0; transform: translateX(10px); } }
 
 @media (prefers-reduced-motion: reduce) {
-  .guide, .guide__panel, .guide__page { animation: none; }
+  .guide-popup, .guide-popup__panel, .guide-popup__page { animation: none; }
 }

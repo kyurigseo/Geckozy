@@ -15,9 +15,9 @@ const PAGES = [
   function Why() {
     return (
       <>
-        <img src={ventImg} alt="환기구가 있는 사육장 일러스트" className="guide__hero" />
-        <h3 className="guide__sub"><img src={sproutIcon} alt="" /> 환기는 왜 필요한가요?</h3>
-        <p className="guide__text">
+        <img src={ventImg} alt="환기구가 있는 사육장 일러스트" className="guide-popup__hero" />
+        <h3 className="guide-popup__sub"><img src={sproutIcon} alt="" /> 환기는 왜 필요한가요?</h3>
+        <p className="guide-popup__text">
           <strong>분무 후 사육장 내부의 수분이 자연스럽게 빠져나가면서 습도가 다시 낮아질 수 있도록 도와줘요.</strong>{" "}
           적절한 공기 흐름은 습윤 - 건조 사이클을 만드는 데 중요해요.
         </p>
@@ -27,11 +27,11 @@ const PAGES = [
   function Check() {
     return (
       <>
-        <h3 className="guide__sub"><img src={sproutIcon} alt="" /> 환기할 때 확인할 곳</h3>
-        <ul className="guide__checks">
+        <h3 className="guide-popup__sub"><img src={sproutIcon} alt="" /> 환기할 때 확인할 곳</h3>
+        <ul className="guide-popup__checks">
           {CHECKS.map((c) => (
             <li key={c}>
-              <span className="guide__check" aria-hidden="true">✓</span>
+              <span className="guide-popup__check" aria-hidden="true">✓</span>
               <p>{c}</p>
             </li>
           ))}
@@ -42,19 +42,19 @@ const PAGES = [
   function Manage({ scrapped, onScrap }) {
     return (
       <>
-        <h3 className="guide__sub"><img src={sproutIcon} alt="" /> 이렇게 관리해보세요</h3>
-        <p className="guide__text">
+        <h3 className="guide-popup__sub"><img src={sproutIcon} alt="" /> 이렇게 관리해보세요</h3>
+        <p className="guide-popup__text">
           <strong>같은 상황이 반복되면, 분무량을 조절해주세요</strong>
           <br />
           환기 상태에 문제가 없는데도 습한 상태가 오래 이어진다면, 다음 분무 때 물의 양을 조금 줄여보고 건조 속도가 달라지는지 비교해보세요.
         </p>
-        <div className="guide__warn">
+        <div className="guide-popup__warn">
           <h4><span aria-hidden="true">⚠️</span> 주의 사항</h4>
           <p>습도를 빠르게 낮추기 위해 선풍기나 에어컨 바람을 사육장에 직접 쐬지 마세요.</p>
         </div>
         <button
           type="button"
-          className={`guide__scrap ${scrapped ? "is-on" : ""}`}
+          className={`guide-popup__scrap ${scrapped ? "is-on" : ""}`}
           onClick={onScrap}
           aria-pressed={scrapped}
         >
@@ -91,27 +91,27 @@ export default function GuideModal({ onClose }) {
   }, [onClose]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="guide" onClick={onClose}>
+    <div className="guide-popup" onClick={onClose}>
       <div
-        className="guide__panel"
+        className="guide-popup__panel"
         role="dialog"
         aria-modal="true"
-        aria-labelledby="guide-title"
+        aria-labelledby="guide-popup-title"
         onClick={(e) => e.stopPropagation()}
       >
-        <button type="button" className="guide__close" onClick={onClose} aria-label="닫기">✕</button>
+        <button type="button" className="guide-popup__close" onClick={onClose} aria-label="닫기">✕</button>
 
-        <h2 id="guide-title" className="guide__title">사육장 환기 관리</h2>
+        <h2 id="guide-popup-title" className="guide-popup__title">사육장 환기 관리</h2>
 
         {/* key={page}: 페이지가 바뀔 때마다 새로 그려서 전환 애니메이션이 다시 실행됨 */}
-        <div className="guide__page" key={page}>
+        <div className="guide-popup__page" key={page}>
           <Page scrapped={scrapped} onScrap={() => setScrapped((v) => !v)} />
         </div>
 
-        <footer className="guide__pager">
-          <button type="button" className="guide__arrow" onClick={prev} disabled={page === 0} aria-label="이전">‹</button>
+        <footer className="guide-popup__pager">
+          <button type="button" className="guide-popup__arrow" onClick={prev} disabled={page === 0} aria-label="이전">‹</button>
           <span aria-live="polite">{page + 1}/{PAGES.length}</span>
-          <button type="button" className="guide__arrow" onClick={next} disabled={page === last} aria-label="다음">›</button>
+          <button type="button" className="guide-popup__arrow" onClick={next} disabled={page === last} aria-label="다음">›</button>
         </footer>
       </div>
     </div>
