@@ -219,7 +219,6 @@ export default function Record() {
           )}
         </div>
 
-        {/* 이달의 기록 요약 */}
         <section className="record-sheet">
           <div className="record-sheet__head">
             <h2>
