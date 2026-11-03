@@ -1,96 +1,156 @@
-$brown: #5a3a28;
-$wood: #c98c5a;
-$wood-dark: #8a5a3a;
-$paper: #fdecd0;
-$font: "Galmuri11", "DungGeunMo", "Pretendard", sans-serif;
+$brown-1: #492515;
+$brown-2: #B47952;
+$brown-4: #944B1B;
+$text-outline: #5B3524;
+$beige-1: #FFECCB;
+$beige-3: #FFDCB9;
 
+$font-katuri: "andong-katuri", sans-serif;
+$font-mamablock: "mamablock-210", sans-serif;
+$font-pixel: "yoon-px-pixman", sans-serif;
+
+
+$panel-w: 313px;
+$panel-h: 501px;
+
+// 홈 위에 뜨는 팝업. 모든 클래스가 guide-popup으로 시작해서 가이드 페이지(.guide)와 겹치지 않아요.
 .guide-popup {
   position: fixed;
   inset: 0;
-  z-index: 50; // 네비바(100)보다 아래 → 디자인처럼 네비바는 팝업 위에 보임
+  z-index: 50; // 하단 네비(100)보다 아래
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 16px 16px 120px; // 네비바에 안 가려지게
-  font-family: $font;
-  color: $brown;
-  background: rgba(60, 60, 50, 0.55);
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.4);
+  font-family: "Pretendard", sans-serif;
+  line-height: 1.5; 
+  letter-spacing: -0.02em; 
+  color: $text-outline;
   animation: guide-popup-fade 0.15s ease-out;
 
   &__panel {
     position: relative;
     display: flex;
     flex-direction: column;
-    width: 100%;
-    max-width: 330px;
-    min-height: 440px; // 페이지마다 높이가 달라도 팝업 크기는 일정하게
-    max-height: 100%;
-    padding: 28px 24px 18px;
-    background: $paper;
-    // 나무 액자 느낌: 바깥 나무 테두리 + 안쪽 얇은 선
-    border: 6px solid $wood;
-    border-radius: 6px;
-    box-shadow: inset 0 0 0 2px #f6c99b, 0 0 0 3px $wood-dark, 0 8px 18px rgba(0, 0, 0, 0.3);
+    box-sizing: border-box;
+    width: $panel-w;
+    height: $panel-h;
+    aspect-ratio: #{$panel-w} / #{$panel-h};
+    padding: 64px 28px 30px; 
+    overflow: hidden; 
+    background-position: center;
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
     animation: guide-popup-pop 0.18s ease-out;
-    // 덩굴 장식 이미지를 쓴다면:
-    // &::before { content: ""; position: absolute; top: -20px; left: -20px; width: 90px; height: 90px; background: url("../assets/vine-corner.png") center / contain no-repeat; pointer-events: none; }
+
+
+
+    &:focus {
+      outline: none;
+    }
   }
 
   &__close {
     position: absolute;
-    top: -14px;
-    right: -14px;
-    width: 32px;
-    height: 32px;
-    font-size: 14px;
-    font-weight: 800;
-    color: #fff;
-    background: #e8505b;
-    border: 3px solid #a82f3a;
-    border-radius: 6px;
+    top: 6px;
+    right: 6px;
+    z-index: 1;
+    width: 35px;
+    height: 36px;
+    padding: 0;
+    background: none;
+    border: 0;
     cursor: pointer;
+
+    img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $brown-1;
+      outline-offset: 2px;
+    }
   }
 
   &__title {
-    margin: 4px 0 18px;
-    font-size: 20px;
+    margin: 0 0 14px;
+    font-family: $font-katuri;
+    font-size: 28px;
+    font-weight: 400;
+    line-height: 1.4;
     text-align: center;
+    color: #5B3524;
+    letter-spacing: -0.02em;
   }
 
   &__page {
     flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: none;
     animation: guide-popup-slide 0.2s ease-out;
+    margin: 0 0px;
+
+
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
   &__hero {
     display: block;
-    width: 88%;
-    margin: 0 auto 22px;
+    width: 217px;
+    height: 131px;
+    margin: 0 auto 14px;
+    object-fit: contain;
+    margin-bottom: 29px;
   }
 
   &__sub {
     display: flex;
     align-items: center;
-    gap: 6px;
-    margin: 0 0 12px;
-    font-size: 14px;
+    gap: 8px;
+    margin: 0 0 10px;
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1.4;
+    color: #5B3524;
+    font-family: $font-katuri;
+    letter-spacing: -0.02em;
+    margin-bottom: 15px;
+    margin-top: 5px;
 
     img {
-      width: 18px;
+      flex-shrink: 0;
+      width: 29px;
+      height: 20px;
+      object-fit: contain;
+      margin-right: 10px;
     }
   }
 
   &__text {
     margin: 0;
-    font-size: 12px;
-    line-height: 1.7;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.5; 
+    
 
     strong {
-      font-weight: 800;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.4;
+      font-family: Pretendard;
+  
     }
   }
 
-  // 2페이지: 체크 리스트
   &__checks {
     display: flex;
     flex-direction: column;
@@ -103,99 +163,156 @@ $font: "Galmuri11", "DungGeunMo", "Pretendard", sans-serif;
       display: flex;
       align-items: center;
       gap: 12px;
+      letter-spacing: -0.02em;
+      font-weight: 400;
+      color: #5B3524;
+      font-size: 18px;
     }
 
     p {
+      flex: 1;
       margin: 0;
-      font-size: 11.5px;
-      font-weight: 700;
-      line-height: 1.5;
+      font-size: 14px;
+      font-weight: 400;
+
+      strong {
+        font-weight: 700;
+        letter-spacing: -0.02em;
+
+
+      }
     }
   }
 
   &__check {
-    display: grid;
-    place-items: center;
     flex-shrink: 0;
-    width: 24px;
-    height: 24px;
-    font-size: 14px;
-    font-weight: 800;
-    color: #fff;
-    background: #f5a85a;
-    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    margin-right: 15px;
   }
 
-  // 3페이지: 주의 사항 + 스크랩
   &__warn {
-    margin: 16px 0;
-    padding: 14px;
-    background: #f8d3a4;
-    border-radius: 12px;
+    margin: 14px 0 12px;
+    padding: 10px 12px;
+    background: #FFC58D99;
+    border-radius: 10px;
+    width: 246px;
+    height: 98px;
 
     h4 {
-      margin: 0 0 6px;
-      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin: 0 0 4px;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 1.5;
+      color: #5B3524;
+      letter-spacing: -0.02em;
+      font-family: $font-katuri;
+      font-size: 18px;
+
+      img {
+        width: 26px;
+        height: 26px;
+        object-fit: contain;
+        margin-right: 10px;
+        margin-left: 10px;
+        margin-bottom: 5px;
+      }
     }
 
     p {
-      margin: 0;
-      font-size: 10.5px;
-      line-height: 1.6;
+      font-size: 12px;
+      font-weight: 500;
+      margin: 10px;
+      color: #5B3524;
+      letter-spacing: -0.02em;
+      line-height: 1.5;
     }
   }
 
   &__scrap {
     display: block;
     margin: 0 auto;
-    padding: 6px 28px;
-    font-family: inherit;
+    padding: 5px 26px;
+    font-family: $font-pixel;
     font-size: 12px;
     font-weight: 700;
-    color: $brown;
-    background: #fbe3b5;
-    border: 2px solid $wood-dark;
-    border-radius: 6px;
+    line-height: 1.4;
+    color: #5B3524;
+    background: url(../../assets/home/btn_frame.png);
+    width: 105px;
+    height: 35px;
     cursor: pointer;
 
-    &.is-on {
-      background: #f5a85a;
-      color: #fff;
-    }
   }
 
-  // 하단 이전/다음
   &__pager {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-top: 16px;
-    font-size: 15px;
-    font-weight: 800;
+    padding: 30px 6px 0;
+  }
+
+  &__count {
+    font-family: $font-pixel;
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1;
+    color: #5B3524;
   }
 
   &__arrow {
-    width: 30px;
-    height: 30px;
-    font-size: 20px;
-    line-height: 1;
-    color: $brown;
-    background: #fbe3b5;
-    border: 2px solid $wood-dark;
-    border-radius: 8px;
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    background: none;
+    border: 0;
     cursor: pointer;
+
+
+    img {
+      display: block;
+      object-fit: contain;
+      width: 29px;
+      height: 29px;
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(2px);
+    }
 
     &:disabled {
       opacity: 0.35;
       cursor: default;
     }
+
+    &:focus-visible {
+      outline: 2px solid $brown-1;
+      outline-offset: 2px;
+    }
   }
 }
 
-@keyframes guide-popup-fade { from { opacity: 0; } }
-@keyframes guide-popup-pop { from { opacity: 0; transform: translateY(8px) scale(0.97); } }
-@keyframes guide-popup-slide { from { opacity: 0; transform: translateX(10px); } }
+@keyframes guide-popup-fade {
+  from { opacity: 0; }
+}
+
+@keyframes guide-popup-pop {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+}
+
+@keyframes guide-popup-slide {
+  from { opacity: 0; transform: translateX(10px); }
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .guide-popup, .guide-popup__panel, .guide-popup__page { animation: none; }
+  .guide-popup,
+  .guide-popup__panel,
+  .guide-popup__page {
+    animation: none;
+  }
 }
