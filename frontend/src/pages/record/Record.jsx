@@ -36,7 +36,6 @@ const SUMMARY_COLOR = { shedding: "#5B911C", poop: "#FF9834", cleaning: "#FF646E
 
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
-
 const SAMPLE_DAYS = [
   [1, "feeding"], [4, "etc"], [9, "shedding"], [10, "shedding"], [14, "cleaning"],
   [22, "feeding"], [24, "symptom"], [25, "poop", true], [27, "weight"],
@@ -64,7 +63,9 @@ const fetchRecords = async (year, month) => {
 
 // ─────────── 달력 계산 ───────────
 const buildCells = (year, month) => {
+  // 해당 월 1일의 요일 (0: 일요일 ~ 6: 토요일)
   const blanks = new Date(year, month - 1, 1).getDay();
+  // 해당 월의 총 일수
   const days = new Date(year, month, 0).getDate();
   return [...Array(blanks).fill(null), ...Array.from({ length: days }, (_, i) => i + 1)];
 };
@@ -224,7 +225,6 @@ export default function Record() {
             <h2>
               {ym.m}월의 기록 <span>({data.records.length}건)</span>
             </h2>
-            {/* TODO: 자세히 보기 페이지가 만들어지면 연결 */}
             <button type="button" className="record-sheet__more" onClick={() => navigate("/record/detail")}>
               자세히 보기 <span aria-hidden="true">›</span>
             </button>
