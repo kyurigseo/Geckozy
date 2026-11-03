@@ -1,117 +1,177 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./GuidePopup.scss";
 
+import closeImg from "../../assets/home/close.png";
+import ventImg from "../../assets/home/vent.png";
+import checkImg from "../../assets/home/check.png";
+import warnImg from "../../assets/home/warn.png"; 
+import sproutIcon from "../../assets/home/icon-leaf.png"; 
+import frameImg from "../../assets/home/frame.png"; 
+import prevImg from "../../assets/home/prev.png"; 
+import nextImg from "../../assets/home/next.png"; 
 
-
-const CHECKS = [
-  "상단이나 측면의 환기구가 장식물에 가려져 있지 않나요?",
-  "사육장이 벽이나 가구에 너무 밀착되어 있지 않나요?",
-  "분무 후 벽면이나 내부의 물기가 지나치게 오래 남아 있지는 않나요?",
-  "바닥재가 계속 축축한 상태로 유지되고 있지는 않나요?",
+const PAGES = [
+  {
+    key: "why",
+    title: "환기는 왜 필요한가요?",
+    lead: "분무 후 사육장 내부의 수분이 자연스럽게 빠져나가면서 습도가 다시 낮아질 수 있도록 도와줘요.",
+    body: "적절한 공기 흐름은 습윤 - 건조 사이클을 만드는 데 중요해요.",
+  },
+  {
+    key: "check",
+    title: "환기할 때 확인할 곳",
+    items: [
+      { strong: "상단이나 측면의 환기구", rest: "가 장식물에 가려져 있지 않나요?" },
+      { strong: "사육장이 벽이나 가구에", rest: " 너무 밀착되어 있지 않나요?" },
+      { strong: "분무 후 벽면이나 내부의 물기", rest: "가 지나치게 오래 남아 있지는 않나요?" },
+      { strong: "바닥재가 계속 축축한 상태", rest: "로 유지되고 있지는 않나요?" },
+    ],
+  },
+  {
+    key: "manage",
+    title: "이렇게 관리해보세요",
+    lead: "같은 상황이 반복되면, 분무량을 조절해주세요",
+    body: "환기 상태에 문제가 없는데도 습한 상태가 오래 이어진다면, 다음 분무 때 물의 양을 조금 줄여보고 건조 속도가 달라지는지 비교해보세요.",
+    warn: {
+      title: "주의 사항",
+      text: "습도를 빠르게 낮추기 위해 선풍기나 에어컨 바람을 사육장에 직접 쐬지 마세요.",
+    },
+  },
 ];
 
-// 각 페이지를 함수로 두면 페이지를 추가/수정하기 쉬워요
-const PAGES = [
-  function Why() {
+const LAST = PAGES.length - 1;
+
+
+function PageBody({ page, scrapped, onScrap }) {
+  const heading = (
+    <h3 className="guide-popup__sub">
+      <img src={sproutIcon} alt="" /> {page.title}
+    </h3>
+  );
+
+  if (page.key === "why") {
     return (
       <>
         <img src={ventImg} alt="환기구가 있는 사육장 일러스트" className="guide-popup__hero" />
-        <h3 className="guide-popup__sub"><img src={sproutIcon} alt="" /> 환기는 왜 필요한가요?</h3>
+        {heading}
         <p className="guide-popup__text">
-          <strong>분무 후 사육장 내부의 수분이 자연스럽게 빠져나가면서 습도가 다시 낮아질 수 있도록 도와줘요.</strong>{" "}
-          적절한 공기 흐름은 습윤 - 건조 사이클을 만드는 데 중요해요.
+          <strong>{page.lead}</strong> <br />{page.body}
         </p>
       </>
     );
-  },
-  function Check() {
+  }
+
+  if (page.key === "check") {
     return (
       <>
-        <h3 className="guide-popup__sub"><img src={sproutIcon} alt="" /> 환기할 때 확인할 곳</h3>
+        {heading}
         <ul className="guide-popup__checks">
-          {CHECKS.map((c) => (
-            <li key={c}>
-              <span className="guide-popup__check" aria-hidden="true">✓</span>
-              <p>{c}</p>
+          {page.items.map((item) => (
+            <li key={item.strong}>
+              <img src={checkImg} alt="" className="guide-popup__check" />
+              <p>
+                <strong>{item.strong}</strong>
+                {item.rest}
+              </p>
             </li>
           ))}
         </ul>
       </>
     );
-  },
-  function Manage({ scrapped, onScrap }) {
-    return (
-      <>
-        <h3 className="guide-popup__sub"><img src={sproutIcon} alt="" /> 이렇게 관리해보세요</h3>
-        <p className="guide-popup__text">
-          <strong>같은 상황이 반복되면, 분무량을 조절해주세요</strong>
-          <br />
-          환기 상태에 문제가 없는데도 습한 상태가 오래 이어진다면, 다음 분무 때 물의 양을 조금 줄여보고 건조 속도가 달라지는지 비교해보세요.
-        </p>
-        <div className="guide-popup__warn">
-          <h4><span aria-hidden="true">⚠️</span> 주의 사항</h4>
-          <p>습도를 빠르게 낮추기 위해 선풍기나 에어컨 바람을 사육장에 직접 쐬지 마세요.</p>
-        </div>
-        <button
-          type="button"
-          className={`guide-popup__scrap ${scrapped ? "is-on" : ""}`}
-          onClick={onScrap}
-          aria-pressed={scrapped}
-        >
-          {scrapped ? "스크랩됨" : "스크랩"}
-        </button>
-      </>
-    );
-  },
-];
+  }
 
-export default function GuideModal({ onClose }) {
+  return (
+    <>
+      {heading}
+      <p className="guide-popup__text">
+        <strong>{page.lead}</strong>
+        <br />
+        {page.body}
+      </p>
+
+      <div className="guide-popup__warn">
+        <h4>
+          <img src={warnImg} alt="" /> {page.warn.title}
+        </h4>
+        <p>{page.warn.text}</p>
+      </div>
+
+      <button
+        type="button"
+        className={`guide-popup__scrap ${scrapped ? "is-on" : ""}`}
+        onClick={onScrap}
+        aria-pressed={scrapped}
+      >
+        {scrapped ? "스크랩됨" : "스크랩"}
+      </button>
+    </>
+  );
+}
+
+
+export default function GuidePopup({ onClose }) {
   const [page, setPage] = useState(0);
-  const [scrapped, setScrapped] = useState(false); // 실제로는 서버/로컬 저장소와 연결
-  const last = PAGES.length - 1;
-  const Page = PAGES[page];
+  const [scrapped, setScrapped] = useState(false); // TODO: 서버/로컬 저장소와 연결
+  const panelRef = useRef(null);
 
   const prev = () => setPage((p) => Math.max(0, p - 1));
-  const next = () => setPage((p) => Math.min(last, p + 1));
+  const next = () => setPage((p) => Math.min(LAST, p + 1));
 
-  // 키보드: ← → 이동, ESC 닫기 / 팝업 중 뒤 화면 스크롤 잠금
   useEffect(() => {
     const onKey = (e) => {
       if (e.key === "Escape") onClose();
-      if (e.key === "ArrowLeft") prev();
-      if (e.key === "ArrowRight") next();
+      if (e.key === "ArrowLeft") setPage((p) => Math.max(0, p - 1));
+      if (e.key === "ArrowRight") setPage((p) => Math.min(LAST, p + 1));
     };
     window.addEventListener("keydown", onKey);
+
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+
+    const opener = document.activeElement;
+    panelRef.current?.focus();
+
     return () => {
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = prevOverflow;
+      opener?.focus?.();
     };
-  }, [onClose]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [onClose]);
 
   return (
     <div className="guide-popup" onClick={onClose}>
       <div
+        ref={panelRef}
         className="guide-popup__panel"
         role="dialog"
         aria-modal="true"
         aria-labelledby="guide-popup-title"
+        tabIndex={-1}
+        style={{ backgroundImage: `url(${frameImg})` }}
         onClick={(e) => e.stopPropagation()}
       >
-        <button type="button" className="guide-popup__close" onClick={onClose} aria-label="닫기">✕</button>
+        <button type="button" className="guide-popup__close" onClick={onClose} aria-label="닫기">
+          <img src={closeImg} alt="" />
+        </button>
 
-        <h2 id="guide-popup-title" className="guide-popup__title">사육장 환기 관리</h2>
+        <h2 id="guide-popup-title" className="guide-popup__title">
+          사육장 환기 관리
+        </h2>
 
-        {/* key={page}: 페이지가 바뀔 때마다 새로 그려서 전환 애니메이션이 다시 실행됨 */}
         <div className="guide-popup__page" key={page}>
-          <Page scrapped={scrapped} onScrap={() => setScrapped((v) => !v)} />
+          <PageBody page={PAGES[page]} scrapped={scrapped} onScrap={() => setScrapped((v) => !v)} />
         </div>
 
         <footer className="guide-popup__pager">
-          <button type="button" className="guide-popup__arrow" onClick={prev} disabled={page === 0} aria-label="이전">‹</button>
-          <span aria-live="polite">{page + 1}/{PAGES.length}</span>
-          <button type="button" className="guide-popup__arrow" onClick={next} disabled={page === last} aria-label="다음">›</button>
+          <button type="button" className="guide-popup__arrow" onClick={prev} disabled={page === 0} aria-label="이전 페이지">
+            <img src={prevImg} alt="" />
+          </button>
+          <span className="guide-popup__count" aria-live="polite">
+            {page + 1}/{PAGES.length}
+          </span>
+          <button type="button" className="guide-popup__arrow" onClick={next} disabled={page === LAST} aria-label="다음 페이지">
+            <img src={nextImg} alt="" />
+          </button>
         </footer>
       </div>
     </div>
