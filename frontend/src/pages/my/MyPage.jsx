@@ -21,6 +21,7 @@ import chevronIcon from '../../assets/my/icon-chevron-right.svg'
 import SaveConfirmPopup from './components/common/SaveConfirmPopup'
 
 import './MyPage.scss'
+import { useSound } from '../../sound/SoundProvider'
 
 const GECKO_IMAGES = {
   beige: geckoBeige,
@@ -61,6 +62,7 @@ const MENU_SECTIONS = [
 
 const MyPage = () => {
   const navigate = useNavigate()
+  const { playSfx } = useSound()
   const [profile, setProfile] = useState(null)
   const [confirmType, setConfirmType] = useState(null)
 
@@ -82,6 +84,7 @@ const MyPage = () => {
 
   const handleMenuClick = (item) => {
     if (item.key === 'logout' || item.key === 'delete-account') {
+      playSfx('button')
       setConfirmType(item.key)
       return
     }
@@ -90,6 +93,7 @@ const MyPage = () => {
   }
 
   const handleConfirm = () => {
+    playSfx('button')
     if (confirmType === 'logout') {
       setConfirmType(null)
       navigate('/onboarding')

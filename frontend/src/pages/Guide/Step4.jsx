@@ -15,9 +15,11 @@ import back from '../../assets/guide/뒤로가기.svg'
 import finalButton from '../../assets/guide/마지막 단계.svg'
 
 import './Step4.scss'
+import { useSound } from '../../sound/SoundProvider'
 
 const Step4 = () => {
   const navigate = useNavigate()
+  const { playSfx } = useSound()
 
   const currentDay = 7
 
@@ -152,7 +154,10 @@ const Step4 = () => {
             className="step4-button"
             src={currentDay === 7 ? finalButton : checkButton}
             alt={currentDay === 7 ? '마지막 단계' : '환경 확인 중'}
-            onClick={currentDay === 7 ? () => navigate('/guide/step5') : undefined}
+            onClick={currentDay === 7 ? () => {
+              playSfx('button')
+              navigate('/guide/step5')
+            } : undefined}
             />
 
         </div>

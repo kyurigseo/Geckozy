@@ -12,10 +12,12 @@ import enclosureButtonPressed from '../../assets/guide/사육장 버튼 눌림.s
 import EnclosureInfo from './EnclosureInfo'
 
 import './Step1.scss'
+import { useSound } from '../../sound/SoundProvider'
 
 
 const Step1 = () => {
   const navigate = useNavigate()
+  const { playSfx } = useSound()
   const [popup, setPopup] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   return (
@@ -126,7 +128,10 @@ const Step1 = () => {
 
             <button
             className="step1-button"
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => {
+              playSfx('button')
+              setIsModalOpen(true)
+            }}
             >
             <img className="button-normal" src={enclosureButton} alt="사육장 정보 입력하기" />
             <img className="button-pressed" src={enclosureButtonPressed} alt="사육장 정보 입력하기" />

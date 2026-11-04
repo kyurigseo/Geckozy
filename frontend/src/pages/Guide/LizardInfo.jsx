@@ -12,9 +12,11 @@ import calendar from '../../assets/guide/달력.svg'
 import complete from '../../assets/guide/완료버튼.svg'
 
 import './LizardInfo.scss'
+import { useSound } from '../../sound/SoundProvider'
 
 const LizardInfo = ({ step, onClose }) => {
   const navigate = useNavigate()
+  const { playSfx } = useSound()
   const [birthUnknown, setBirthUnknown] = useState(false)
   const [birthDateValue, setBirthDateValue] = useState('')
   const [sizeUnknown, setSizeUnknown] = useState(false)
@@ -129,7 +131,10 @@ const LizardInfo = ({ step, onClose }) => {
 
             <button
             className="complete-button"
-            onClick={() => navigate('/loading', { state: { step: step } })}
+            onClick={() => {
+              playSfx('button')
+              navigate('/loading', { state: { step: step } })
+            }}
             >
             <img src={complete} alt="완료" />
             </button>

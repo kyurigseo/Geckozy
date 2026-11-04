@@ -6,9 +6,11 @@ import backIcon from '../../assets/guide/뒤로가기_사육장 확인.svg'
 import flowerFloor from '../../assets/guide/꽃바닥.svg'
 import enclosureMatch from '../../assets/guide/사육장 적합.svg'
 import nextButton from '../../assets/guide/다음단계로 이동하기.svg'
+import { useSound } from '../../sound/SoundProvider'
 
 const EnclosureCheck = () => {
   const navigate = useNavigate()
+  const { playSfx } = useSound()
   const { state } = useLocation()
 
   const { width, depth, height, material, customMaterial, ventilation } = state || {}
@@ -38,7 +40,13 @@ const EnclosureCheck = () => {
 
       <p className="enclosure-check-match-p">사육장 안에 이동 구조물을 배치할 수 있는<br />높이도 충분한지 함께 확인해주세요.</p>
 
-      <button className="enclosure-check-next" onClick={() => navigate('/guide/step2')}>
+      <button
+        className="enclosure-check-next"
+        onClick={() => {
+          playSfx('button')
+          navigate('/guide/step2')
+        }}
+      >
         <img src={nextButton} alt="다음 단계로 이동하기" />
       </button>
 

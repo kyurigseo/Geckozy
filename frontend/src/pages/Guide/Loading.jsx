@@ -7,12 +7,14 @@ import loadingText from '../../assets/guide/Loading....svg'
 import loadinglizard from '../../assets/guide/로딩도마뱀.svg'
 import loadingStone from '../../assets/guide/로딩중 돌.svg'
 import loadingStoneSelected from '../../assets/guide/로딩중 돌 선택.svg'
-import backgroundMusic from '../../assets/guide/배경음악.svg'
+import SoundToggle from '../onboarding/components/common/SoundToggle'
+import { useSound } from '../../sound/SoundProvider'
 
 import './Loading.scss'
 
 const Loading = () => {
   const navigate = useNavigate()
+  const { isSoundOn, toggleSound } = useSound()
   const location = useLocation()
 
   const step = location.state?.step || 1
@@ -56,7 +58,9 @@ const Loading = () => {
 
         </div>
 
-        <img className="backgroundMusic" src={backgroundMusic} alt="" />
+        <div className="backgroundMusic">
+          <SoundToggle isOn={isSoundOn} onToggle={toggleSound} />
+        </div>
 
       </div>
 

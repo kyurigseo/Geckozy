@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 
 import OnboardingHeader from '../common/OnboardingHeader'
 import SoundToggle from '../common/SoundToggle'
+import { useSound } from '../../../../sound/SoundProvider'
 
 import vineDeco from '../../../../assets/onboarding/deco-vine-wide.png'
 import groundDeco from '../../../../assets/onboarding/deco-ground.png'
@@ -31,11 +32,13 @@ const START_METHOD_OPTIONS = [
 
 const StartMethod = ({ updateForm, onPrev, goTo, isSoundOn, onToggleSound }) => {
   const navigate = useNavigate()
+  const { playSfx } = useSound()
 
   const handleSelect = (value) => {
     updateForm('startMethod', value)
 
     if (value === 'owner') {
+      playSfx('button')
       goTo('gecko-custom')
     } else {
       // TODO: 온보딩 완료(둘러보기) 상태를 API에 저장

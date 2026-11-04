@@ -13,6 +13,7 @@ import leafIcon from '../../../../assets/my/나뭇잎.svg'
 import SaveConfirmPopup from '../common/SaveConfirmPopup'
 
 import './LizardManage.scss'
+import { useSound } from '../../../../sound/SoundProvider'
 
 const GECKO_IMAGES = {
   beige: geckoBeige,
@@ -30,14 +31,17 @@ const INITIAL_LIZARDS = [
 
 const LizardManage = () => {
   const navigate = useNavigate()
+  const { playSfx } = useSound()
   const [lizards, setLizards] = useState(INITIAL_LIZARDS)
   const [deleteTarget, setDeleteTarget] = useState(null)
 
   const handleDelete = (id) => {
+    playSfx('button')
     setDeleteTarget(id)
   }
 
   const confirmDelete = () => {
+    playSfx('button')
     setLizards((prev) => prev.filter((lizard) => lizard.id !== deleteTarget))
     setDeleteTarget(null)
   }
