@@ -1,0 +1,142 @@
+@use '../../../onboarding/variables' as *;
+@use '../../../onboarding/mixins' as *;
+
+.scrap {
+  position: relative;
+  width: 393px;
+  height: 852px;
+  margin: 0 auto;
+  overflow: hidden;
+  background: #FDF7EE;
+  color: #5B3524;
+}
+
+.scrap-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 114px;
+  box-sizing: border-box;
+
+  h1 {
+    position: absolute;
+    top: 56px;
+    left: 50%;
+    margin: 0;
+    transform: translateX(-50%);
+    font-family: 'Pretendard', sans-serif;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 150%;
+    letter-spacing: -0.02em;
+    text-align: center;
+    color: #492515;
+    white-space: nowrap;
+  }
+}
+
+.scrap-back {
+  position: absolute;
+  top: 56px;
+  left: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+
+  img {
+    display: block;
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+  }
+}
+
+.scrap-content {
+  height: calc(100% - 119px);
+  padding: 2px 21px 0 21px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.scrap-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 171px);
+  column-gap: 10px;
+  row-gap: 16px;
+  align-items: start;
+}
+
+.scrap-card {
+  position: relative;
+  width: 171px;
+  height: 166px;
+}
+
+.scrap-card-background {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+}
+
+.scrap-card-image {
+  position: absolute;
+  top: 27px;
+  left: 50%;
+  z-index: 1;
+  display: block;
+  width: 109px;
+  height: 64px;
+  transform: translateX(-50%);
+  object-fit: contain;
+}
+
+.scrap-card-title {
+  position: absolute;
+  top: 103px;
+  left: 5px;
+  z-index: 1;
+  width: 161px;
+  font-family: 'andong-katuri', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 140%;
+  letter-spacing: -0.02em;
+  color: #492515;
+  text-align: center;
+  white-space: nowrap;
+
+}
+
+.scrap-card-date {
+  position: absolute;
+  top: 130px;
+  left: 0;
+  z-index: 1;
+  width: 171px;
+  font-family: 'Pretendard', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 150%;
+  letter-spacing: -0.02em;
+  color: #DAA576;
+  text-align: center;
+
+  
+}

@@ -1,0 +1,128 @@
+@use '../../variables' as *;
+@use '../../mixins' as *;
+
+// 화면 높이에 고정하고, 아래 패널 안에서만 스크롤한다 (배경·미리보기는 고정)
+.custom-screen {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+  background-color: $color-main-beige-4;
+}
+
+// 위쪽 무대 (0~431). 벽지 패턴 배경 480x852
+.custom-screen-stage {
+  position: relative;
+  flex-shrink: 0;
+  height: 431px;
+  padding: 56px 22px 0;
+  background-position: center top;
+  background-size: 480px 852px;
+  background-repeat: no-repeat;
+
+  .onboarding-header {
+    z-index: 3;
+  }
+}
+
+// 진행바 + 배지 (top 88)
+.custom-screen-progress {
+  position: absolute;
+  top: 88px;
+  left: 22px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.custom-screen-badge {
+  width: 82px;
+  height: 75px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+
+  img {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+// 피그마에 없는 요소 (필수 항목 안내)
+.custom-screen-notice {
+  position: absolute;
+  top: 166px;
+  left: 50%;
+  z-index: 4;
+  margin: 0;
+  padding: 4px 12px;
+  border-radius: 100px;
+  background-color: $color-main-beige-4;
+  @include text-caption;
+  color: $color-main-brown;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+// 스피커 (도마뱀 화면 기준 left 306, top 172)
+.custom-screen-sound {
+  position: absolute;
+  top: 172px;
+  right: 35px;
+  z-index: 3;
+}
+
+// 탭 (top 381, 78x52). 선택된 탭은 패널 위로 올라와 테두리를 덮는다
+.custom-screen-tabs {
+  position: absolute;
+  top: 381px;
+  left: 42px;
+  display: flex;
+  gap: 4px;
+}
+
+.custom-screen-tab {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  width: 78px;
+  height: 52px;
+  padding: 10px 0 0;
+  border: 4px solid $color-main-outline;
+  border-bottom: none;
+  border-radius: 20px 20px 0 0;
+  background-color: $color-main-beige-3;
+  filter: drop-shadow(0 -4px 0 $color-panel-shadow);
+  cursor: pointer;
+
+  &.active {
+    z-index: 3;
+    height: 56px;
+    background-color: $color-main-beige-4;
+  }
+}
+
+// 패널 (top 431, 408 폭으로 화면 양옆을 넘친다). 안쪽 기준: 왼쪽 22, 위 458
+.custom-screen-panel {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  min-height: 0;
+  margin: 0 -7.5px;
+  padding: 23px 24.5px 56px 25.5px;
+  border: 4px solid $color-main-outline;
+  border-bottom: none;
+  border-radius: 50px 50px 0 0;
+  background-color: $color-main-beige-4;
+  box-shadow: 0 -5px 0 $color-panel-shadow;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

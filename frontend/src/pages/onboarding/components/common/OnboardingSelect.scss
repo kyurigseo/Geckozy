@@ -1,0 +1,118 @@
+@use '../../variables' as *;
+@use '../../mixins' as *;
+
+// 피그마 드롭다운 컴포넌트. 닫힘 h51, 열림 h189 (아래 요소 위로 겹쳐서 펼침)
+.onboarding-select {
+  position: relative;
+  height: 51px;
+}
+
+.onboarding-select-box {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1.5px solid $color-main-beige-3;
+  border-radius: 10px;
+  background-color: $color-white;
+  overflow: hidden;
+
+  .open & {
+    z-index: 10;
+  }
+}
+
+.onboarding-select-trigger,
+.onboarding-select-option {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0 17px 0 18px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  @include text-dropdown;
+  color: $color-gray-600;
+  text-align: left;
+}
+
+.onboarding-select-trigger {
+  justify-content: space-between;
+  height: 48px; // 51 - 테두리
+}
+
+// 아이콘 원본은 '<' 모양. 닫힘이면 아래(⌄), 열림이면 위(^)를 보도록 회전
+.onboarding-select-icon {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  height: 6px;
+
+  img {
+    width: 8px;
+    height: 14px;
+    transform: rotate(-90deg);
+
+    .open & {
+      transform: rotate(90deg);
+    }
+  }
+}
+
+.onboarding-select-options {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: -6px 0 0; // 피그마: 첫 항목 하이라이트가 헤더 영역과 겹침
+  padding: 0 0 10px;
+  list-style: none;
+}
+
+.onboarding-select-option {
+  height: 32px;
+
+  &:hover,
+  &:focus-visible {
+    outline: none;
+    background-color: $color-dropdown-hover;
+  }
+}
+
+// ===== 베이지 (피그마 '분무 빈도' 드롭다운: 닫힘 h40, 항목 간격 31) =====
+.onboarding-select-cream {
+  height: 40px;
+
+  .onboarding-select-box {
+    border-color: $color-main-beige-3;
+    background-color: $color-main-beige-2;
+  }
+
+  .onboarding-select-trigger {
+    height: 37px; // 40 - 테두리
+    padding: 0 14px 0 13px;
+    @include text-body-s;
+    color: $color-sub-beige;
+  }
+
+  &.is-filled:not(.open) .onboarding-select-trigger {
+    @include text-body-s-bold;
+    color: $color-main-brown;
+  }
+
+  .onboarding-select-options {
+    gap: 0;
+    margin-top: -3px;
+    padding-bottom: 6px;
+  }
+
+  .onboarding-select-option {
+    height: 31px;
+    padding: 0 14px 0 13px;
+    @include text-body-s;
+    color: $color-main-brown;
+  }
+}

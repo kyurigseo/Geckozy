@@ -1,0 +1,11 @@
+@use 'variables' as *;
+
+// 모바일 프레임 기준. 화면이 더 넓으면 가운데 정렬
+.onboarding {
+  position: relative;
+  width: 100%;
+  max-width: $frame-width;
+  min-height: 100dvh;
+  margin: 0 auto;
+  overflow: hidden;
+}

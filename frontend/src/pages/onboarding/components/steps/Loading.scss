@@ -1,0 +1,70 @@
+@use '../../variables' as *;
+@use '../../mixins' as *;
+
+// 피그마 '로딩' (393x852). 구름 배경 420x870 (아래 -14)
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100dvh;
+  padding-top: 248px;
+  background: url('../../../../assets/onboarding/deco-clouds.png') center bottom -14px / 420px 870px no-repeat;
+  background-color: $color-main-beige-4;
+  text-align: center;
+}
+
+// 문구 (top 248, 간격 10)
+.loading-message {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  p {
+    margin: 0;
+    font-family: $font-family-pixel;
+    font-weight: $font-weight-regular;
+    line-height: $line-height-base;
+    letter-spacing: $letter-spacing-loading;
+  }
+}
+
+.loading-title {
+  font-size: $font-size-pixel-2xl;
+  color: $color-main-outline;
+}
+
+.loading-description {
+  font-size: $font-size-pixel-m;
+  color: $color-main-brown-3;
+}
+
+// 바위 위 도마뱀 (top 363, 160x81)
+.loading-gecko {
+  width: 160px;
+  height: 81px;
+  margin-top: 49px;
+  image-rendering: pixelated;
+}
+
+// Loading... + 점 (top 468, 간격 18)
+.loading-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  margin-top: 24px;
+}
+
+.loading-text {
+  margin: 0;
+  font-family: $font-family-pixel;
+  font-size: $font-size-pixel-xl;
+  line-height: $line-height-base;
+  letter-spacing: $letter-spacing-loading;
+  color: $color-main-brown-2;
+}
+
+// 스피커 (top 603)
+.loading-sound {
+  margin-top: 66px;
+}

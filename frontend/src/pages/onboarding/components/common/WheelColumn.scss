@@ -1,0 +1,71 @@
+@use 'sass:math';
+@use '../../variables' as *;
+@use '../../mixins' as *;
+
+$item-height: 38px; // WheelColumn.jsx의 WHEEL_ITEM_HEIGHT와 같게
+$visible-rows: 5;
+
+// 가운데(선택) 줄 위아래 구분선. 열이 붙어 있으면 선이 이어져 보인다
+.wheel {
+  position: relative;
+  min-width: 0;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    left: 0;
+    height: 1px;
+    background-color: $color-gray-200;
+    pointer-events: none;
+  }
+
+  &::before {
+    top: $item-height * math.div($visible-rows - 1, 2);
+  }
+
+  &::after {
+    top: $item-height * math.div($visible-rows + 1, 2);
+  }
+}
+
+.wheel-column {
+  height: $item-height * $visible-rows;
+  margin: 0;
+  padding: $item-height * 2 0;
+  list-style: none;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.wheel-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: $item-height;
+  scroll-snap-align: center;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+// 가운데(선택) / 바로 옆 / 그 바깥
+.wheel-item-active {
+  @include text-title-s;
+  color: $color-black;
+}
+
+.wheel-item-near {
+  @include text-title-s;
+  color: $color-gray-400;
+}
+
+.wheel-item-far {
+  @include text-body-l;
+  color: $color-gray-200;
+}

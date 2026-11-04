@@ -1,0 +1,60 @@
+@use '../../variables' as *;
+@use '../../mixins' as *;
+
+// 카드 109x149, 가로 간격 12, 세로 간격 15 (패널 안쪽 기준보다 1px 왼쪽에서 시작)
+.choice-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 109px);
+  gap: 15px 12px;
+  margin: 0 0 0 -1px;
+  padding: 0;
+  list-style: none;
+}
+
+.choice-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 149px;
+  border: 2px solid $color-main-beige-3;
+  border-radius: 20px;
+  background-color: $color-main-beige-2;
+  box-shadow: inset -10px -10px 0 $color-main-beige;
+}
+
+// 55x55 동그란 썸네일 (피그마 마스크)
+.choice-card-thumb {
+  position: relative;
+  flex-shrink: 0;
+  width: 55px;
+  height: 55px;
+  margin-top: 21px;
+  border-radius: 50%;
+  overflow: hidden;
+
+  img {
+    display: block;
+    max-width: none;
+  }
+}
+
+// '선택' 버튼 81x28
+.choice-card-select {
+  width: 81px;
+  height: 28px;
+  margin-top: 23px;
+  padding: 0;
+  border: 1px solid $color-main-green-2;
+  border-radius: 100px;
+  background-color: $color-main-green;
+  box-shadow: inset -5px -5px 0 $color-select-shadow;
+  cursor: pointer;
+  @include text-pixel-m;
+  color: $color-main-green-2;
+
+  &.selected {
+    background-color: $color-main-green-2;
+    box-shadow: inset 5px 5px 0 $color-select-shadow-active;
+    color: $color-sub-green;
+  }
+}

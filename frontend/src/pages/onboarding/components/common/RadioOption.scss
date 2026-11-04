@@ -1,0 +1,30 @@
+@use '../../variables' as *;
+@use '../../mixins' as *;
+
+.radio-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: $color-main-outline;
+  white-space: nowrap;
+
+  img {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+  }
+}
+
+.radio-option-s {
+  @include text-body-s;
+}
+
+// 16px 문구는 줄 높이 24라서 아이콘(22)을 아래에 맞춘다 (피그마 items-end)
+.radio-option-m {
+  align-items: flex-end;
+  @include text-body-m-bold-medium;
+}

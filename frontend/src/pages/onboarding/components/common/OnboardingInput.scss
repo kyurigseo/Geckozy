@@ -1,0 +1,124 @@
+@use '../../variables' as *;
+@use '../../mixins' as *;
+
+.onboarding-input {
+  display: block;
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+}
+
+.onboarding-input-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+// 아이콘마다 크기가 달라서(메일 25x17, 자물쇠 20x25) 25x25 칸 안에 맞춰 글자 시작 위치를 통일
+.onboarding-input-icon {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 25px;
+  height: 25px;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.onboarding-input-field {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  outline: none;
+  background: none;
+
+  &::placeholder {
+    color: $color-gray-400;
+  }
+
+  // 입력 바로 여는 표시용 입력칸
+  &[readonly] {
+    cursor: pointer;
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.onboarding-input-suffix {
+  flex-shrink: 0;
+}
+
+.onboarding-input.is-disabled {
+  opacity: 0.5;
+}
+
+// 기본 (피그마 회원가입 입력창 h51)
+.onboarding-input-basic {
+  .onboarding-input-box {
+    height: 51px;
+    padding: 0 18px;
+    border: 1.5px solid $color-main-beige-3;
+    border-radius: 10px;
+    background-color: $color-white;
+  }
+
+  .onboarding-input-field {
+    @include text-body-m-medium;
+    color: $color-main-brown;
+  }
+}
+
+// 픽셀 (피그마 진입화면 입력창 321x48)
+.onboarding-input-pixel {
+  .onboarding-input-box {
+    height: 48px;
+    padding: 0 16px;
+    border: 1.5px solid $color-main-brown-2;
+    border-radius: 10px;
+    background-color: $color-main-beige-4;
+  }
+
+  .onboarding-input-field {
+    @include text-pixel-l;
+    color: $color-main-outline;
+  }
+}
+
+// 베이지 (피그마 도마뱀 기본정보 입력창 h40)
+.onboarding-input-cream {
+  .onboarding-input-box {
+    height: 40px;
+    padding: 0 15px;
+    border: 1.5px solid $color-main-beige-3;
+    border-radius: 10px;
+    background-color: $color-main-beige-2;
+  }
+
+  .onboarding-input-field,
+  .onboarding-input-suffix {
+    @include text-body-s;
+  }
+
+  // 입력한 값은 굵게 (피그마 채워진 상태 Body/S-Bold), 안내 문구는 보통 굵기
+  .onboarding-input-field {
+    @include text-body-s-bold;
+    color: $color-main-outline;
+
+    &::placeholder {
+      @include text-body-s;
+      color: $color-sub-beige;
+    }
+  }
+
+  .onboarding-input-suffix {
+    color: $color-sub-beige;
+  }
+}

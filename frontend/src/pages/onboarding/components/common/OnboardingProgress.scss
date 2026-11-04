@@ -1,0 +1,27 @@
+@use '../../variables' as *;
+
+// 채움 영역: 진행바 안쪽 칸(가로 7.7~225.5px) 안에서만 늘어난다. 왼쪽 끝 6px은 피그마 시작 상태 기준
+// 0%일 때도 최소 26px (피그마 시작 상태), 100%일 때 오른쪽 끝 227px (잎사귀 장식 앞까지)
+$fill-min: 26px;
+$fill-max: 221px;
+
+.onboarding-progress {
+  position: relative;
+  flex-shrink: 0;
+  width: 261px;
+  height: 38px;
+  background: url('../../../../assets/onboarding/progress-bar.png') center / 100% 100% no-repeat;
+}
+
+.onboarding-progress-fill {
+  position: absolute;
+  top: 10px;
+  left: 6px;
+  width: calc(#{$fill-min} + (#{$fill-max} - #{$fill-min}) * var(--progress));
+  height: 21px;
+  border: 2px solid $color-main-brown;
+  border-radius: 10px;
+  background-color: $color-sub-beige-2;
+  box-shadow: inset -5px -5px 0 $color-progress-shadow;
+  transition: width 0.3s ease;
+}

@@ -1,0 +1,74 @@
+@use 'sass:math';
+
+// 사육장 미리보기 (벽지 또는 빈 사육장 위에 바닥재·덩굴·구조물을 겹침)
+// 쓰는 화면과 상관없이 먹도록 최상위에 둔다. 크기·위치는 className으로 덮어쓴다
+// img처럼 부모 너비를 채우고, 사육장(크림 벽지) 이미지 비율 562:560으로 자기 높이를 가진다.
+// 안쪽 레이어는 이 상자 기준 %로 놓여서(TankPreview.jsx) 너비가 바뀌어도 서로 어긋나지 않는다
+.tank-preview {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 562 / 560;
+  pointer-events: none; // 장식이라 터치를 막지 않음 (스크롤·아래 버튼에 그대로 전달)
+
+  img {
+    position: absolute;
+    display: block;
+    max-width: none;
+  }
+}
+
+// 사육장 본체 = 상자 전체
+.tank-preview-wall {
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.tank-preview-vine {
+  transform: rotate(2.52deg);
+}
+
+// 벽 색: 크림 벽지 이미지 위에 같은 이미지를 겹치고 벽면만 남겨 색을 바꾼다 (테두리 나무색·바닥·콘센트는 그대로)
+// 벽면 영역: 크림 벽지 이미지(562x560) 안쪽 육각형에서 바닥 마름모를 뺀 모양
+// 필터 값은 초록·노랑 벽지 이미지의 벽 색과 비교해서 맞춘 값
+.tank-preview-wall-tint {
+  clip-path: polygon(8% 32.5%, 49.6% 9.8%, 92.4% 32.1%, 92.4% 68.2%, 90.2% 69.1%, 49.3% 48.2%, 8.9% 68.6%, 8% 68%);
+}
+
+.tank-preview-wall-tint-empty {
+  filter: grayscale(1) brightness(0.86);
+}
+
+.tank-preview-wall-tint-green {
+  filter: hue-rotate(40deg);
+}
+
+.tank-preview-wall-tint-yellow {
+  filter: hue-rotate(12deg) saturate(2.2) brightness(1.02);
+}
+
+// 바닥재: 사육장 바닥 마름모 모양으로 잘라낸다 (꼭짓점 왼·뒤·오른·앞)
+// $floor-side-raise: 양옆 꼭짓점(왼·오른)을 같은 거리만큼 위로 올리는 값
+// $floor-side-extend: 양옆 꼭짓점을 같은 거리만큼 바깥쪽(가로)으로 늘리는 값
+// $floor-top-raise: 위(뒤쪽) 꼭짓점을 위로 올리는 값. 아래 꼭짓점은 그대로
+// 원래 크기(바닥 영역 228.1x121.3px)에서 1.5px·4px인 값을 %로 둬서 크기가 바뀌어도 같은 모양
+$floor-side-raise: math.div(1.5, 121.3) * 100%;
+$floor-side-extend: math.div(4, 228.1) * 100%;
+$floor-top-raise: math.div(1.5, 121.3) * 100%;
+
+.tank-preview-floor {
+  position: absolute;
+  clip-path: polygon(
+    calc(0% - #{$floor-side-extend}) calc(46.9% - #{$floor-side-raise}),
+    49.7% calc(0% - #{$floor-top-raise}),
+    calc(100% + #{$floor-side-extend}) calc(48.2% - #{$floor-side-raise}),
+    50.3% 100%
+  );
+}
+
+// 바닥재 그림을 12% 크게 깔아서, 잘라낸 마름모 안이 빈틈 없이 덮이게 한다
+.tank-preview-floor-fill {
+  position: absolute;
+  inset: 0;
+  transform: scale(1.12);
+}

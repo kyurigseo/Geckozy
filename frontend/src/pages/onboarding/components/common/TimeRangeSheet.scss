@@ -1,0 +1,39 @@
+@use '../../variables' as *;
+@use '../../mixins' as *;
+
+// 피그마 시간 시트: 제목 아래 31px에 '시작 시간 ~ 종료 시간', 14px 아래 휠 (열 148, 간격 38)
+.time-range-sheet-labels {
+  display: flex;
+  justify-content: center;
+  gap: 59px;
+  margin-top: 22px;
+  @include text-pixel-l;
+  color: $color-main-brown-2;
+}
+
+.time-range-sheet-wheels {
+  display: grid;
+  grid-template-columns: 148px 148px;
+  justify-content: center;
+  gap: 38px;
+  margin-top: 14px;
+}
+
+// '사용하지 않음' (휠 아래 16px, 가운데)
+.time-range-sheet-none {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+
+  .radio-option {
+    gap: 9px;
+  }
+}
+
+.time-range-sheet .bottom-sheet-confirm {
+  margin-top: 22px;
+}
+
+.time-range-sheet-none + .bottom-sheet-confirm {
+  margin-top: 28px;
+}

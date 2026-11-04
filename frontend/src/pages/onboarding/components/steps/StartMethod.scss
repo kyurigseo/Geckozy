@@ -1,0 +1,143 @@
+@use '../../variables' as *;
+@use '../../mixins' as *;
+
+// 피그마 '선택' (393x852). 세로 간격은 피그마 절대 좌표 기준
+.start-method {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  padding: 56px 22px 34px;
+  background-color: $color-main-beige-4;
+}
+
+// 상단 덩굴 장식 (top 47, 394x131) — 헤더 뒤에 깔림
+.start-method-vine {
+  position: absolute;
+  top: 47px;
+  left: 0;
+  width: 100%;
+  height: 131px;
+  object-fit: cover;
+  object-position: top;
+  pointer-events: none;
+}
+
+.start-method .onboarding-header {
+  z-index: 1;
+}
+
+// 안내 문구 (top 150)
+.start-method-guide {
+  position: relative;
+  margin: 62px 0 0;
+  text-align: center;
+  @include text-pixel-xl;
+  color: $color-main-outline;
+}
+
+// 카드 (top 310, 455 / 350x123)
+.start-method-options {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  margin-top: 100px;
+}
+
+.start-method-card {
+  display: flex;
+  align-items: center;
+  width: 350px;
+  max-width: 100%;
+  height: 123px;
+  padding: 0 26px 3px 24px;
+  border: none;
+  background: center / 100% 100% no-repeat;
+  cursor: pointer;
+  text-align: left;
+}
+
+.start-method-card-yellow {
+  background-image: url('../../../../assets/onboarding/card-yellow.svg');
+}
+
+.start-method-card-green {
+  background-image: url('../../../../assets/onboarding/card-green.svg');
+}
+
+// 아이콘 칸 53px 안에 가운데 정렬 (도마뱀 53x44, 새싹 36x44)
+.start-method-card-icon {
+  display: flex;
+  flex-shrink: 0;
+  justify-content: center;
+  width: 53px;
+  margin-right: 13px;
+
+  img {
+    height: 44px;
+    image-rendering: pixelated;
+  }
+}
+
+.start-method-card-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.start-method-card-title {
+  @include text-body-m-bold;
+  color: $color-main-outline;
+}
+
+.start-method-card-description {
+  display: flex;
+  flex-direction: column;
+  @include text-body-s;
+
+  .start-method-card-yellow & {
+    color: $color-main-brown-2;
+  }
+
+  .start-method-card-green & {
+    color: $color-main-green-2;
+  }
+}
+
+// 화살표 (11x22). 원본 SVG가 'v' 모양이라 '>'가 되도록 회전
+.start-method-card-arrow {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 11px;
+  height: 22px;
+
+  img {
+    width: 26px;
+    height: 15px;
+    transform: rotate(-90deg);
+  }
+}
+
+// 하단 흙바닥 (top 621, 394x197) + 스피커 (top 692)
+.start-method-bottom {
+  position: relative;
+  height: 197px;
+  margin: auto -22px 0;
+}
+
+.start-method-ground {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.start-method-sound {
+  position: absolute;
+  top: 71px;
+  left: 50%;
+  transform: translateX(-50%);
+}

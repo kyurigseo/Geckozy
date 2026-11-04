@@ -1,0 +1,321 @@
+$brown-1: #492515;
+$brown-2: #B47952;
+$brown-4: #944B1B;
+$text-outline: #5B3524;
+$beige-1: #FFECCB;
+$beige-3: #FFDCB9;
+
+$font-katuri: "andong-katuri", sans-serif;
+$font-mamablock: "mamablock-210", sans-serif;
+$font-pixel: "yoon-px-pixman", sans-serif;
+
+
+$panel-w: 313px;
+$panel-h: 501px;
+
+// 홈 위에 뜨는 팝업. 모든 클래스가 guide-popup으로 시작해서 가이드 페이지(.guide)와 겹치지 않아요.
+.guide-popup {
+  position: fixed;
+  inset: 0;
+  z-index: 50; // 하단 네비(100)보다 아래
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.4);
+  font-family: "Pretendard", sans-serif;
+  line-height: 1.5; 
+  letter-spacing: -0.02em; 
+  color: $text-outline;
+  animation: guide-popup-fade 0.15s ease-out;
+
+  &__panel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    width: $panel-w;
+    height: $panel-h;
+    aspect-ratio: #{$panel-w} / #{$panel-h};
+    padding: 64px 28px 30px; 
+    overflow: hidden; 
+    background-position: center;
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    animation: guide-popup-pop 0.18s ease-out;
+
+
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  &__close {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    z-index: 1;
+    width: 35px;
+    height: 36px;
+    padding: 0;
+    background: none;
+    border: 0;
+    cursor: pointer;
+
+    img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $brown-1;
+      outline-offset: 2px;
+    }
+  }
+
+  &__title {
+    margin: 0 0 14px;
+    font-family: $font-katuri;
+    font-size: 28px;
+    font-weight: 400;
+    line-height: 1.4;
+    text-align: center;
+    color: #5B3524;
+    letter-spacing: -0.02em;
+  }
+
+  &__page {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: none;
+    animation: guide-popup-slide 0.2s ease-out;
+    margin: 0 0px;
+
+
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  &__hero {
+    display: block;
+    width: 217px;
+    height: 131px;
+    margin: 0 auto 14px;
+    object-fit: contain;
+    margin-bottom: 29px;
+  }
+
+  &__sub {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 10px;
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1.4;
+    color: #5B3524;
+    font-family: $font-katuri;
+    letter-spacing: -0.02em;
+    margin-bottom: 15px;
+    margin-top: 5px;
+
+    img {
+      flex-shrink: 0;
+      width: 29px;
+      height: 20px;
+      object-fit: contain;
+      margin-right: 10px;
+    }
+  }
+
+  &__text {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.5; 
+    max-width: 2405x;     
+    margin: 0 auto;       
+    text-align: left;
+    
+
+    strong {
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.4;
+      font-family: Pretendard;
+  
+    }
+  }
+
+  &__checks {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      letter-spacing: -0.02em;
+      font-weight: 400;
+      color: #5B3524;
+      font-size: 18px;
+    }
+
+    p {
+      flex: 1;
+      margin: 0;
+      font-size: 14px;
+      font-weight: 400;
+
+      strong {
+        font-weight: 700;
+        letter-spacing: -0.02em;
+
+
+      }
+    }
+  }
+
+  &__check {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    margin-right: 15px;
+  }
+
+  &__warn {
+    margin: 14px 0 12px;
+    padding: 10px 12px;
+    background: #FFC58D99;
+    border-radius: 10px;
+    width: 246px;
+    height: 98px;
+
+    h4 {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin: 0 0 4px;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 1.5;
+      color: #5B3524;
+      letter-spacing: -0.02em;
+      font-family: $font-katuri;
+      font-size: 18px;
+
+      img {
+        width: 26px;
+        height: 26px;
+        object-fit: contain;
+        margin-right: 10px;
+        margin-left: 10px;
+        margin-bottom: 5px;
+      }
+    }
+
+    p {
+      font-size: 12px;
+      font-weight: 500;
+      margin: 10px;
+      color: #5B3524;
+      letter-spacing: -0.02em;
+      line-height: 1.5;
+    }
+  }
+
+  &__scrap {
+    display: block;
+    margin: 0 auto;
+    padding: 5px 26px;
+    font-family: $font-pixel;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.4;
+    color: #5B3524;
+    background: url(../../assets/home/btn_frame.png);
+    width: 105px;
+    height: 35px;
+    cursor: pointer;
+
+  }
+
+  &__pager {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 30px 6px 0;
+  }
+
+  &__count {
+    font-family: $font-pixel;
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1;
+    color: #5B3524;
+  }
+
+  &__arrow {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    background: none;
+    border: 0;
+    cursor: pointer;
+
+
+    img {
+      display: block;
+      object-fit: contain;
+      width: 29px;
+      height: 29px;
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(2px);
+    }
+
+    &:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $brown-1;
+      outline-offset: 2px;
+    }
+  }
+}
+
+@keyframes guide-popup-fade {
+  from { opacity: 0; }
+}
+
+@keyframes guide-popup-pop {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+}
+
+@keyframes guide-popup-slide {
+  from { opacity: 0; transform: translateX(10px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guide-popup,
+  .guide-popup__panel,
+  .guide-popup__page {
+    animation: none;
+  }
+}
