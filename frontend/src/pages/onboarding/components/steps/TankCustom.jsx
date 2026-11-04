@@ -3,6 +3,7 @@ import { useState } from 'react'
 import TankCustomScreen from '../common/TankCustomScreen'
 import OnboardingButton from '../common/OnboardingButton'
 import QuestPopup from '../common/QuestPopup'
+import { useSound } from '../../../../sound/SoundProvider'
 import { TANK_REQUIRED_MESSAGE, getTankProgress, isTankComplete } from '../common/tankRules'
 
 import geckoBadge from '../../../../assets/onboarding/badge-gecko.png'
@@ -11,6 +12,7 @@ import geckoBadge from '../../../../assets/onboarding/badge-gecko.png'
 const TankCustom = ({ form, updateForm, onPrev, onNext, isSoundOn, onToggleSound }) => {
   const { tank, questSeen } = form
   const [notice, setNotice] = useState('')
+  const { playSfx } = useSound()
 
   const update = (fields) => {
     updateForm('tank', { ...tank, ...fields })
@@ -19,6 +21,7 @@ const TankCustom = ({ form, updateForm, onPrev, onNext, isSoundOn, onToggleSound
 
   // 커스텀 완료: 필수 항목(벽지·바닥재)을 채웠으면 다음 단계로
   const handleComplete = () => {
+    playSfx('button')
     if (isTankComplete(tank)) {
       setNotice('')
       onNext()

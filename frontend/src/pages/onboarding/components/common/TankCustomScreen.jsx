@@ -5,6 +5,7 @@ import ChoiceCard from './ChoiceCard'
 import OnboardingInput from './OnboardingInput'
 import LeafTitle from './LeafTitle'
 import RadioOption from './RadioOption'
+import { useSound } from '../../../../sound/SoundProvider'
 
 import TankPreview from '../../../../components/tank/TankPreview'
 import { TANK_PARTS } from '../../../../components/tank/tankParts'
@@ -63,6 +64,7 @@ const TankCustomScreen = ({
   children,
 }) => {
   const [activeTab, setActiveTab] = useState('decor')
+  const { playSfx } = useSound()
 
   const update = onChange
 
@@ -96,7 +98,10 @@ const TankCustomScreen = ({
                       key={option.value}
                       label={option.label}
                       selected={isSelected}
-                      onToggle={() => update({ [part.type]: isSelected ? '' : option.value })}
+                      onToggle={() => {
+                        playSfx('select')
+                        update({ [part.type]: isSelected ? '' : option.value })
+                      }}
                     >
                       <img className={`tank-custom-thumb tank-custom-thumb-${part.type}-${option.value}`} src={option.image} alt="" />
                     </ChoiceCard>

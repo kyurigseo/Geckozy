@@ -7,6 +7,7 @@ import LeafTitle from './LeafTitle'
 import SearchSelect from './SearchSelect'
 import RadioOption from './RadioOption'
 import DateWheelSheet from './DateWheelSheet'
+import { useSound } from '../../../../sound/SoundProvider'
 
 import wallpaper from '../../../../assets/onboarding/bg-pattern-yellow.png'
 import logDeco from '../../../../assets/onboarding/deco-log.png'
@@ -74,6 +75,7 @@ const formatDate = (value) => {
 const GeckoCustomScreen = ({ title, onBack, gecko, onChange, progress, badge, notice, isSoundOn, onToggleSound, children }) => {
   const [activeTab, setActiveTab] = useState('color')
   const [isDateSheetOpen, setIsDateSheetOpen] = useState(false)
+  const { playSfx } = useSound()
 
   const update = onChange
   const previewGecko = GECKO_COLORS.find((color) => color.value === gecko.color)?.gecko ?? DEFAULT_GECKO
@@ -111,7 +113,10 @@ const GeckoCustomScreen = ({ title, onBack, gecko, onChange, progress, badge, no
               key={color.value}
               label={color.label}
               selected={gecko.color === color.value}
-              onToggle={() => update({ color: gecko.color === color.value ? '' : color.value })}
+              onToggle={() => {
+                playSfx('select')
+                update({ color: gecko.color === color.value ? '' : color.value })
+              }}
             >
               <img className="gecko-custom-swatch" src={color.swatch} alt="" />
             </ChoiceCard>
