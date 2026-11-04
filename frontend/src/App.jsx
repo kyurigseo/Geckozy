@@ -26,6 +26,13 @@ import Home from "./pages/home/Home";
 import Temperature from "./pages/home/Temperature";
 import Humidity from "./pages/home/Humidity";
 
+import Record from "./pages/record/Record";
+import RecordForm from "./pages/record/RecordForm"; 
+import RecordSaved from './pages/record/RecordSaved';
+import RecordList from './pages/record/RecordList';
+
+
+
 
 function App() {
   return (
@@ -43,7 +50,7 @@ function App() {
         <Route path="/guide/enclosure-check" element={<EnclosureCheck />} />
         <Route path="/loading-fin" element={<LoadingFin />} />
 
-    
+        <Route path="/record/new/:type" element={<RecordForm />} />
 
         <Route element={<Layout />}>
           <Route path="/my" element={<MyPage />} />
@@ -57,6 +64,12 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/temperature" element={<Temperature />} />
           <Route path="/humidity" element={<Humidity />} />
+
+          <Route path="/record" element={<Record />} />
+          <Route path="/record/saved" element={<RecordSaved />} />
+          <Route path="/record/list" element={<RecordList />} />
+
+
           <Route path="*" element={null} />
         </Route>
       </Routes>

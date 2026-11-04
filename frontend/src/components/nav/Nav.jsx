@@ -14,6 +14,13 @@ const Nav = () => {
   const navigate = useNavigate()
   const location = useLocation()
 
+  const hideNavPaths = ['/record/saved', '/record/list'];
+  const shouldHideNav = hideNavPaths.some((path) => location.pathname.includes(path));
+
+  if (shouldHideNav) {
+    return null;
+  }
+  
   return (
     <nav className="bottom-nav">
       <img className="bottom-nav-background" src={bottomBar} alt="" />
