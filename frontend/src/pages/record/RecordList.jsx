@@ -18,6 +18,23 @@ import bgBadgeGreen from '../../assets/record/bg_badge_green.png';
 import bgBadgeOrange from '../../assets/record/bg_badge_orange.png';
 import bgBtnFinish from '../../assets/record/bg_btn_finish.png';
 
+import buttonSrc from '../../assets/sounds/button.mp3';
+import selectSrc from '../../assets/sounds/select.mp3';
+
+const playButtonSfx = () => {
+  const sound = new Audio(buttonSrc);
+  sound.volume = 0.5;
+  sound.currentTime = 0;
+  sound.play().catch(() => {});
+};
+
+const playSelectSfx = () => {
+  const sound = new Audio(selectSrc);
+  sound.volume = 0.5;
+  sound.currentTime = 0;
+  sound.play().catch(() => {});
+};
+
 const INITIAL_DATA = [
   { id: 1, date: '1', day: '화', color: 'green', type: '먹이', icon: iconFood, time: '오후 7시 35분', text: '밀웜 5마리를 줬는데 다 먹지 않고 자러...', imgUrl: 'https://via.placeholder.com/80' },
   { id: 2, date: '4', day: '금', color: 'orange', type: '추가기록', icon: iconEtc, time: '오후 7시 35분', text: '새 은신처로 바꿨는데 들어가서 잘 쉬...', imgUrl: 'https://via.placeholder.com/80' },
@@ -36,20 +53,31 @@ export default function RecordList() {
   const [isEditing, setIsEditing] = useState(false); 
 
   const handleDelete = (id) => {
+    playSelectSfx(); // 🎯 삭제 버튼 효과음
     setRecords((prev) => prev.filter((item) => item.id !== id));
   };
 
   return (
     <div className={`record-list-page ${isEditing ? 'is-editing-mode' : ''}`}>
       <header className="list-header">
-        <button type="button" className="header-btn" onClick={() => navigate(-1)}>
+        <button 
+          type="button" 
+          className="header-btn" 
+          onClick={() => {
+            playButtonSfx(); // 🎯 뒤로가기 효과음
+            navigate(-1);
+          }}
+        >
           <img src={iconBack} alt="뒤로가기" />
         </button>
         <h1 className="header-title">9월의 기록 ({records.length}건)</h1>
         <button 
           type="button" 
           className={`header-btn ${isEditing ? 'active' : ''}`}
-          onClick={() => setIsEditing((v) => !v)}
+          onClick={() => {
+            playButtonSfx(); // 🎯 편집 모드 전환 효과음
+            setIsEditing((v) => !v);
+          }}
         >
           <img src={iconEdit} alt="편집" />
         </button>
@@ -104,18 +132,21 @@ export default function RecordList() {
       </main>
 
       {isEditing && (
-  <div className="finish-btn-wrapper">
-    <img src={bgBtnFinish} alt="" className="finish-btn-bg" />
-    
-    <button 
-      type="button" 
-      className="finish-btn" 
-      onClick={() => setIsEditing(false)}
-    >
-      완료
-    </button>
-  </div>
-)}
+        <div className="finish-btn-wrapper">
+          <img src={bgBtnFinish} alt="" className="finish-btn-bg" />
+          
+          <button 
+            type="button" 
+            className="finish-btn" 
+            onClick={() => {
+              playSelectSfx(); 
+              setIsEditing(false);
+            }}
+          >
+            완료
+          </button>
+        </div>
+      )}
     </div>
   );
 }

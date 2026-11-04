@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate} from "react-router-dom";
 
 import Layout from "./components/layout/Layout";
 import Onboarding from "./pages/onboarding/Onboarding";
@@ -30,6 +30,8 @@ import Record from "./pages/record/Record";
 import RecordForm from "./pages/record/RecordForm"; 
 import RecordSaved from './pages/record/RecordSaved';
 import RecordList from './pages/record/RecordList';
+import RecordDetail from './pages/record/Recorddetail';
+
 
 
 
@@ -38,6 +40,7 @@ function App() {
   return (
     <div className="app">
       <Routes>
+        <Route path="/" element={<Navigate to="/onboarding" replace />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/my/gecko-custom" element={<MyGeckoCustom />} />
         <Route path="/my/tank-custom" element={<MyTankCustom />} />
@@ -61,17 +64,18 @@ function App() {
           <Route path="/guide/step4" element={<Step4 />} />
           <Route path="/guide/step5" element={<Step5 />} />
 
-          <Route path="/" element={<Home />} />
+          <Route path="/home" element={<Home />} />
           <Route path="/temperature" element={<Temperature />} />
           <Route path="/humidity" element={<Humidity />} />
 
           <Route path="/record" element={<Record />} />
           <Route path="/record/saved" element={<RecordSaved />} />
+          <Route path="/record/detail/:date" element={<RecordDetail />} />
           <Route path="/record/list" element={<RecordList />} />
 
 
-          <Route path="*" element={null} />
         </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
   );

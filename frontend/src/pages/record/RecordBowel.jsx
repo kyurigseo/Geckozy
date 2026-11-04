@@ -8,7 +8,7 @@ import btnAddPhoto from '../../assets/record/btn_add_photo.png';
 import photoEmpty from '../../assets/record/photo_empty.png';
 import btnComplete from '../../assets/record/btn_complete.png';
 
-const RecordBowel = ({ onBack }) => {
+const RecordBowel = ({ onBack, onComplete }) => {
   const [status, setStatus] = useState('평소와 다름');
   const [diffs, setDiffs] = useState(['묽음']);
   const [memo, setMemo] = useState('');
@@ -79,7 +79,7 @@ const RecordBowel = ({ onBack }) => {
           </div>
         </section>
         <div className="submit-area">
-        <button type="button" className="submit-btn-img">
+        <button type="button" className="submit-btn-img"  onClick={onComplete}>
             <img src={btnComplete} alt="완료 배경" />
             <span className="btn-text">완료</span>
         </button>

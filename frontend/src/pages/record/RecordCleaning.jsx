@@ -8,7 +8,7 @@ import btnAddPhoto from '../../assets/record/btn_add_photo.png';
 import photoEmpty from '../../assets/record/photo_empty.png';
 import btnComplete from '../../assets/record/btn_complete.png';
 
-const RecordCleaning = ({ onBack }) => {
+const RecordCleaning = ({ onBack, onComplete }) => {
   const [scope, setScope] = useState('부분 청소');
   const [items, setItems] = useState(['바닥재', '배설물']);
   const [memo, setMemo] = useState('');
@@ -80,7 +80,7 @@ const RecordCleaning = ({ onBack }) => {
         </section>
 
         <div className="submit-area">
-        <button type="button" className="submit-btn-img">
+        <button type="button" className="submit-btn-img"  onClick={onComplete}>
             <img src={btnComplete} alt="완료 배경" />
             <span className="btn-text">완료</span>
         </button>

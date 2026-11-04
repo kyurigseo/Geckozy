@@ -38,7 +38,7 @@ button {
   position: relative;
   width: 100%;
   max-width: 430px;
-  height: 100dvh;
+  height: 100%;
   margin: 0 auto;
   overflow: hidden;
   font-family: $font-katuri;
@@ -164,9 +164,7 @@ button {
       width: 100%;
     }
 
-    &.is-off {
-      opacity: 0.4;
-    }
+
   }
 }
 

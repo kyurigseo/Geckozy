@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSound } from "../../sound/SoundProvider";
+
 import "./Record.scss";
 
 import bgImg from "../../assets/record/bg.svg"; 
@@ -11,6 +13,25 @@ import cleaningIcon from "../../assets/record/icon_cleaning.png";
 import poopIcon from "../../assets/record/icon_poop.png"; 
 import symptomIcon from "../../assets/record/icon_symptom.png"; 
 import etcIcon from "../../assets/record/icon_etc.png"; 
+
+// 🎯 효과음 파일 import
+import buttonSrc from '../../assets/sounds/button.mp3';
+import selectSrc from '../../assets/sounds/select.mp3';
+
+// 🎯 BGM On/Off 상태와 무관하게 항상 소리가 나는 독립 효과음 함수
+const playButtonSfx = () => {
+  const sound = new Audio(buttonSrc);
+  sound.volume = 0.5;
+  sound.currentTime = 0;
+  sound.play().catch(() => {});
+};
+
+const playSelectSfx = () => {
+  const sound = new Audio(selectSrc);
+  sound.volume = 0.5;
+  sound.currentTime = 0;
+  sound.play().catch(() => {});
+};
 
 const TYPES = {
   feeding: { label: "먹이", icon: feedingIcon },
@@ -63,9 +84,7 @@ const fetchRecords = async (year, month) => {
 
 // ─────────── 달력 계산 ───────────
 const buildCells = (year, month) => {
-  // 해당 월 1일의 요일 (0: 일요일 ~ 6: 토요일)
   const blanks = new Date(year, month - 1, 1).getDay();
-  // 해당 월의 총 일수
   const days = new Date(year, month, 0).getDate();
   return [...Array(blanks).fill(null), ...Array.from({ length: days }, (_, i) => i + 1)];
 };
@@ -109,6 +128,7 @@ export default function Record() {
   const [ym, setYm] = useState({ y: today.getFullYear(), m: today.getMonth() + 1 });
   const [data, setData] = useState({ records: [], summary: [] });
   const [menuOpen, setMenuOpen] = useState(false);
+  const { isSoundOn, toggleSound, playSfx } = useSound();
 
   useEffect(() => {
     let cancelled = false;
@@ -153,13 +173,29 @@ export default function Record() {
     <div className="record-page" style={{ backgroundImage: `url(${bgImg})` }}>
       <div className="record-page__scroll">
         <header className="record-cal__nav">
-          <button type="button" className="record-cal__arrow" onClick={() => moveMonth(-1)} aria-label="이전 달">
+          <button 
+            type="button" 
+            className="record-cal__arrow" 
+            onClick={() => {
+              playButtonSfx(); // 🎯 이전 달 클릭 효과음
+              moveMonth(-1);
+            }} 
+            aria-label="이전 달"
+          >
             ‹
           </button>
           <h1 className="record-cal__title" aria-live="polite">
             {ym.y}년 <span>{ym.m}월</span>
           </h1>
-          <button type="button" className="record-cal__arrow" onClick={() => moveMonth(1)} aria-label="다음 달">
+          <button 
+            type="button" 
+            className="record-cal__arrow" 
+            onClick={() => {
+              playButtonSfx(); // 🎯 다음 달 클릭 효과음
+              moveMonth(1);
+            }} 
+            aria-label="다음 달"
+          >
             ›
           </button>
         </header>
@@ -196,7 +232,10 @@ export default function Record() {
             style={{ backgroundImage: `url(${addBtnImg})` }}
             aria-haspopup="menu"
             aria-expanded={menuOpen}
-            onClick={() => setMenuOpen((v) => !v)}
+            onClick={() => {
+              playButtonSfx(); // 🎯 기록 추가하기 버튼 클릭 효과음
+              setMenuOpen((v) => !v);
+            }}
           >
             기록 추가하기
           </button>
@@ -210,7 +249,10 @@ export default function Record() {
                   role="menuitem"
                   className="record-menu__item"
                   style={{ "--x": `${x}px`, "--y": `${y}px` }}
-                  onClick={() => openForm(type)}
+                  onClick={() => {
+                    playSelectSfx(); // 🎯 7가지 카테고리 항목 선택 효과음
+                    openForm(type);
+                  }}
                 >
                   <img src={TYPES[type].icon} alt="" />
                   <span>{TYPES[type].label}</span>
@@ -225,7 +267,14 @@ export default function Record() {
             <h2>
               {ym.m}월의 기록 <span>({data.records.length}건)</span>
             </h2>
-            <button type="button" className="record-sheet__more" onClick={() => navigate("/record/list")}>
+            <button 
+              type="button" 
+              className="record-sheet__more" 
+              onClick={() => {
+                playButtonSfx(); // 🎯 자세히 보기 버튼 효과음
+                navigate("/record/list");
+              }}
+            >
               자세히 보기 <span aria-hidden="true">›</span>
             </button>
           </div>
