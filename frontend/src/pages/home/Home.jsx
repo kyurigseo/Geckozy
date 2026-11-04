@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSound } from "../../sound/SoundProvider";
 import GuideModal from "./GuidePopup";
 import "./Home.scss";
+import TankPreview from "../../components/tank/TankPreview"
+
 
 import { getMyProfile, getMyTank } from "../../api/my";
 
@@ -22,6 +25,9 @@ import dropdownIcon from "../../assets/home/dropdown_icon.png"
 import careBtn from "../../assets/home/care_guide_btn.png"
 import darkRightBtn from "../../assets/home/darker_rightarrow_icon.png"
 
+import buttonSrc from '../../assets/sounds/button.mp3';
+
+
 
 const TERRARIUMS = [{ id: 1, pet: "레오", name: "1번 사육장", alerts: 2 }];
 
@@ -37,9 +43,9 @@ const METRICS = [
 
 export default function Home() {
   const navigate = useNavigate();
-  const [showAlerts, setShowAlerts] = useState(false);
-  const [soundOn, setSoundOn] = useState(true);
+  const [activePinId, setActivePinId] = useState(null);
   const [showGuide, setShowGuide] = useState(false);
+  const { isSoundOn, toggleSound, playSfx } = useSound();
 
   // 마이페이지에서 고른 프로필/사육장
   const [profile, setProfile] = useState(null);
@@ -69,6 +75,28 @@ export default function Home() {
   const dayName = today.toLocaleDateString("ko-KR", { weekday: "short" });
   const formattedDate = `${dateStr} (${dayName})`;
 
+  useEffect(() => {
+    const unlockSfx = () => {
+      // 첫 클릭 시 무음으로 한번 재생을 시도해서 브라우저 차단을 풀어버림
+      playSfx('button');
+      window.removeEventListener('pointerdown', unlockSfx);
+    };
+
+    window.addEventListener('pointerdown', unlockSfx);
+    return () => window.removeEventListener('pointerdown', unlockSfx);
+  }, [playSfx]);
+
+  const playButtonSfx = () => {
+    const sound = new Audio(buttonSrc);
+    sound.volume = 0.5; 
+    sound.currentTime = 0; 
+    sound.play().catch((err) => {
+      console.warn("효과음 재생 차단됨:", err);
+    });
+  };
+
+
+
   return (
     <div className="home">
       <div className="home__scroll">
@@ -94,46 +122,49 @@ export default function Home() {
 
         {/* 사육장 일러스트 + 알림 핀 */}
         <section className="stage">
-          {/* TODO: 팀원이 TankPreview를 export하면 {tank && <TankPreview tank={tank} />}로 교체 */}
-          <img 
-            src={current?.image || defaultTerrarium} 
-            alt={tankName || "사육장"} 
-            className="stage__img" 
-          />
-
-          <button
-            type="button"
-            className={`stage__sound ${soundOn ? "" : "is-off"}`}
-            onClick={() => setSoundOn((v) => !v)}
-            aria-label="소리 켜기/끄기"
-          >
-            <span aria-hidden="true">
-              {soundOn ? <img src={musicOn} alt="소리 켬" /> : <img src={musicOff} alt="소리 끔" />}
-            </span>
-          </button>
-
-          {ALERTS.map((a) => (
-            <div key={a.id} className="pin" style={{ left: `${a.x}%`, top: `${a.y}%` }}>
-              {showAlerts && (
-                <button
-                  type="button"
-                  className={`pin__bubble pin__bubble--${a.bubbleSide}`}
-                  onClick={() => navigate(a.link)}
-                >
-                  <strong>{a.text}</strong>
-                  <small>[확인하러 가기]</small>
-                </button>
-              )}
+          <TankPreview tank={tank} className="home-tank-preview" />
+        
+ 
               <button
-                type="button"
-                className="pin__dot"
-                onClick={() => setShowAlerts((v) => !v)}
-                aria-label="알림 보기"
-              >
-                !
-              </button>
-            </div>
-          ))}
+                  type="button"
+                  className={`stage__sound ${isSoundOn ? "" : "is-off"}`}
+                  onClick={toggleSound}
+                  aria-label="소리 켜기/끄기"
+                >
+                  <span aria-hidden="true">
+                    <img 
+                      src={isSoundOn ? musicOn : musicOff} 
+                      alt={isSoundOn ? "소리 켬" : "소리 끔"} 
+                    />
+                  </span>
+                </button>
+
+          {ALERTS.map((a) => {
+              const isOpen = activePinId === a.id;
+              return (
+                <div key={a.id} className="pin" style={{ left: `${a.x}%`, top: `${a.y}%` }}>
+                  {isOpen && (
+                    <button
+                      type="button"
+                      className={`pin__bubble pin__bubble--${a.bubbleSide}`}
+                      onClick={() => navigate(a.link)}
+                    >
+                      <strong>{a.text}</strong>
+                      <small>[확인하러 가기]</small>
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    className="pin__dot"
+                    onClick={() => setActivePinId(isOpen ? null : a.id)}
+                    aria-label="알림 보기"
+                  >
+                    !
+                  </button>
+                </div>
+              );
+            })}
         </section>
 
         {/* 하단 시트 */}
@@ -189,7 +220,13 @@ export default function Home() {
             <p>
               분무 이후 습도가 평소보다 오래 유지되고 있어요. 환기가 원활한지 확인해보는 것을 추천드려요!
             </p>
-            <button type="button" className="coach__btn" onClick={() => setShowGuide(true)}>
+            <button type="button" className="coach__btn" 
+      
+            onClick={() => {
+              console.log("버튼 클릭됨 / playSfx 호출");
+              playButtonSfx();
+              setShowGuide(true);}}
+            >
               관리 도감 보기 <span aria-hidden="true"><img src={darkRightBtn} alt="이동" /></span>
             </button>
           </div>

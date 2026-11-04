@@ -42,6 +42,12 @@ $h-guide-min: 289px;
     padding: 0 16px 140px; // 아래: 하단 네비에 가려지지 않게
     box-sizing: border-box;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none; 
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
   &__content {

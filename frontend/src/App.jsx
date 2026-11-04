@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate} from "react-router-dom";
 
 import Layout from "./components/layout/Layout";
 import Onboarding from "./pages/onboarding/Onboarding";
@@ -38,6 +38,7 @@ function App() {
   return (
     <div className="app">
       <Routes>
+        <Route path="/" element={<Navigate to="/onboarding" replace />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/my/gecko-custom" element={<MyGeckoCustom />} />
         <Route path="/my/tank-custom" element={<MyTankCustom />} />
@@ -61,7 +62,7 @@ function App() {
           <Route path="/guide/step4" element={<Step4 />} />
           <Route path="/guide/step5" element={<Step5 />} />
 
-          <Route path="/" element={<Home />} />
+          <Route path="/home" element={<Home />} />
           <Route path="/temperature" element={<Temperature />} />
           <Route path="/humidity" element={<Humidity />} />
 
@@ -70,8 +71,8 @@ function App() {
           <Route path="/record/list" element={<RecordList />} />
 
 
-          <Route path="*" element={null} />
         </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
   );

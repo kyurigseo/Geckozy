@@ -10,6 +10,23 @@ import frameImg from "../../assets/home/frame.png";
 import prevImg from "../../assets/home/prev.png"; 
 import nextImg from "../../assets/home/next.png"; 
 
+import buttonSrc from "../../assets/sounds/button.mp3";
+import selectSrc from "../../assets/sounds/select.mp3";
+
+const playButtonSfx = () => {
+  const sound = new Audio(buttonSrc);
+  sound.volume = 0.5;
+  sound.currentTime = 0;
+  sound.play().catch(() => {});
+};
+
+const playSelectSfx = () => {
+  const sound = new Audio(selectSrc);
+  sound.volume = 0.5;
+  sound.currentTime = 0;
+  sound.play().catch(() => {});
+};
+
 const PAGES = [
   {
     key: "why",
@@ -40,7 +57,6 @@ const PAGES = [
 ];
 
 const LAST = PAGES.length - 1;
-
 
 function PageBody({ page, scrapped, onScrap }) {
   const heading = (
@@ -99,7 +115,10 @@ function PageBody({ page, scrapped, onScrap }) {
       <button
         type="button"
         className={`guide-popup__scrap ${scrapped ? "is-on" : ""}`}
-        onClick={onScrap}
+        onClick={() => {
+          playSelectSfx(); 
+          onScrap();
+        }}
         aria-pressed={scrapped}
       >
         {scrapped ? "스크랩됨" : "스크랩"}
@@ -107,7 +126,6 @@ function PageBody({ page, scrapped, onScrap }) {
     </>
   );
 }
-
 
 export default function GuidePopup({ onClose }) {
   const [page, setPage] = useState(0);
@@ -150,7 +168,15 @@ export default function GuidePopup({ onClose }) {
         style={{ backgroundImage: `url(${frameImg})` }}
         onClick={(e) => e.stopPropagation()}
       >
-        <button type="button" className="guide-popup__close" onClick={onClose} aria-label="닫기">
+        <button 
+          type="button" 
+          className="guide-popup__close" 
+          onClick={() => {
+            playButtonSfx(); // 🎯 닫기 버튼 효과음
+            onClose();
+          }} 
+          aria-label="닫기"
+        >
           <img src={closeImg} alt="" />
         </button>
 
@@ -163,13 +189,31 @@ export default function GuidePopup({ onClose }) {
         </div>
 
         <footer className="guide-popup__pager">
-          <button type="button" className="guide-popup__arrow" onClick={prev} disabled={page === 0} aria-label="이전 페이지">
+          <button 
+            type="button" 
+            className="guide-popup__arrow" 
+            onClick={() => {
+              if (page > 0) playButtonSfx(); // 🎯 첫 페이지가 아닐 때만 효과음 재생
+              prev();
+            }} 
+            disabled={page === 0} 
+            aria-label="이전 페이지"
+          >
             <img src={prevImg} alt="" />
           </button>
           <span className="guide-popup__count" aria-live="polite">
             {page + 1}/{PAGES.length}
           </span>
-          <button type="button" className="guide-popup__arrow" onClick={next} disabled={page === LAST} aria-label="다음 페이지">
+          <button 
+            type="button" 
+            className="guide-popup__arrow" 
+            onClick={() => {
+              if (page !== LAST) playButtonSfx(); // 🎯 마지막 페이지가 아닐 때만 효과음 재생
+              next();
+            }} 
+            disabled={page === LAST} 
+            aria-label="다음 페이지"
+          >
             <img src={nextImg} alt="" />
           </button>
         </footer>

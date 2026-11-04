@@ -1,0 +1,353 @@
+// 기록 상세 — 달력/시트 기본 스타일은 Record.scss 것을 쓰고, 여기선 상세에만 필요한 것만 덧붙임
+$brown: #6b3f1f;
+$brown-soft: #a2724a;
+$cream: #fff8ea;
+$band: #f7e7c3;
+$card-bg: #fff3da;
+$card-line: #f4d9a2;
+$orange: #ff9834;
+$temp: #f0731f;
+$humid: #5db3f5;
+$px: "yoon-px-pixman", sans-serif;
+
+.record-detail {
+  // ── 달력: 선택된 날짜 강조 ──
+  .record-cal__cell {
+    &.has-record {
+      cursor: pointer;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #fff;
+      outline-offset: 2px;
+      border-radius: 12px;
+    }
+
+    &.is-selected {
+      .record-cal__num {
+        color: #fff;
+        font-size: 1.25em;
+        font-weight: 700;
+      }
+
+      .record-cal__icon {
+        border-radius: 50%;
+        box-shadow: 0 0 0 3px #d6eba8;
+      }
+    }
+  }
+
+  // ── 시트 안쪽 ──
+  &__sheet {
+    .record-sheet__head {
+      align-items: center;
+    }
+  }
+
+  &__trash {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1.5px solid $card-line;
+    border-radius: 50%;
+    background: #fff;
+    cursor: pointer;
+
+    &:active {
+      transform: scale(0.94);
+    }
+  }
+
+  // 전체 폭으로 깔리는 구분 띠 (시트 패딩 값을 몰라도 양옆 끝까지 닿게)
+  &__band {
+    height: 10px;
+    margin: 18px 0 16px;
+    background: $band;
+    box-shadow: 0 0 0 100vmax $band;
+    clip-path: inset(0 -100vmax);
+  }
+
+  &__h {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 12px;
+    font-family: $px;
+    font-size: 18px;
+    font-weight: 400;
+    color: $brown;
+  }
+
+  &__loading {
+    margin: 0;
+    font-size: 13px;
+    color: $brown-soft;
+  }
+
+  // ── 기록 카드 ──
+  &__entries {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  &__entry {
+    position: relative;
+    padding: 2px 0;
+
+    // 같은 날 기록이 여러 건일 때만 구분됨
+    &:not(:only-child) {
+      padding: 10px;
+      border: 2px solid transparent;
+      border-radius: 16px;
+      cursor: pointer;
+
+      &.is-active {
+        border-color: $card-line;
+        background: rgba(255, 255, 255, 0.5);
+      }
+    }
+  }
+
+  &__entry-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  &__badge {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 62px;
+    height: 62px;
+    border: 3px solid #7a9a3a;
+    border-radius: 50%;
+    background: #f1f6dc;
+
+    img {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+    }
+  }
+
+  &__entry-main {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  &__type {
+    font-family: $px;
+    font-size: 20px;
+    font-weight: 400;
+    color: $brown;
+  }
+
+  &__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__tag {
+    padding: 3px 10px;
+    border: 1.5px solid;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+
+    &.is-pink {
+      color: #c8495a;
+      background: #ffd3d8;
+      border-color: #f3a3ae;
+    }
+
+    &.is-orange {
+      color: #a8601c;
+      background: #ffd89e;
+      border-color: #f0b765;
+    }
+  }
+
+  &__photos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 14px 0 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+      width: 84px;
+      height: 84px;
+      overflow: hidden;
+      border-radius: 10px;
+      background: $card-line;
+    }
+
+    img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__memo {
+    margin: 12px 0 0;
+    padding: 11px 12px;
+    border: 1.5px solid #ecdcc0;
+    border-radius: 10px;
+    background: #fff;
+    font-size: 13px;
+    line-height: 1.45;
+    color: $brown;
+    word-break: keep-all;
+  }
+
+  &__time {
+    display: block;
+    margin-top: 8px;
+    font-size: 11px;
+    text-align: right;
+    color: $brown-soft;
+  }
+
+  // ── 당시 사육환경 ──
+  &__stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  &__stat {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 12px;
+    border: 2px solid $card-line;
+    border-radius: 16px;
+    background: $card-bg;
+    box-shadow: inset 0 0 0 3px #fff8e8;
+  }
+
+  &__stat-label {
+    display: block;
+    font-size: 12px;
+    color: $brown-soft;
+  }
+
+  &__stat-value {
+    display: block;
+    margin-top: 2px;
+    font-family: $px;
+    font-size: 26px;
+    font-weight: 400;
+    color: $brown;
+  }
+
+  // ── 환경 데이터 요약 ──
+  &__note {
+    margin-top: 14px;
+    padding: 14px;
+    border: 2px solid #f0d27c;
+    border-radius: 14px;
+    background: #fff2c8;
+
+    p {
+      margin: 8px 0 0;
+      font-size: 12.5px;
+      line-height: 1.5;
+      color: $brown;
+      word-break: keep-all;
+    }
+  }
+
+  &__note-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: $brown;
+
+    strong {
+      font-size: 15px;
+    }
+  }
+}
+
+// ── 24시간 차트 ──
+.env-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+
+  &__grid {
+    stroke: #eedfc4;
+    stroke-width: 1;
+  }
+
+  &__unit,
+  &__tick {
+    font-size: 8.5px;
+  }
+
+  &__unit--t,
+  &__tick--t {
+    fill: #f0902f;
+  }
+
+  &__unit--h,
+  &__tick--h {
+    fill: $humid;
+  }
+
+  &__tick--x {
+    fill: $brown;
+    font-size: 8.5px;
+  }
+
+  &__bar {
+    stroke: $temp;
+    stroke-width: 5;
+    stroke-linecap: round;
+  }
+
+  &__dot {
+    fill: $humid;
+  }
+
+  &__mark {
+    stroke: $brown;
+    stroke-width: 1;
+    stroke-dasharray: 1.5 2.5;
+    stroke-linecap: round;
+  }
+
+  &__mark-dot {
+    fill: $brown;
+  }
+
+  &__tip {
+    fill: $brown;
+  }
+
+  &__tip-text {
+    fill: #fff;
+    font-size: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .record-detail__trash {
+    transition: transform 0.12s ease;
+  }
+}
