@@ -8,7 +8,7 @@ import btnAddPhoto from '../../assets/record/btn_add_photo.png';
 import photoEmpty from '../../assets/record/photo_empty.png';
 import btnComplete from '../../assets/record/btn_complete.png';
 
-const RecordFeed = ({ onBack }) => {
+const RecordFeed = ({ onBack, onComplete }) => {
   const [feedType, setFeedType] = useState('직접 입력');
   const [customInput, setCustomInput] = useState('');
   const [response, setResponse] = useState('대부분 먹음');
@@ -80,7 +80,7 @@ const RecordFeed = ({ onBack }) => {
         </section>
 
         <div className="submit-area">
-        <button type="button" className="submit-btn-img">
+        <button type="button" className="submit-btn-img"  onClick={onComplete}>
             <img src={btnComplete} alt="완료 배경" />
             <span className="btn-text">완료</span>
         </button>

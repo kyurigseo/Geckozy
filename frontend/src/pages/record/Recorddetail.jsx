@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 // 달력/페이지 뼈대(record-page, record-cal__*, record-add, record-menu, record-sheet)는 Record.scss를 그대로 씀
 import "./Record.scss";
-import "./RecordDetail.scss";
+import "./Recorddetail.scss";
 
 import bgImg from "../../assets/record/bg.svg";
 import addBtnImg from "../../assets/record/add_btn.png";
@@ -14,9 +14,16 @@ import cleaningIcon from "../../assets/record/icon_cleaning.png";
 import poopIcon from "../../assets/record/icon_poop.png";
 import symptomIcon from "../../assets/record/icon_symptom.png";
 import etcIcon from "../../assets/record/icon_etc.png";
-
+import deleteIcon from "../../assets/record/icon_trash.png";
 import buttonSrc from "../../assets/sounds/button.mp3";
 import selectSrc from "../../assets/sounds/select.mp3";
+
+
+import sproutIcon from "../../assets/record/icon_sprout.png";
+import trendIcon from "../../assets/record/icon_trend.png";
+import docIcon from "../../assets/record/icon_doc.png";
+import thermoIcon from "../../assets/record/icon_thermo.png";
+import dropIcon from "../../assets/record/icon_drop.png";
 
 const playSfx = (src) => {
   const sound = new Audio(src);
@@ -137,44 +144,6 @@ const summarize = (pts) => {
     : "기록 전후로 온습도에서 눈에 띄는 변화는 확인되지 않았어요.";
 };
 
-// ─────────── 작은 아이콘 (이미지 에셋 없이 SVG) ───────────
-const Sprout = () => (
-  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-    <path d="M12 21V12" stroke="#6b3f1f" strokeWidth="2" strokeLinecap="round" />
-    <path d="M12 13C12 8 8 6 4 6c0 4 3 7 8 7Z" fill="#7bb33a" stroke="#4f7d1c" strokeWidth="1.5" strokeLinejoin="round" />
-    <path d="M12 11c0-4 3-6 7-6 0 4-3 6-7 6Z" fill="#9ccc4c" stroke="#4f7d1c" strokeWidth="1.5" strokeLinejoin="round" />
-  </svg>
-);
-const Trend = () => (
-  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-    <path d="M3 3v18h18" fill="none" stroke="#6b3f1f" strokeWidth="2" strokeLinecap="round" />
-    <path d="M7 15l4-4 3 3 5-6" fill="none" stroke="#f0731f" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-const Doc = () => (
-  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-    <rect x="4" y="3" width="16" height="18" rx="3" fill="#fff" stroke="#6b3f1f" strokeWidth="2" />
-    <path d="M8 16v-3M12 16V9M16 16v-5" stroke="#f0731f" strokeWidth="2.2" strokeLinecap="round" />
-  </svg>
-);
-const Trash = () => (
-  <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-    <path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12" fill="none" stroke="#a2724a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-const Thermo = () => (
-  <svg viewBox="0 0 32 32" width="40" height="40" aria-hidden="true">
-    <rect x="12" y="3" width="8" height="18" rx="4" fill="#fff" stroke="#8a4b2a" strokeWidth="2" />
-    <rect x="14.5" y="10" width="3" height="12" fill="#e8484f" />
-    <circle cx="16" cy="24" r="6" fill="#e8484f" stroke="#8a4b2a" strokeWidth="2" />
-  </svg>
-);
-const Drop = () => (
-  <svg viewBox="0 0 32 32" width="40" height="40" aria-hidden="true">
-    <path d="M16 3S6 14 6 20a10 10 0 0 0 20 0C26 14 16 3 16 3Z" fill="#5cb6f6" stroke="#2f6fa8" strokeWidth="2" strokeLinejoin="round" />
-    <path d="M11 20a5 5 0 0 0 4 5" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
-  </svg>
-);
 
 // ─────────── 전후 24시간 차트 ───────────
 const VB_W = 300;
@@ -476,7 +445,7 @@ export default function RecordDetail() {
                   {ym.m}월 {day}일 <span>({dayRecords.length}건)</span>
                 </h2>
                 <button type="button" className="record-detail__trash" onClick={handleDelete} aria-label="기록 삭제">
-                  <Trash />
+                  <img src={deleteIcon} alt="" />
                 </button>
               </div>
 
@@ -528,19 +497,19 @@ export default function RecordDetail() {
               <div className="record-detail__band" aria-hidden="true" />
 
               <h3 className="record-detail__h">
-                <Sprout /> 당시 사육환경
+                <img src={sproutIcon} alt="" /> 당시 사육환경
               </h3>
               {envStats ? (
                 <div className="record-detail__stats">
                   <div className="record-detail__stat">
-                    <Thermo />
+                    <img src={thermoIcon} alt="" />
                     <div>
                       <span className="record-detail__stat-label">평균 온도</span>
                       <strong className="record-detail__stat-value">{envStats.temp.toFixed(1)}°C</strong>
                     </div>
                   </div>
                   <div className="record-detail__stat">
-                    <Drop />
+                    <img src={dropIcon} alt="" />
                     <div>
                       <span className="record-detail__stat-label">평균 습도</span>
                       <strong className="record-detail__stat-value">{Math.round(envStats.humid)}%</strong>
@@ -551,10 +520,9 @@ export default function RecordDetail() {
                 <p className="record-detail__loading">환경 데이터를 불러오는 중이에요.</p>
               )}
 
-              <div className="record-detail__band" aria-hidden="true" />
 
               <h3 className="record-detail__h">
-                <Trend /> {TYPES[active.type]?.label ?? "기록"} 전후 24시간 환경 변화
+               <img src={trendIcon} alt="" /> {TYPES[active.type]?.label ?? "기록"} 전후 24시간 환경 변화
               </h3>
               {env && (
                 <EnvChart points={env} recordTime={active.time} dateLabel={`${ym.m}/${day}`} />
@@ -563,7 +531,7 @@ export default function RecordDetail() {
               {envStats && (
                 <div className="record-detail__note">
                   <div className="record-detail__note-head">
-                    <Doc /> <strong>환경 데이터 요약</strong>
+                    <img src={docIcon} alt="" /> <strong>환경 데이터 요약</strong>
                   </div>
                   <p>{envStats.note}</p>
                 </div>

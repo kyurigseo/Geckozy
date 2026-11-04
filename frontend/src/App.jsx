@@ -30,6 +30,8 @@ import Record from "./pages/record/Record";
 import RecordForm from "./pages/record/RecordForm"; 
 import RecordSaved from './pages/record/RecordSaved';
 import RecordList from './pages/record/RecordList';
+import RecordDetail from './pages/record/Recorddetail';
+
 
 
 
@@ -68,6 +70,7 @@ function App() {
 
           <Route path="/record" element={<Record />} />
           <Route path="/record/saved" element={<RecordSaved />} />
+          <Route path="/record/detail/:date" element={<RecordDetail />} />
           <Route path="/record/list" element={<RecordList />} />
 
 

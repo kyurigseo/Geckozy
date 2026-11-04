@@ -1,58 +1,75 @@
-// 기록 상세 — 달력/시트 기본 스타일은 Record.scss 것을 쓰고, 여기선 상세에만 필요한 것만 덧붙임
+
 $brown: #6b3f1f;
 $brown-soft: #a2724a;
-$cream: #fff8ea;
-$band: #f7e7c3;
-$card-bg: #fff3da;
-$card-line: #f4d9a2;
+$band: #f8e8c6;
+$card-line: #f6dcae;
 $orange: #ff9834;
 $temp: #f0731f;
 $humid: #5db3f5;
+
 $px: "yoon-px-pixman", sans-serif;
+$round: "andong-katuri", sans-serif; 
+
+$font-pixel: "yoon-px-pixman", sans-serif;
+$font-katuri: "andong-katuri", sans-serif;
+$font-mamablock: "mamablock-210", sans-serif;
 
 .record-detail {
-  // ── 달력: 선택된 날짜 강조 ──
   .record-cal__cell {
     &.has-record {
       cursor: pointer;
     }
 
-    &:focus-visible {
-      outline: 2px solid #fff;
-      outline-offset: 2px;
-      border-radius: 12px;
-    }
+   
 
     &.is-selected {
       .record-cal__num {
-        color: #fff;
-        font-size: 1.25em;
-        font-weight: 700;
+        font-size: 20px;
       }
 
       .record-cal__icon {
-        border-radius: 50%;
-        box-shadow: 0 0 0 3px #d6eba8;
+        width: 44px;
+        height: 44px;
+
+        img {
+          width: 44px;
+          height: 44px;
+          object-fit: contain;
+        }
       }
     }
   }
 
-  // ── 시트 안쪽 ──
-  &__sheet {
-    .record-sheet__head {
-      align-items: center;
+  .record-sheet.record-detail__sheet {
+    padding-left: 22px;
+    padding-right: 22px;
+  }
+
+  .record-sheet__head {
+    align-items: center;
+
+    h2 {
+      font-family: $round;
+      font-size: 28px;
+      font-weight: 400;
+      color: $brown;
+
+      span {
+        color: $orange;
+      }
     }
   }
 
   &__trash {
     display: grid;
     place-items: center;
-    width: 30px;
-    height: 30px;
+    flex: none;
+    width: 32px;
+    height: 32px;
     padding: 0;
     border: 1.5px solid $card-line;
     border-radius: 50%;
-    background: #fff;
+    background: #fdf0d6;
     cursor: pointer;
 
     &:active {
@@ -60,24 +77,43 @@ $px: "yoon-px-pixman", sans-serif;
     }
   }
 
-  // 전체 폭으로 깔리는 구분 띠 (시트 패딩 값을 몰라도 양옆 끝까지 닿게)
+  // 시트 양옆 끝까지 닿는 구분 띠
   &__band {
     height: 10px;
-    margin: 18px 0 16px;
-    background: $band;
-    box-shadow: 0 0 0 100vmax $band;
+    margin: 20px 0 20px;
+    background: #FFECCB;
+    box-shadow: 0 0 0 100vmax #FFECCB;
     clip-path: inset(0 -100vmax);
   }
 
+  // 제목: 첫 번째(당시 사육환경)는 크게, 두 번째(전후 24시간)는 작게 — 시안 기준
   &__h {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin: 0 0 12px;
-    font-family: $px;
-    font-size: 18px;
+    margin: 0 0 14px;
+    font-family: $round;
     font-weight: 400;
     color: $brown;
+
+    svg {
+      flex: none;
+      width: 28px;
+      height: 28px;
+    }
+
+    &:first-of-type {
+      font-size: 20px;
+    }
+
+    &:nth-of-type(2) {
+      font-size: 16px;
+
+      svg {
+        width: 26px;
+        height: 26px;
+      }
+    }
   }
 
   &__loading {
@@ -95,9 +131,8 @@ $px: "yoon-px-pixman", sans-serif;
 
   &__entry {
     position: relative;
-    padding: 2px 0;
 
-    // 같은 날 기록이 여러 건일 때만 구분됨
+    // 같은 날 기록이 여러 건일 때만 선택 표시가 보임
     &:not(:only-child) {
       padding: 10px;
       border: 2px solid transparent;
@@ -114,23 +149,19 @@ $px: "yoon-px-pixman", sans-serif;
   &__entry-head {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 11px;
   }
 
   &__badge {
     flex: none;
     display: grid;
     place-items: center;
-    width: 62px;
-    height: 62px;
-    border: 3px solid #7a9a3a;
-    border-radius: 50%;
-    background: #f1f6dc;
+    width: 74px;
+    height: 74px;
 
     img {
-      width: 40px;
-      height: 40px;
-      object-fit: contain;
+      width: 69px;
+      height: 69px;
     }
   }
 
@@ -142,16 +173,16 @@ $px: "yoon-px-pixman", sans-serif;
   }
 
   &__type {
-    font-family: $px;
+    font-family: $font-pixel;
     font-size: 20px;
     font-weight: 400;
-    color: $brown;
+    color: #5B3524;
   }
 
   &__tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 7px;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -161,35 +192,36 @@ $px: "yoon-px-pixman", sans-serif;
     padding: 3px 10px;
     border: 1.5px solid;
     border-radius: 8px;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
+    line-height: 1.3;
 
     &.is-pink {
-      color: #c8495a;
-      background: #ffd3d8;
-      border-color: #f3a3ae;
+      color: #C73F48;
+      background: #FFB8BD;
+      border-color: #FF646E;
     }
 
     &.is-orange {
-      color: #a8601c;
-      background: #ffd89e;
-      border-color: #f0b765;
+      color: #944B1B;
+      background: #FFC58D;
+      border-color: #FF9834;
     }
   }
 
   &__photos {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    margin: 14px 0 0;
+    gap: 9px;
+    margin: 10px 0 0;
     padding: 0;
     list-style: none;
 
     li {
-      width: 84px;
-      height: 84px;
+      width: 106px;
+      height: 106px;
       overflow: hidden;
-      border-radius: 10px;
+      border-radius: 11px;
       background: $card-line;
     }
 
@@ -202,9 +234,9 @@ $px: "yoon-px-pixman", sans-serif;
   }
 
   &__memo {
-    margin: 12px 0 0;
-    padding: 11px 12px;
-    border: 1.5px solid #ecdcc0;
+    margin: 14px 0 0;
+    padding: 8px 12px;
+    border: 1.5px solid #f1dfbf;
     border-radius: 10px;
     background: #fff;
     font-size: 13px;
@@ -215,8 +247,8 @@ $px: "yoon-px-pixman", sans-serif;
 
   &__time {
     display: block;
-    margin-top: 8px;
-    font-size: 11px;
+    margin-top: 6px;
+    font-size: 10px;
     text-align: right;
     color: $brown-soft;
   }
@@ -225,46 +257,67 @@ $px: "yoon-px-pixman", sans-serif;
   &__stats {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    gap: 21px;
+    margin-bottom: 30px;
   }
 
   &__stat {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 14px 12px;
+    gap: 12px;
+    min-height: 87px;
+    padding: 12px 14px;
     border: 2px solid $card-line;
-    border-radius: 16px;
-    background: $card-bg;
-    box-shadow: inset 0 0 0 3px #fff8e8;
+    border-radius: 22px;
+    background: #FDF7EE;
+    box-shadow: inset -10px -10px 0 #FFECCB99;
+
+    
+
+    img {
+       flex: none;
+        object-fit: contain;
+    }
+        &:nth-child(1) img {
+        width: 32px;
+        height: 50px;
+    }
+
+    &:nth-child(2) img {
+        width: 34px;
+        height: 45px;
+    }
   }
 
   &__stat-label {
     display: block;
-    font-size: 12px;
-    color: $brown-soft;
+    font-size: 14px;
+    color: #B47952;
   }
 
   &__stat-value {
     display: block;
     margin-top: 2px;
-    font-family: $px;
-    font-size: 26px;
+    font-family: $font-mamablock;
+    font-size: 30px;
     font-weight: 400;
+    letter-spacing: -0.02em;
     color: $brown;
   }
 
   // ── 환경 데이터 요약 ──
   &__note {
-    margin-top: 14px;
-    padding: 14px;
-    border: 2px solid #f0d27c;
-    border-radius: 14px;
-    background: #fff2c8;
+    margin-top: 16px;
+    padding: 14px 17px;
+    border: 2px solid #FFC58D;
+    border-radius: 10px;
+    background: #FFECCB;
+    width: 350px;
+    height: 88px;
 
     p {
       margin: 8px 0 0;
-      font-size: 12.5px;
+      font-size: 11.5px;
       line-height: 1.5;
       color: $brown;
       word-break: keep-all;
@@ -277,8 +330,16 @@ $px: "yoon-px-pixman", sans-serif;
     gap: 8px;
     color: $brown;
 
+    svg {
+      width: 28px;
+      height: 28px;
+    }
+
     strong {
-      font-size: 15px;
+      font-family: $round;
+      font-size: 18px;
+      font-weight: 400;
+      color: #492515;
     }
   }
 }
@@ -291,8 +352,9 @@ $px: "yoon-px-pixman", sans-serif;
   overflow: visible;
 
   &__grid {
-    stroke: #eedfc4;
+    stroke: #f1e1c4;
     stroke-width: 1;
+    stroke-dasharray: 2 3;
   }
 
   &__unit,
@@ -337,7 +399,7 @@ $px: "yoon-px-pixman", sans-serif;
   }
 
   &__tip {
-    fill: $brown;
+    fill: #a8754d;
   }
 
   &__tip-text {

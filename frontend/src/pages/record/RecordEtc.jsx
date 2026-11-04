@@ -98,7 +98,7 @@ function WheelColumn({ items, unit, defaultValue, onChange }) {
   );
 }
 
-const RecordEtc = ({ onBack }) => {
+const RecordEtc = ({ onBack,onComplete  }) => {
   const [etcType, setEtcType] = useState('사육장 변화');
   const [selectedTime, setSelectedTime] = useState('');
   const [isPickerOpen, setIsPickerOpen] = useState(false);
@@ -187,7 +187,7 @@ const RecordEtc = ({ onBack }) => {
         </section>
 
         <div className="submit-area">
-          <button type="button" className="submit-btn-img">
+          <button type="button" className="submit-btn-img"  onClick={onComplete}>
             <img src={btnComplete} alt="완료" />
             <span className="btn-text">완료</span>
           </button>

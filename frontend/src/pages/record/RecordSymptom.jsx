@@ -9,7 +9,7 @@ import btnAddPhoto from '../../assets/record/btn_add_photo.png';
 import photoEmpty from '../../assets/record/photo_empty.png';
 import btnComplete from '../../assets/record/btn_complete.png';
 
-const RecordSymptom = ({ onBack }) => {
+const RecordSymptom = ({ onBack, onComplete }) => {
   const [changes, setChanges] = useState(['먹이 반응 저하']);
   const [startTime, setStartTime] = useState('오늘 처음');
   const [observed, setObserved] = useState('현재도 관찰됨');
@@ -98,7 +98,7 @@ const RecordSymptom = ({ onBack }) => {
         </section>
 
         <div className="submit-area">
-    <button type="button" className="submit-btn-img">
+    <button type="button" className="submit-btn-img"  onClick={onComplete}>
         <img src={btnComplete} alt="완료 배경" />
         <span className="btn-text">완료</span>
     </button>

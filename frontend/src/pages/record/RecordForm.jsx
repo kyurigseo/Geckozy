@@ -38,11 +38,15 @@ const RecordForm = () => {
     navigate(-1);
   };
 
-  // 완료 처리 핸들러 (RecordSaved로 전환 -> RecordSaved 내부 타임아웃이 /record로 자동 이동)
   const handleComplete = () => {
-    playSelectSfx();
-    setIsSaved(true);
-  };
+     playButtonSfx(); 
+  const d = new Date();
+  const date = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  navigate("/record/saved", {
+    replace: true, 
+    state: { next: `/record/detail/${date}` },
+  });
+};
 
   const formProps = {
     onBack: handleBack,
