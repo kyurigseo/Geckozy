@@ -140,3 +140,24 @@
 
   
 }
+
+.scrap-card--clickable {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+  cursor: pointer;
+
+  &:active {
+    transform: translateY(2px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #492515;
+    outline-offset: 2px;
+    border-radius: 12px;
+  }
+}

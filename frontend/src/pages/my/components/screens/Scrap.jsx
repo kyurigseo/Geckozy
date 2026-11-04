@@ -1,4 +1,7 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+
+import GuidePopup from '../../../home/GuidePopup' // ← GuidePopup 위치에 맞게 수정
 
 import back from '../../../../assets/my/뒤로가기.svg'
 import scrapBackground from '../../../../assets/my/스크랩 배경.svg'
@@ -11,7 +14,7 @@ import hideoutImage from '../../../../assets/my/스크랩_은신처.svg'
 import './Scrap.scss'
 
 const SCRAPS = [
-  { id: 1, title: '사육장 환기 관리', date: '2026.09.01', image: ventilationImage },
+  { id: 1, title: '사육장 환기 관리', date: '2026.09.01', image: ventilationImage, popup: 'ventilation' },
   { id: 2, title: '환기할 때 확인할 것', date: '2026.08.14', image: checkImage },
   { id: 3, title: '올바른 분무 주기', date: '2026.08.01', image: sprayImage },
   { id: 4, title: '깨끗한 물그릇 관리', date: '2026.07.29', image: waterImage },
@@ -20,6 +23,7 @@ const SCRAPS = [
 
 const Scrap = () => {
   const navigate = useNavigate()
+  const [openPopup, setOpenPopup] = useState(null)
 
   return (
     <div className="scrap">
@@ -32,16 +36,37 @@ const Scrap = () => {
 
       <main className="scrap-content">
         <div className="scrap-grid">
-          {SCRAPS.map((item) => (
-            <article className="scrap-card" key={item.id}>
-              <img className="scrap-card-background" src={scrapBackground} alt="" />
-              <img className="scrap-card-image" src={item.image} alt="" />
-              <strong className="scrap-card-title">{item.title}</strong>
-              <span className="scrap-card-date">{item.date}</span>
-            </article>
-          ))}
+          {SCRAPS.map((item) => {
+            const content = (
+              <>
+                <img className="scrap-card-background" src={scrapBackground} alt="" />
+                <img className="scrap-card-image" src={item.image} alt="" />
+                <strong className="scrap-card-title">{item.title}</strong>
+                <span className="scrap-card-date">{item.date}</span>
+              </>
+            )
+
+            return item.popup ? (
+              <button
+                type="button"
+                key={item.id}
+                className="scrap-card scrap-card--clickable"
+                onClick={() => setOpenPopup(item.popup)}
+              >
+                {content}
+              </button>
+            ) : (
+              <article className="scrap-card" key={item.id}>
+                {content}
+              </article>
+            )
+          })}
         </div>
       </main>
+
+      {openPopup === 'ventilation' && (
+        <GuidePopup initialScrapped onClose={() => setOpenPopup(null)} />
+      )}
     </div>
   )
 }
