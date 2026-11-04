@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import OnboardingInput from '../common/OnboardingInput'
 import OnboardingButton from '../common/OnboardingButton'
 import SoundToggle from '../common/SoundToggle'
+import { useSound } from '../../../../sound/SoundProvider'
 import { login as requestLogin } from '../../../../api/onboarding'
 
 import logo from '../../../../assets/onboarding/logo.png'
@@ -17,12 +18,14 @@ const Login = ({ form, updateForm, goTo, isSoundOn, onToggleSound }) => {
   const { login } = form
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { playSfx } = useSound()
 
   const handleChange = (field) => (value) => updateForm('login', { ...login, [field]: value })
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (isSubmitting) return
+    playSfx('button')
 
     if (!login.email.trim() || !login.password.trim()) {
       setError('이메일과 비밀번호를 입력해주세요.')
@@ -85,7 +88,10 @@ const Login = ({ form, updateForm, goTo, isSoundOn, onToggleSound }) => {
         <span className="login-links-divider" aria-hidden="true">|</span>
         <OnboardingButton variant="text">비밀번호 찾기</OnboardingButton>
         <span className="login-links-divider" aria-hidden="true">|</span>
-        <OnboardingButton variant="text" onClick={() => goTo('signup')}>회원가입</OnboardingButton>
+        <OnboardingButton variant="text" onClick={() => {
+            playSfx('button')
+            goTo('signup')
+          }}>회원가입</OnboardingButton>
       </nav>
 
       {error && <p className="login-error" role="alert">{error}</p>}
