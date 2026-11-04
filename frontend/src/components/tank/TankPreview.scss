@@ -1,14 +1,27 @@
+@use 'sass:math';
+
 // 사육장 미리보기 (벽지 또는 빈 사육장 위에 바닥재·덩굴·구조물을 겹침)
 // 쓰는 화면과 상관없이 먹도록 최상위에 둔다. 크기·위치는 className으로 덮어쓴다
+// img처럼 부모 너비를 채우고, 사육장(크림 벽지) 이미지 비율 562:560으로 자기 높이를 가진다.
+// 안쪽 레이어는 이 상자 기준 %로 놓여서(TankPreview.jsx) 너비가 바뀌어도 서로 어긋나지 않는다
 .tank-preview {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 562 / 560;
+  pointer-events: none; // 장식이라 터치를 막지 않음 (스크롤·아래 버튼에 그대로 전달)
 
   img {
     position: absolute;
+    display: block;
     max-width: none;
   }
+}
+
+// 사육장 본체 = 상자 전체
+.tank-preview-wall {
+  top: 0;
+  left: 0;
+  width: 100%;
 }
 
 .tank-preview-vine {
@@ -38,9 +51,10 @@
 // $floor-side-raise: 양옆 꼭짓점(왼·오른)을 같은 거리만큼 위로 올리는 값
 // $floor-side-extend: 양옆 꼭짓점을 같은 거리만큼 바깥쪽(가로)으로 늘리는 값
 // $floor-top-raise: 위(뒤쪽) 꼭짓점을 위로 올리는 값. 아래 꼭짓점은 그대로
-$floor-side-raise: 1.5px;
-$floor-side-extend: 4px;
-$floor-top-raise: 1.5px;
+// 원래 크기(바닥 영역 228.1x121.3px)에서 1.5px·4px인 값을 %로 둬서 크기가 바뀌어도 같은 모양
+$floor-side-raise: math.div(1.5, 121.3) * 100%;
+$floor-side-extend: math.div(4, 228.1) * 100%;
+$floor-top-raise: math.div(1.5, 121.3) * 100%;
 
 .tank-preview-floor {
   position: absolute;

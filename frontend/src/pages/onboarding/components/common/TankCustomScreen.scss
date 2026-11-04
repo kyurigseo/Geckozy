@@ -17,6 +17,14 @@
     top: 169px;
     right: 41px;
   }
+
+  // 미리보기(TankPreview): 무대에서 사육장 자리 (left 55, top 159, 너비 280.5 → 높이는 비율대로)
+  .tank-preview {
+    position: absolute;
+    top: 159px;
+    left: 55px;
+    width: 280.5px;
+  }
 }
 
 // 마이: 진행바 줄이 없어서 무대가 58px 위로 (사육장 top 101, 탭 top 347, 패널 top 397)
@@ -31,7 +39,7 @@
 
   // 미리보기(TankPreview)도 같이 위로
   .tank-preview {
-    top: -58px;
+    top: 101px;
   }
 }
 
