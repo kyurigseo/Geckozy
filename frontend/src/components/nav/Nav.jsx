@@ -14,6 +14,12 @@ const Nav = () => {
   const navigate = useNavigate()
   const location = useLocation()
 
+  const isSavedPage = location.pathname.includes('/record/saved')
+
+  if (isSavedPage) {
+    return null
+  }
+
   return (
     <nav className="bottom-nav">
       <img className="bottom-nav-background" src={bottomBar} alt="" />
