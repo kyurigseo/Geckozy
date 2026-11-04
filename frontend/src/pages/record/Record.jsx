@@ -225,7 +225,7 @@ export default function Record() {
             <h2>
               {ym.m}월의 기록 <span>({data.records.length}건)</span>
             </h2>
-            <button type="button" className="record-sheet__more" onClick={() => navigate("/record/detail")}>
+            <button type="button" className="record-sheet__more" onClick={() => navigate("/record/list")}>
               자세히 보기 <span aria-hidden="true">›</span>
             </button>
           </div>

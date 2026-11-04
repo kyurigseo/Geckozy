@@ -14,12 +14,13 @@ const Nav = () => {
   const navigate = useNavigate()
   const location = useLocation()
 
-  const isSavedPage = location.pathname.includes('/record/saved')
+  const hideNavPaths = ['/record/saved', '/record/list'];
+  const shouldHideNav = hideNavPaths.some((path) => location.pathname.includes(path));
 
-  if (isSavedPage) {
-    return null
+  if (shouldHideNav) {
+    return null;
   }
-
+  
   return (
     <nav className="bottom-nav">
       <img className="bottom-nav-background" src={bottomBar} alt="" />

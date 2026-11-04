@@ -29,6 +29,9 @@ import Humidity from "./pages/home/Humidity";
 import Record from "./pages/record/Record";
 import RecordForm from "./pages/record/RecordForm"; 
 import RecordSaved from './pages/record/RecordSaved';
+import RecordList from './pages/record/RecordList';
+
+
 
 
 function App() {
@@ -64,6 +67,8 @@ function App() {
 
           <Route path="/record" element={<Record />} />
           <Route path="/record/saved" element={<RecordSaved />} />
+          <Route path="/record/list" element={<RecordList />} />
+
 
           <Route path="*" element={null} />
         </Route>
