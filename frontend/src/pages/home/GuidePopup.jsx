@@ -109,9 +109,9 @@ function PageBody({ page, scrapped, onScrap }) {
 }
 
 
-export default function GuidePopup({ onClose }) {
+export default function GuidePopup({ onClose, initialScrapped = false }) {
   const [page, setPage] = useState(0);
-  const [scrapped, setScrapped] = useState(false); // TODO: 서버/로컬 저장소와 연결
+  const [scrapped, setScrapped] = useState(initialScrapped); // TODO: 서버/로컬 저장소와 연결
   const panelRef = useRef(null);
 
   const prev = () => setPage((p) => Math.max(0, p - 1));
