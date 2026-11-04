@@ -1,7 +1,7 @@
 @use '../../variables' as *;
 @use '../../mixins' as *;
 
-// 사육장 커스텀 화면 (온보딩·마이 공통). 공통 틀은 CustomScreen, 카드는 ChoiceCard
+// 사육장 커스텀 화면 (온보딩·마이 공통). 공통 틀은 CustomScreen, 카드는 ChoiceCard, 미리보기는 TankPreview
 // 사육장 화면은 진행바 줄이 가운데(left 23), 배지 79x74, 스피커 38x41 (left 314, top 169)
 .tank-custom {
   .custom-screen-progress {
@@ -29,69 +29,10 @@
     top: 347px;
   }
 
-  .tank-custom-preview {
+  // 미리보기(TankPreview)도 같이 위로
+  .tank-preview {
     top: -58px;
   }
-}
-
-// ===== 미리보기 (벽지 또는 빈 사육장 위에 바닥재·덩굴·구조물을 겹침) =====
-.tank-custom-preview {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-
-  img {
-    position: absolute;
-    max-width: none;
-  }
-}
-
-.tank-custom-vine {
-  transform: rotate(2.52deg);
-}
-
-// 벽 색: 크림 벽지 이미지 위에 같은 이미지를 겹치고 벽면만 남겨 색을 바꾼다 (테두리 나무색·바닥·콘센트는 그대로)
-// 벽면 영역: 크림 벽지 이미지(562x560) 안쪽 육각형에서 바닥 마름모를 뺀 모양
-// 필터 값은 초록·노랑 벽지 이미지의 벽 색과 비교해서 맞춘 값
-.tank-custom-wall-tint {
-  clip-path: polygon(8% 32.5%, 49.6% 9.8%, 92.4% 32.1%, 92.4% 68.2%, 90.2% 69.1%, 49.3% 48.2%, 8.9% 68.6%, 8% 68%);
-}
-
-.tank-custom-wall-tint-empty {
-  filter: grayscale(1) brightness(0.86);
-}
-
-.tank-custom-wall-tint-green {
-  filter: hue-rotate(40deg);
-}
-
-.tank-custom-wall-tint-yellow {
-  filter: hue-rotate(12deg) saturate(2.2) brightness(1.02);
-}
-
-// 바닥재: 사육장 바닥 마름모 모양으로 잘라낸다 (꼭짓점 왼·뒤·오른·앞)
-// $floor-side-raise: 양옆 꼭짓점(왼·오른)을 같은 거리만큼 위로 올리는 값
-// $floor-side-extend: 양옆 꼭짓점을 같은 거리만큼 바깥쪽(가로)으로 늘리는 값
-// $floor-top-raise: 위(뒤쪽) 꼭짓점을 위로 올리는 값. 아래 꼭짓점은 그대로
-$floor-side-raise: 1.5px;
-$floor-side-extend: 4px;
-$floor-top-raise: 1.5px;
-
-.tank-custom-floor {
-  position: absolute;
-  clip-path: polygon(
-    calc(0% - #{$floor-side-extend}) calc(46.9% - #{$floor-side-raise}),
-    49.7% calc(0% - #{$floor-top-raise}),
-    calc(100% + #{$floor-side-extend}) calc(48.2% - #{$floor-side-raise}),
-    50.3% 100%
-  );
-}
-
-// 바닥재 그림을 12% 크게 깔아서, 잘라낸 마름모 안이 빈틈 없이 덮이게 한다
-.tank-custom-floor-fill {
-  position: absolute;
-  inset: 0;
-  transform: scale(1.12);
 }
 
 // ===== 꾸미기 탭 ===== (제목 top 453, 카드 top 493, 섹션 간격 20)
