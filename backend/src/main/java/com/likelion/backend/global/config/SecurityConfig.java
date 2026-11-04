@@ -1,5 +1,6 @@
 package com.likelion.backend.global.config;
 
+import com.likelion.backend.domain.auth.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -8,9 +9,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,9 +22,15 @@ import java.util.List;
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Value("${cors.allowed-origins}")
     private String corsAllowedOrigins;
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -93,7 +103,8 @@ public class SecurityConfig {
                         // 회원가입 / 로그인은 인증 없이 접근 가능
                         .requestMatchers(
                                 "/auth/signup",
-                                "/auth/login"
+                                "/auth/login",
+                                "/auth/check-username"
                         ).permitAll()
 
                         // Swagger
@@ -109,6 +120,11 @@ public class SecurityConfig {
 
                         // 나머지는 인증 필요
                         .anyRequest().authenticated()
+                )
+
+                .addFilterBefore(
+                        jwtAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class
                 );
 
         return http.build();

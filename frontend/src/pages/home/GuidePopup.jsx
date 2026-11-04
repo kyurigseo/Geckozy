@@ -55,7 +55,7 @@ function PageBody({ page, scrapped, onScrap }) {
         <img src={ventImg} alt="환기구가 있는 사육장 일러스트" className="guide-popup__hero" />
         {heading}
         <p className="guide-popup__text">
-          <strong>{page.lead}</strong> {page.body}
+          <strong>{page.lead}</strong> <br />{page.body}
         </p>
       </>
     );

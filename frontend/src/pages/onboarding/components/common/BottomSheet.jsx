@@ -1,6 +1,7 @@
 import { createPortal } from 'react-dom'
 
 import OnboardingButton from './OnboardingButton'
+import { useSound } from '../../../../sound/SoundProvider'
 
 import closeIcon from '../../../../assets/onboarding/icon-close.svg'
 
@@ -9,6 +10,13 @@ import './BottomSheet.scss'
 // 아래에서 올라오는 시트 (피그마 '생년월일', '조명 사용 시간' 등). 어두운 영역·닫기 버튼을 누르면 닫힌다.
 // 열 때마다 새로 마운트해서 쓴다: {isOpen && <BottomSheet ... />}
 const BottomSheet = ({ title, className = '', confirmLabel = '확인', onConfirm, onClose, children }) => {
+  const { playSfx } = useSound()
+
+  const handleConfirm = () => {
+    playSfx('button')
+    onConfirm()
+  }
+
   return createPortal(
     <div className={`bottom-sheet ${className}`}>
       <div className="bottom-sheet-dim" onClick={onClose} />
@@ -24,7 +32,7 @@ const BottomSheet = ({ title, className = '', confirmLabel = '확인', onConfirm
         {children}
 
         <div className="bottom-sheet-confirm">
-          <OnboardingButton onClick={onConfirm}>{confirmLabel}</OnboardingButton>
+          <OnboardingButton onClick={handleConfirm}>{confirmLabel}</OnboardingButton>
         </div>
       </div>
     </div>,

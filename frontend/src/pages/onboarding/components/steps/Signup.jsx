@@ -5,6 +5,7 @@ import OnboardingField from '../common/OnboardingField'
 import OnboardingInput from '../common/OnboardingInput'
 import OnboardingSelect from '../common/OnboardingSelect'
 import OnboardingButton from '../common/OnboardingButton'
+import { useSound } from '../../../../sound/SoundProvider'
 import { checkIdDuplicate, signup as requestSignup } from '../../../../api/onboarding'
 
 import './Signup.scss'
@@ -24,6 +25,7 @@ const Signup = ({ form, updateForm, onPrev, resetTo }) => {
   const [idCheckMessage, setIdCheckMessage] = useState('')
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { playSfx } = useSound()
 
   const handleChange = (field) => (value) => updateForm('signup', { ...signup, [field]: value })
 
@@ -45,6 +47,7 @@ const Signup = ({ form, updateForm, onPrev, resetTo }) => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (isSubmitting) return
+    playSfx('button')
 
     // TODO: 아이디·비밀번호 형식, 비밀번호 확인 일치, 중복확인 완료 여부 검사
     if (REQUIRED_FIELDS.some((field) => !signup[field].trim())) {

@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 
+import { useSound } from '../../sound/SoundProvider'
+
 import Login from './components/steps/Login'
 import Signup from './components/steps/Signup'
 import StartMethod from './components/steps/StartMethod'
@@ -99,15 +101,16 @@ const Onboarding = () => {
   // 지나온 단계 기록. 뒤로가기는 실제로 왔던 단계로 돌아간다 (로그인→시작 방식 / 회원가입→시작 방식)
   const [history, setHistory] = useState(saved?.history ?? [STEPS[0].key])
   const [form, setForm] = useState(() => mergeForm(saved?.form))
-  const [isSoundOn, setIsSoundOn] = useState(saved?.isSoundOn ?? true)
+  // 배경음악 켜기/끄기는 앱 공용 SoundProvider에서 관리 (localStorage에 저장)
+  const { isSoundOn, toggleSound } = useSound()
 
   useEffect(() => {
     try {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ history, form: withoutPasswords(form), isSoundOn }))
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ history, form: withoutPasswords(form) }))
     } catch {
       // 저장소를 쓸 수 없는 환경(사파리 개인정보 보호 모드 등)에서는 저장 없이 진행
     }
-  }, [history, form, isSoundOn])
+  }, [history, form])
 
   // 온보딩을 떠나면(홈 이동 등) 저장값 삭제. 새로고침은 언마운트가 아니라서 유지된다
   useEffect(() => () => sessionStorage.removeItem(STORAGE_KEY), [])
@@ -124,7 +127,6 @@ const Onboarding = () => {
 
   // key: INITIAL_FORM의 최상위 키 (예: 'gecko'), value: 해당 키의 새 값
   const updateForm = (key, value) => setForm((prev) => ({ ...prev, [key]: value }))
-  const toggleSound = () => setIsSoundOn((prev) => !prev)
 
   const currentKey = history[history.length - 1]
   const { Component: CurrentStep } = STEPS.find((step) => step.key === currentKey)
