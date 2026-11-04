@@ -6,77 +6,15 @@ import OnboardingInput from './OnboardingInput'
 import LeafTitle from './LeafTitle'
 import RadioOption from './RadioOption'
 
+import TankPreview from '../../../../components/tank/TankPreview'
+import { TANK_PARTS } from '../../../../components/tank/tankParts'
+
 import wallpaper from '../../../../assets/onboarding/bg-pattern-orange.png'
 import paletteIcon from '../../../../assets/onboarding/icon-palette.png'
 import listIcon from '../../../../assets/onboarding/icon-list.png'
 import checkBadgeIcon from '../../../../assets/onboarding/icon-check-badge.svg'
-import wallCream from '../../../../assets/onboarding/tank-wall-cream.png'
-import wallGreen from '../../../../assets/onboarding/tank-wall-green.png'
-import wallYellow from '../../../../assets/onboarding/tank-wall-yellow.png'
-import floorBark from '../../../../assets/onboarding/tank-floor-bark.png'
-import floorSand from '../../../../assets/onboarding/tank-floor-sand.png'
-import floorGrass from '../../../../assets/onboarding/tank-floor-grass.png'
-import vineHeart from '../../../../assets/onboarding/tank-vine-heart.png'
-import vineCurly from '../../../../assets/onboarding/tank-vine-curly.png'
-import vineLeaf from '../../../../assets/onboarding/tank-vine-leaf.png'
-import structureLog from '../../../../assets/onboarding/tank-structure-log.png'
-import structureRock from '../../../../assets/onboarding/tank-structure-rock.png'
-import structureStump from '../../../../assets/onboarding/tank-structure-stump.png'
 
 import './TankCustomScreen.scss'
-
-// 미리보기에서 각 이미지의 위치 [left, top, width, height?] (무대 기준 px)
-// 이미지마다 캔버스 여백이 달라서, 그림 영역이 피그마 예시(크림 벽지·하트 덩굴·통나무)와 겹치도록 계산한 값
-const CREAM_WALL_RECT = [55, 159, 280.5]
-
-// 사육장 본체: 벽지·빈 사육장 이미지가 각각 따로 그려져 안쪽 모양이 조금씩 달라서,
-// 기준인 크림 벽지 이미지 하나를 쓰고 벽면 색만 바꾼다 (TankCustom.scss의 .tank-custom-wall-tint-*)
-// 빈 사육장은 회색, 초록·노랑은 각 벽지 이미지의 벽 색에 맞춘 필터
-// TODO: 같은 원본에서 벽 색만 바꾼 빈 사육장·벽지 이미지를 받으면 이미지로 교체
-
-// 바닥재: 사육장 바닥 마름모(무대 기준 꼭짓점 왼(80,350.7) 뒤(193.3,293.8) 오른(308.1,352.2) 앞(194.8,415))에
-// 각 바닥재 이미지의 윗면을 늘려 맞추고 바닥 모양대로 잘라낸다. fill: 잘라낸 영역 안에서 이미지 위치 [left, top, width, height]
-const FLOOR_AREA = { left: 80, top: 293.8, width: 228.1, height: 121.3 }
-
-// 피그마 순서. type: 섹션 키 (form.tank의 키와 같음)
-const TANK_PARTS = [
-  {
-    type: 'wall',
-    title: '벽지',
-    options: [
-      { value: 'cream', label: '크림 벽지', image: wallCream },
-      { value: 'green', label: '초록 벽지', image: wallGreen },
-      { value: 'yellow', label: '노랑 벽지', image: wallYellow },
-    ],
-  },
-  {
-    type: 'floor',
-    title: '바닥재',
-    options: [
-      { value: 'bark', label: '나무껍질 바닥재', image: floorBark, fill: [-10.5, -68.9, 244.1, 204.9] },
-      { value: 'sand', label: '모래 바닥재', image: floorSand, fill: [-7, -66.8, 242.5, 198.3] },
-      { value: 'grass', label: '잔디 바닥재', image: floorGrass, fill: [-4.8, -50, 238.7, 184.8] },
-    ],
-  },
-  {
-    type: 'vine',
-    title: '덩굴',
-    options: [
-      { value: 'heart', label: '하트잎 덩굴', image: vineHeart, rect: [73.6, 191.9, 133.1] },
-      { value: 'curly', label: '꼬불 덩굴', image: vineCurly, rect: [78.4, 195.3, 124.9] },
-      { value: 'leaf', label: '잎사귀 덩굴', image: vineLeaf, rect: [69.2, 196.7, 131.1] },
-    ],
-  },
-  {
-    type: 'structure',
-    title: '구조물',
-    options: [
-      { value: 'log', label: '통나무 은신처', image: structureLog, rect: [96, 253, 156] },
-      { value: 'rock', label: '바위 은신처', image: structureRock, rect: [91.9, 258.8, 159.3] },
-      { value: 'stump', label: '그루터기', image: structureStump, rect: [87.6, 259.9, 163.3] },
-    ],
-  },
-]
 
 const SIZE_FIELDS = [
   { key: 'width', label: '가로' },
@@ -104,7 +42,6 @@ const TABS = [
   { key: 'info', label: '기본정보', icon: listIcon, iconSize: [26, 30] },
 ]
 
-const rectStyle = ([left, top, width, height]) => ({ left, top, width, height })
 const onlyNumber = (value) => value.replace(/[^0-9.]/g, '')
 
 // 사육장 커스텀 화면 (온보딩 '내 사육장 등록하기'·마이 '사육장 커스텀' 공통)
@@ -128,10 +65,6 @@ const TankCustomScreen = ({
   const [activeTab, setActiveTab] = useState('decor')
 
   const update = onChange
-  const selectedOption = (part) => part.options.find((option) => option.value === tank[part.type])
-  const [wallPart, floorPart, ...decorParts] = TANK_PARTS
-  const wallTint = selectedOption(wallPart)?.value ?? 'empty'
-  const floor = selectedOption(floorPart)
 
   return (
     <CustomScreen
@@ -145,29 +78,7 @@ const TankCustomScreen = ({
       isSoundOn={isSoundOn}
       onToggleSound={onToggleSound}
       soundSize="small"
-      stage={
-        <div className="tank-custom-preview" aria-label="내 사육장 미리보기" role="img">
-          <img src={wallCream} alt="" style={rectStyle(CREAM_WALL_RECT)} />
-          {wallTint !== 'cream' && (
-            <img className={`tank-custom-wall-tint tank-custom-wall-tint-${wallTint}`} src={wallCream} alt="" style={rectStyle(CREAM_WALL_RECT)} />
-          )}
-          {floor && (
-            <div className="tank-custom-floor" style={FLOOR_AREA}>
-              <div className="tank-custom-floor-fill">
-                <img src={floor.image} alt="" style={rectStyle(floor.fill)} />
-              </div>
-            </div>
-          )}
-          {decorParts.map((part) => {
-            const option = selectedOption(part)
-            return (
-              option && (
-                <img key={part.type} className={`tank-custom-${part.type}`} src={option.image} alt="" style={rectStyle(option.rect)} />
-              )
-            )
-          })}
-        </div>
-      }
+      stage={<TankPreview tank={tank} />}
       tabs={TABS}
       activeTab={activeTab}
       onTabChange={setActiveTab}
