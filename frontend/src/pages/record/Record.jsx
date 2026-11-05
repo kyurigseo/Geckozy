@@ -209,8 +209,26 @@ export default function Record() {
           {cells.map((day, i) => {
             const rec = day ? byDay.get(day) : null;
             const type = rec ? TYPES[rec.type] : null;
+
+            // 기록이 있는 날짜를 누르면 상세 보기로 이동
+            const goDetail = rec
+              ? () => {
+                  playButtonSfx();
+                  const pad = (n) => String(n).padStart(2, "0");
+                  navigate(`/record/detail/${ym.y}-${pad(ym.m)}-${pad(day)}`);
+                }
+              : undefined;
+
             return (
-              <li key={day ?? `blank-${i}`} className="record-cal__cell">
+              <li
+                key={day ?? `blank-${i}`}
+                className="record-cal__cell"
+                onClick={goDetail}
+                onKeyDown={rec ? (e) => (e.key === "Enter" || e.key === " ") && goDetail() : undefined}
+                role={rec ? "button" : undefined}
+                tabIndex={rec ? 0 : undefined}
+                style={rec ? { cursor: "pointer" } : undefined}
+              >
                 {day && <span className="record-cal__num">{day}</span>}
                 {rec && type && (
                   <span className="record-cal__icon">
