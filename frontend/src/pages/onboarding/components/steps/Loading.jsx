@@ -20,8 +20,9 @@ const Loading = ({ form, isSoundOn, onToggleSound }) => {
     let isCancelled = false
     const minDelay = new Promise((resolve) => setTimeout(resolve, MIN_LOADING_TIME))
 
-    // TODO: 저장 실패 시 처리 (다시 시도 안내 등)
-    Promise.all([saveOnboarding(formRef.current), minDelay]).then(() => {
+    // TODO: 저장 실패 시 처리 (다시 시도 안내 등). 지금은 실패해도 홈으로 이동
+    Promise.all([saveOnboarding(formRef.current), minDelay]).then(([result]) => {
+      if (!result.success) console.error('온보딩 저장 실패:', result.message)
       if (!isCancelled) navigate('/home')
     })
 

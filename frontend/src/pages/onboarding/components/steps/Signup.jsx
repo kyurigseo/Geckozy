@@ -41,6 +41,10 @@ const Signup = ({ form, updateForm, onPrev, resetTo }) => {
     }
 
     const result = await checkIdDuplicate(signup.id)
+    if (result.available === null) {
+      setIdCheckMessage(result.message)
+      return
+    }
     setIdCheckMessage(result.available ? '사용 가능한 아이디예요.' : '이미 사용 중인 아이디예요.')
   }
 
@@ -60,6 +64,7 @@ const Signup = ({ form, updateForm, onPrev, resetTo }) => {
     const result = await requestSignup({
       id: signup.id,
       password: signup.password,
+      passwordConfirm: signup.passwordConfirm,
       email: `${signup.emailId}@${signup.emailDomain}`,
     })
     setIsSubmitting(false)
@@ -68,7 +73,7 @@ const Signup = ({ form, updateForm, onPrev, resetTo }) => {
     if (result.success) {
       resetTo('login')
     } else {
-      setError('회원가입에 실패했어요. 다시 시도해주세요.')
+      setError(result.message)
     }
   }
 
