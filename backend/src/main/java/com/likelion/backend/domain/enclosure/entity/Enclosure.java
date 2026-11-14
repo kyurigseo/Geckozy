@@ -98,4 +98,21 @@ public class Enclosure {
         this.decorationDesign = decorationDesign;
         this.concernDetail = concernDetail;
     }
+    public void update(BigDecimal width, BigDecimal height, BigDecimal depth,
+                       String material, String ventilation, String materialOther,
+                       String wallDesign, String vineDesign, String floorDesign,
+                       String decorationDesign, String concernDetail) {
+        this.width = width;
+        this.height = height;
+        this.depth = depth;
+        this.material = Material.valueOf(material);
+        this.ventilation = Ventilation.valueOf(ventilation);
+        this.materialOther = materialOther;
+        this.wallDesign = wallDesign;
+        this.vineDesign = vineDesign;
+        this.floorDesign = floorDesign;
+        this.decorationDesign = decorationDesign;
+        this.concernDetail = concernDetail;
+    }
+
 }

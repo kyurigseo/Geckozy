@@ -1,8 +1,9 @@
 package com.likelion.backend.domain.enclosure;
 
-import com.likelion.backend.domain.enclosure.dto.EnclosureGuidebookRecommendationResponse;
-import com.likelion.backend.domain.enclosure.dto.EnclosureHumiditySuggestionResponse;
-import com.likelion.backend.domain.enclosure.dto.EnclosureTemperatureSuggestionResponse;
+import com.likelion.backend.domain.enclosure.dto.suggestion.EnclosureGuidebookRecommendationResponse;
+import com.likelion.backend.domain.enclosure.dto.suggestion.EnclosureHumiditySuggestionResponse;
+import com.likelion.backend.domain.enclosure.dto.suggestion.EnclosureTemperatureSuggestionResponse;
+import com.likelion.backend.domain.enclosure.service.EnclosureRecommendationService;
 import com.likelion.backend.domain.enclosure.service.EnclosureService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,8 +18,9 @@ class EnclosureSuggestionTest {
     @BeforeEach
     void setUp() {
         enclosureService = new EnclosureService(
-                null, null, null, null, null,
-                null, null, null, null
+                null,
+                new EnclosureRecommendationService(),
+                null
         );
     }
     @Test

@@ -1,5 +1,6 @@
-package com.likelion.backend.domain.enclosure.dto;
+package com.likelion.backend.domain.enclosure.dto.suggestion;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,11 +11,13 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class EnclosureTemperatureSuggestionResponse {
+public class EnclosureHumiditySuggestionResponse {
 
     private Long enclosureId;
     private String primaryAction;
     private String actionTitle;
     private String actionGuide;
-    private String disclaimer;
+
+    @JsonProperty("isAutomatedSprayingRecommended")
+    private Boolean isAutomatedSprayingRecommended;
 }
