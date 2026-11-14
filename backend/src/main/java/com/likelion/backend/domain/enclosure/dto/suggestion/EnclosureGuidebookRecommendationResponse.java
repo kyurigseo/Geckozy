@@ -1,4 +1,4 @@
-package com.likelion.backend.domain.enclosure.dto;
+package com.likelion.backend.domain.enclosure.dto.suggestion;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

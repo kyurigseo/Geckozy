@@ -1,4 +1,4 @@
-package com.likelion.backend.domain.enclosure.dto;
+package com.likelion.backend.domain.enclosure.dto.crud;
 
 import com.likelion.backend.domain.enclosure.entity.Enclosure;
 import com.likelion.backend.domain.enclosure.entity.EnclosureComponent;
