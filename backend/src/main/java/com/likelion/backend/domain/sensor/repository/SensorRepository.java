@@ -7,4 +7,7 @@ import java.util.Optional;
 
 public interface SensorRepository extends JpaRepository<Sensor, Long> {
     Optional<Sensor> findByEnclosure_Id(Long enclosureId);
+
+    Optional<Sensor> findByDeviceIdentifier(String deviceIdentifier);
+
 }
