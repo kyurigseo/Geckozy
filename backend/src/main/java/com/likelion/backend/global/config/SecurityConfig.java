@@ -1,6 +1,8 @@
 package com.likelion.backend.global.config;
 
 import com.likelion.backend.domain.auth.jwt.JwtAuthenticationFilter;
+import com.likelion.backend.global.security.JwtAccessDeniedHandler;
+import com.likelion.backend.global.security.JwtAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -23,6 +25,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
     @Value("${cors.allowed-origins}")
     private String corsAllowedOrigins;
@@ -118,8 +122,19 @@ public class SecurityConfig {
                                 "/health"
                         ).permitAll()
 
+                        // 에러 응답 (처리되지 않은 예외가 403으로 가려지지 않도록)
+                        .requestMatchers(
+                                "/error"
+                        ).permitAll()
+
                         // 나머지는 인증 필요
                         .anyRequest().authenticated()
+                )
+
+                // 인증/인가 실패 시 JSON 응답 (401 / 403)
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                        .accessDeniedHandler(jwtAccessDeniedHandler)
                 )
 
                 .addFilterBefore(

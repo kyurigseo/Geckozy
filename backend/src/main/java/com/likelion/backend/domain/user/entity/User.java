@@ -16,6 +16,10 @@ import java.time.LocalDateTime;
                 @UniqueConstraint(
                         name = "UK_USERS_USERNAME",
                         columnNames = "username"
+                ),
+                @UniqueConstraint(
+                        name = "UK_USERS_EMAIL",
+                        columnNames = "email"
                 )
         }
 )
