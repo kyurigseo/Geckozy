@@ -1,7 +1,11 @@
 package com.likelion.backend.domain.sensor.repository;
 
+import com.likelion.backend.domain.sensor.entity.Sensor;
 import com.likelion.backend.domain.sensor.entity.SensorMeasurement;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,4 +19,8 @@ public interface SensorMeasurementRepository extends JpaRepository<SensorMeasure
 
     List<SensorMeasurement> findBySensor_SensorIdAndMeasuredAtBetweenOrderByMeasuredAtAsc(
             Long sensorId, LocalDateTime start, LocalDateTime end);
+
+    @Modifying
+    @Query("delete from SensorMeasurement m where m.sensor = :sensor")
+    void deleteBySensor(@Param("sensor") Sensor sensor);
 }

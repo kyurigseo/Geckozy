@@ -24,7 +24,7 @@ public class Sensor {
     @JoinColumn(name = "enclosure_id", nullable = false, unique = true)
     private Enclosure enclosure;
 
-    @Column(name = "device_identifier", nullable = false, length = 100)
+    @Column(name = "device_identifier", nullable = false, length = 100, unique = true)
     private String deviceIdentifier;
 
     @Enumerated(EnumType.STRING)
