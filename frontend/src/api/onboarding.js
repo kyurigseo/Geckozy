@@ -71,6 +71,7 @@ export const signup = async ({ id, password, passwordConfirm, email }) => {
 
 // 종 이름 → 서버 종 번호 (speciesId)
 // TODO: 백엔드에 번호 확인 후 채우기. '종 목록 조회' API가 생기면 서버에서 받아오기
+// (2026-11-16 기준 서버 species 테이블이 비어 있어 어떤 번호든 SPECIES_NOT_FOUND)
 const SPECIES_IDS = {
   '비어디드 드래곤': null,
   '크레스티드 게코': null,
@@ -147,6 +148,10 @@ const toConcernIds = async (concerns) => {
 // 온보딩 입력값 저장: 도마뱀 등록 → 사육장 등록(고민 포함) → 관리 방식 등록 (계정 정보는 보내지 않음)
 // TODO: 중간에 실패하면 다시 시도할 때 도마뱀이 두 번 등록되지 않게 처리
 export const saveOnboarding = async ({ gecko, tank, care, concerns, concernText }) => {
+  // 번호가 없는 종을 null로 보내면 서버가 본문 없는 403을 돌려줘서, 요청 전에 막는다
+  if (SPECIES_IDS[gecko.species] == null) {
+    return { success: false, message: '아직 지원하지 않는 종이에요.' }
+  }
   try {
     const { lizardId } = await request('/lizards', { method: 'POST', body: toLizardRequest(gecko) })
     const concernIds = await toConcernIds(concerns)
@@ -157,6 +162,13 @@ export const saveOnboarding = async ({ gecko, tank, care, concerns, concernText 
     await request(`/enclosures/${enclosureId}/management`, { method: 'PUT', body: toManagementRequest(care) })
     return { success: true, lizardId, enclosureId }
   } catch (error) {
-    return { success: false, message: errorMessage(error, {}, '정보 저장에 실패했어요. 다시 시도해주세요.') }
+    return {
+      success: false,
+      message: errorMessage(
+        error,
+        { SPECIES_NOT_FOUND: '아직 지원하지 않는 종이에요.' },
+        '정보 저장에 실패했어요. 다시 시도해주세요.',
+      ),
+    }
   }
 }
