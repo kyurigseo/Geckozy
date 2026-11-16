@@ -1,0 +1,241 @@
+
+@use '../../../onboarding/variables' as *;
+@use '../../../onboarding/mixins' as *;
+
+.lizard-manage {
+  position: relative;
+  width: 393px;
+  height: 852px;
+  margin: 0 auto;
+  overflow: hidden;
+  background: #FDF7EE;
+  color: #5B3524;
+}
+
+.lizard-manage-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 114px;
+  box-sizing: border-box;
+
+  h1 {
+    position: absolute;
+    width: 90px;
+    left: calc(50% - 90px/2 - 0.5px);
+    top: 56px;
+    margin: 0;
+
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 150%;
+
+    text-align: center;
+    letter-spacing: -0.02em;
+
+    color: #492515;
+  }
+}
+
+.lizard-manage-back {
+  position: absolute;
+  top: 56px;
+  left: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+
+  img {
+    display: block;
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+  }
+}
+
+.lizard-manage-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  height: calc(100% - 96px);
+  padding: 0 21px 30px 22px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.lizard-manage-card {
+  flex-shrink: 0;
+  width: 350px;
+  height: 158px;
+  padding: 16px 18px 15px;
+  box-sizing: border-box;
+  border: 1.5px solid #FFD7B4;
+  border-radius: 20px;
+  background: #FFFFFF;
+
+  &.selected {
+    border-color: #FFB56F;
+    background: #FFF0D8;
+  }
+}
+
+.lizard-manage-info {
+  display: flex;
+  align-items: center;
+  gap: 19px;
+  height: 72px;
+
+  position: relative;
+}
+
+.lizard-manage-info > .lizard-manage-leaf {
+  position: absolute;
+  top: 8px;
+  left: 47px;
+  z-index: 3;
+  width: 17px;
+  object-fit: contain;
+}
+
+.lizard-manage-avatar {
+  position: relative;
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  overflow: hidden;
+
+  border: 2px solid #99501F;
+  border-radius: 50%;
+  background: #FDF7EE;
+  box-sizing: border-box;
+
+  > img:first-child {
+    position: absolute;
+    top: 65%;
+    left: 60%;
+    width: 76px;
+    height: 61px;
+    max-width: none;
+    object-fit: contain;
+    transform: translate(-50%, -50%);
+  }
+
+}
+
+.lizard-manage-details {
+  min-width: 0;
+  flex: 1;
+
+  p {
+    margin: 11px 0 0;
+
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 150%;
+
+    display: flex;
+    align-items: center;
+    letter-spacing: -0.02em;
+
+    color: #944B1B;
+
+    flex: none;
+    order: 1;
+    flex-grow: 0;
+
+  }
+}
+
+.lizard-manage-name-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  strong {
+    font-family: 'andong-katuri', sans-serif;
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 140%;
+    white-space: nowrap;
+    color: #492515;
+
+    
+  }
+}
+
+.lizard-manage-selected {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 150%;
+    display: flex;
+    align-items: center;
+    letter-spacing: -0.02em;
+    color: #FF6B01;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 6px 18px;
+    gap: 10px;
+
+    height: 26px;
+
+    background: #FFDCB9;
+    border-radius: 20px;
+
+    flex: none;
+    order: 1;
+    flex-grow: 0;
+
+}
+
+.lizard-manage-delete {
+  display: block;
+  width: 311px;
+  height: 43px;
+  margin: 12px auto 0;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+  }
+}
+
+.lizard-manage-empty {
+  margin: 50px 0;
+  font-family: 'AndongKaturi', sans-serif;
+  font-size: 16px;
+  text-align: center;
+  color: #994E1E;
+}

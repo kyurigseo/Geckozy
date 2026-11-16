@@ -1,0 +1,208 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+.enclosure-check {
+  position: relative;
+
+  width: 393px;
+  height: 852px;
+
+  margin: 0 auto;
+
+  overflow: hidden;
+
+  background: #FDF7EE;
+
+  font-family: 'Pretendard', sans-serif;
+
+
+
+  .enclosure-check-back {
+    position: absolute;
+
+    top: 56px;
+    left: 22px;
+
+    width: 32px;
+    height: 32px;
+
+    padding: 0;
+
+    border: none;
+    background: transparent;
+
+    cursor: pointer;
+
+    z-index: 10;
+  }
+
+  .enclosure-check-tree {
+    position: absolute;
+
+    top: 56px;
+    right: 9px;
+
+    width: 115px;
+    height: 131px;
+  }
+
+
+  .enclosure-check-title {
+      position: absolute;
+      left: 22px;
+      top: 104px;
+
+      font-family: 'Pretendard';
+      font-style: normal;
+      font-weight: 600;
+      font-size: 28px;
+      line-height: 140%;
+
+      letter-spacing: -0.02em;
+
+      color: #492515;
+
+      margin: 0;
+  }
+
+
+  .enclosure-check-info {
+    position: absolute;
+
+    top: 212px;
+    left: 22px;
+
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 10px;
+
+
+    z-index: 4;
+  }
+
+  .enclosure-check-tag {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      box-sizing: border-box;
+
+      height: 35px;
+
+      white-space: nowrap;
+
+
+      box-sizing: border-box;
+
+
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      padding: 5px 15px;
+      gap: 10px;
+
+
+      background: rgba(255, 184, 189, 0.4);
+
+      border: 1px solid #944B1B;
+      border-radius: 8px;
+
+
+      font-family: 'Pretendard';
+      font-style: normal;
+      font-weight: 500;
+      font-size: 15px;
+      line-height: 150%;
+
+      letter-spacing: -0.02em;
+
+      color: #492515;
+
+
+      flex: none;
+      order: 0;
+      flex-grow: 0;
+
+
+  }
+
+
+
+  .enclosure-check-match {
+    position: absolute;
+
+    top: 330px;
+    left: 21px;
+
+    width: 351px;
+    height: 253px;
+
+    object-fit: contain;
+
+    z-index: 2;
+  }
+
+  .enclosure-check-match-p{
+      position: absolute;
+      width: 234px;
+      height: 42px;
+      left: calc(50% - 234px/2 + 0.5px);
+      top: 512px;
+
+      font-family: 'Pretendard';
+      font-style: normal;
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 150%;
+
+      text-align: center;
+      letter-spacing: -0.02em;
+
+      color: #5B3524;
+
+      margin: 0;
+      
+      z-index: 2;
+  }
+
+  .enclosure-check-next {
+    position: absolute;
+
+    top: 683px;
+    left: 98.5px;
+
+    padding: 0;
+
+    border: none;
+    background: transparent;
+
+    cursor: pointer;
+
+    z-index: 5;
+  }
+
+  .enclosure-check-next img {
+    display: block;
+
+    width: 196px;
+  }
+
+
+
+  .enclosure-check-floor {
+    position: absolute;
+
+    left: 3.47px;
+    top: 750px;
+
+    width: 386px;
+    height: auto;
+
+    object-fit: contain;
+
+    z-index: 6;
+
+    pointer-events: none;
+  }
+}

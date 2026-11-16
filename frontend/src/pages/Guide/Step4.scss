@@ -1,0 +1,530 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+.step4 {
+  position: relative;
+  width: 393px;
+  height: 852px;
+  margin: 0 auto;
+  overflow: hidden;
+
+  .step4-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 393px;
+    height: 852px;
+    z-index: 0;
+  }
+
+  .step4-scroll {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 393px;
+    height: 852px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 1;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+    .step4-inner {
+    position: relative;
+    width: 393px;
+    min-height: 1170px;
+
+    &.complete {
+        min-height: 1033px;
+    }
+    }
+
+  .step4-back {
+    position: absolute;
+    top: 46px;
+    left: 18px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    z-index: 10;
+
+    img {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  .step4-progress {
+    position: absolute;
+    top: 55px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    z-index: 10;
+
+    .progress-dot {
+      position: relative;
+      z-index: 10;
+      flex-shrink: 0;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      box-sizing: border-box;
+      background: #FFDCB9;
+      border: 1.5px solid #FFFFFF;
+
+      &.active {
+        width: 13px;
+        height: 13px;
+        background: #FF646E;
+        border: 1.5px solid #FFFFFF;
+        box-shadow: 0 0 0 6px #FFB8BD;
+      }
+    }
+
+    .progress-line {
+      position: relative;
+      z-index: 0;
+      width: 41px;
+      height: 3px;
+      margin-left: -6px;
+      margin-right: -6px;
+      background: #FDF7EE;
+      flex-shrink: 0;
+    }
+  }
+
+  .step4-title {
+    position: absolute;
+    top: 101px;
+    left: 50%;
+    width: 358px;
+    height: auto;
+    transform: translateX(-50%);
+  }
+
+  .step4-title1 {
+    position: absolute;
+    top: 228px;
+    left: 50%;
+    width: 352px;
+    height: auto;
+    transform: translateX(-50%);
+  }
+
+  .step4-check-card {
+    position: absolute;
+    top: 260px;
+    left: 21.5px;
+    width: 350px;
+    height: 151px;
+    box-sizing: border-box;
+    padding: 13px 0 26px 14px;
+    background: #FDF7EE;
+    border: 2px solid #FFC58D;
+    box-shadow: inset -15px -15px 0 #FFECCB;
+    border-radius: 20px;
+
+    .step4-check-title {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+
+      img {
+        width: 29px;
+        height: 13px;
+        object-fit: contain;
+        margin: 0;
+      }
+
+      strong {
+        margin: 0;
+        font-family: 'AndongKaturi', sans-serif;
+        font-style: normal;
+        font-weight: 400;
+        font-size: 15px;
+        line-height: 140%;
+        text-align: center;
+        letter-spacing: -0.02em;
+        color: #5B3524;
+      }
+    }
+
+    p {
+      margin: 8px 0 0;
+      word-break: keep-all;
+      font-family: 'Pretendard', sans-serif;
+      font-style: normal;
+      font-weight: 600;
+      font-size: 12px;
+      line-height: 150%;
+      letter-spacing: -0.02em;
+      color: #5B3524;
+    }
+
+    p + p {
+      margin-top: 0;
+    }
+  }
+
+  .day-graph {
+    position: relative;
+    width: 312px;
+    height: 42px;
+    margin: 11px 0 0;
+
+    .day-graph-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 312px;
+      height: 12px;
+      z-index: 1;
+    }
+
+    .day-graph-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 12px;
+      border-radius: 6px;
+      background: #FFB8BD;
+      z-index: 2;
+    }
+
+    .day-graph-gecko {
+      position: absolute;
+      top: -5px;
+      width: 26px;
+      height: auto;
+      transform: translateX(-50%);
+      z-index: 3;
+    }
+
+        .day-labels {
+            position: absolute;
+            top: 19px;
+            left: 0;
+            width: 312px;
+            height: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            z-index: 4;
+
+            span {
+                width: 14px;
+                height: 14px;
+
+                text-align: center;
+                font-family: 'yoon-px-pixman', sans-serif;
+                font-weight: 400;
+                font-style: normal;
+                font-size: 9px;
+                white-space: nowrap;
+                line-height: 150%;
+                letter-spacing: -0.02em;
+                color: #492515;
+
+                &.current {
+                margin-top: -2px;
+                width: 20px;
+                height: 20px;
+
+                font-style: normal;
+                font-weight: 400;
+                font-size: 13px;
+                line-height: 150%;
+                letter-spacing: -0.02em;
+
+                color: #492515;
+                }
+
+                &.future {
+                color: #B47952;
+                }
+            }
+        }
+  }
+
+  .step4-current {
+    position: absolute;
+    top: 422px;
+    left: 22px;
+    display: flex;
+    gap: 14px;
+  }
+
+  .current-item {
+    display: flex;
+    align-items: center;
+    width: 168px;
+    height: 99px;
+    box-sizing: border-box;
+    padding: 18px 34px 24px 19px;
+    background: #FDF7EE;
+    border: 2px solid #FFC58D;
+    border-radius: 20px;
+    box-shadow: inset -15px -15px 0 #FFECCB;
+
+    img {
+      width: 26.5px;
+      object-fit: contain;
+      margin-right: 15px;
+    }
+
+    span {
+        display: block;
+        font-family: 'Pretendard', sans-serif;
+
+        font-style: normal;
+        font-weight: 500;
+        font-size: 12px;
+        line-height: 150%;
+        letter-spacing: -0.02em;
+
+        color: #B47952;
+
+        margin: 0;
+    }
+
+    strong {
+        display: block;
+        margin-top: 6px;
+        font-family: "mamablock-210", sans-serif;
+        font-weight: 400;
+        font-style: normal;
+        white-space: nowrap;
+
+
+        font-size: 30px;
+        line-height: 33px;
+        letter-spacing: -0.02em;
+
+        color: #5B3524;
+    }
+  }
+
+  .last-measured {
+    font-family: 'Pretendard', sans-serif;
+
+    position: absolute;
+    width: 87px;
+    height: 18px;
+    left: 276px;
+    top: 525px;
+
+    font-style: normal;
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 150%;
+
+    letter-spacing: -0.02em;
+
+    color: #A89EA1;
+  }
+
+  .step4-title2 {
+    position: absolute;
+    top: 557px;
+    left: 50%;
+    width: 227px;
+    height: auto;
+    transform: translateX(-50%);
+  }
+
+  .step4-result {
+    position: absolute;
+    bottom: 261px;
+    left: 22px;
+    width: 350px;
+
+    box-sizing: border-box;
+    padding: 13px 0 26px 12px;
+
+    background: #FDF7EE;
+    border: 2px solid #FFC58D;
+    box-shadow: inset -15px -15px 0 #FFECCB;
+    border-radius: 20px;
+  }
+
+    .result-section {
+        
+
+    .result-title {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+
+        span {
+        position: relative;
+        display: inline-block;
+        z-index: 1;
+        font-family: 'AndongKaturi', sans-serif;
+        font-style: normal;
+        font-weight: 400;
+        font-size: 16px;
+        line-height: 140%;
+        text-align: center;
+        letter-spacing: -0.02em;
+        color: #FFB8BD;
+        flex: none;
+        order: 0;
+        flex-grow: 0;
+        
+
+        &::before {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            font-family: 'AndongKaturi', sans-serif;
+            font-style: normal;
+            font-weight: 500;
+            font-size: 16px;
+            line-height: 140%;
+            letter-spacing: -0.02em;
+            color: #5B3524;
+            -webkit-text-stroke: 2.3px #5B3524;
+            z-index: -1;
+        }
+        }
+
+        strong {
+        font-family: 'AndongKaturi', sans-serif;
+        color: #5B3524;
+        font-style: normal;
+        font-weight: 400;
+        font-size: 15px;
+        line-height: 140%;
+        letter-spacing: -0.02em;
+
+        
+        }
+
+        b {
+        font-family: 'Pretendard', sans-serif;
+        color: #5B3524;
+
+        font-family: 'Pretendard';
+        font-style: normal;
+        font-weight: 700;
+        font-size: 14px;
+        line-height: 150%;
+        letter-spacing: -0.02em;
+
+        color: #5B3524;
+
+        margin-left: 13px;
+        margin-top: -2px;
+        }
+    }
+
+    p {
+        margin-top:4px;
+        margin-bottom:0px;
+
+        padding-left: 25px;
+        font-family: 'Pretendard', sans-serif;
+        word-break: keep-all;
+
+        font-style: normal;
+        font-weight: 500;
+        font-size: 12px;
+        line-height: 150%;
+        letter-spacing: -0.02em;
+
+        color: #5B3524;
+    }
+    .p_1{
+       margin-bottom: 14px;
+    }
+  }
+
+  .result-warning {
+    margin-top: 13px;
+    padding: 11px;
+    background: #FFF1DA;
+    border-radius: 10px;
+    width: 311px;
+    height: 119px;
+
+    .warning-title {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+
+      span {
+        display: block;
+        width: 4px;
+        height: 18px;
+        background: #B47952;
+        border-radius: 10px;
+      }
+
+      strong {
+        font-family: 'Pretendard', sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        color: #492515;
+      }
+    }
+
+    p {
+      margin: 11px 0 0;
+      font-family: 'Pretendard', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 150%;
+      color: #5B3524;
+      word-break: keep-all;
+    }
+    p strong{
+        color: #FF646E;
+        font-weight: 600;
+    }
+    p:nth-of-type(2) {
+        font-size: 11px;
+        font-weight: 500;
+      
+    }
+  }
+
+  .last-update {
+        position: absolute;
+        width: 145px;
+        height: 18px;
+        left: 218px;
+        bottom:238px;
+
+
+        font-family: 'Pretendard';
+        font-style: normal;
+        font-weight: 500;
+        font-size: 12px;
+        line-height: 150%;
+
+        text-align: right;
+        letter-spacing: -0.02em;
+
+        color: #A89EA1;
+  }
+
+  .step4-button {
+        position: absolute;
+        bottom: 160px;
+        left: 50%;
+
+        transform: translateX(-50%);
+        width: 196px;
+        height: auto;
+  }
+}

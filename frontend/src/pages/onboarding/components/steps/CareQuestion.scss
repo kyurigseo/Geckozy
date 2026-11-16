@@ -1,0 +1,72 @@
+@use '../../variables' as *;
+@use '../../mixins' as *;
+
+// 피그마 '관리 방식'. 공통 틀은 common/QuestionLayout
+// 항목: 제목(30) → 14px → 내용, 항목 사이 40px (히팅만 27px)
+.care-question .question-layout-body {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.care-question-field {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.care-question-field-heating {
+  margin-top: -13px; // 피그마: 조명 사용 시간과 27px
+}
+
+.care-question-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  h3 {
+    margin: 0;
+    @include text-pixel-xl;
+    color: $color-main-outline;
+  }
+}
+
+.care-question-title-extra {
+  margin-left: -2px; // 제목과 8px
+  @include text-body-s;
+  color: $color-gray-400;
+}
+
+// 선택지 한 줄 (가로 간격 24)
+.care-question-options {
+  display: flex;
+  gap: 24px;
+}
+
+.care-question-mist-method {
+  margin-left: 29px;
+}
+
+.care-question-mist-times {
+  margin-left: 37px;
+}
+
+// 히팅: 세로로 4개 (간격 11), '정해진 시간'을 고르면 아래에 시간 칸 (left 33, 287 폭)
+.care-question-heating {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  margin-left: 30px;
+}
+
+.care-question-heating-item {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.care-question-heating-time {
+  width: 287px;
+  max-width: calc(100% - 33px);
+  margin-left: 33px;
+}

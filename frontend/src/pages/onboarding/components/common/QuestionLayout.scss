@@ -1,0 +1,71 @@
+@use '../../variables' as *;
+@use '../../mixins' as *;
+
+// 피그마 393 폭. 내용이 길면 페이지 전체가 스크롤된다
+.question-layout {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  padding: 56px 22px 34px;
+  background-color: $color-main-beige-4;
+}
+
+// 오른쪽 위 덩굴 (left 300, top 47, 94x131)
+.question-layout-vine {
+  position: absolute;
+  top: 47px;
+  right: -1px;
+  width: 94px;
+  height: 131px;
+  pointer-events: none;
+}
+
+// 제목 (top 104, Title/M-Bold 두 줄)
+.question-layout-title {
+  display: flex;
+  flex-direction: column;
+  margin: 16px 0 0;
+  @include text-title-m-bold;
+  color: $color-main-brown;
+}
+
+// 내용 (제목 아래 50px)
+.question-layout-body {
+  margin-top: 50px;
+}
+
+// 아래: 안내 문구 + 버튼(162x54) + 흙바닥(394x80). 버튼 아래쪽이 흙바닥 위에 살짝 겹친다
+.question-layout-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: auto -22px 0;
+  padding-top: 28px;
+}
+
+.question-layout-note {
+  margin: 0 0 26px;
+  @include text-body-s;
+  color: $color-main-brown-2;
+  text-align: center;
+}
+
+.question-layout-button {
+  position: relative;
+  z-index: 1;
+
+  .onboarding-button-primary {
+    width: 162px;
+    height: 54px;
+  }
+}
+
+.question-layout-ground {
+  width: 100%;
+  height: 80px;
+  margin-top: -21px;
+  object-fit: cover;
+  object-position: bottom;
+  pointer-events: none;
+}

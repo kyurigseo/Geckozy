@@ -1,0 +1,66 @@
+@use '../../variables' as *;
+@use '../../mixins' as *;
+
+// 닫혀 있을 때도 DOM에 남겨둔다 (iOS에서 탭 즉시 포커스해야 키보드가 올라오기 때문)
+.onboarding-editor {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+
+  &.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+.onboarding-editor-dim {
+  position: absolute;
+  inset: 0;
+  background-color: $color-dim;
+}
+
+// 피그마 입력 바 372x46
+.onboarding-editor-bar {
+  position: absolute;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: min(372px, calc(100% - 21px));
+  height: 46px;
+  padding: 0 5px 0 24px;
+  border: 1px solid $color-sub-beige;
+  border-radius: 50px;
+  background-color: $color-main-beige-4;
+  transform: translateX(-50%);
+}
+
+.onboarding-editor-field {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  outline: none;
+  background: none;
+  @include text-body-s;
+  color: $color-main-brown;
+
+  &::placeholder {
+    color: $color-sub-beige;
+  }
+}
+
+.onboarding-editor-done {
+  flex-shrink: 0;
+  width: 58px;
+  height: 34px;
+  padding: 0;
+  border: none;
+  border-radius: 100px;
+  background-color: $color-sub-beige-2;
+  cursor: pointer;
+  @include text-body-s-bold;
+  color: $color-main-beige-4;
+}

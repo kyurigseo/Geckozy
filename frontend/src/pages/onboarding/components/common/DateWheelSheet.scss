@@ -1,0 +1,19 @@
+// 피그마 '생년월일' 시트 (높이 387, 그림자 없음, 제목 top 29). 공통 틀은 BottomSheet, 휠은 WheelColumn
+.date-wheel-sheet {
+  .bottom-sheet-panel {
+    box-shadow: none;
+  }
+
+  .bottom-sheet-head {
+    margin-top: 26px;
+  }
+}
+
+// 휠 영역 (피그마 top 85, 325 x 186). 세 열이 붙어 있어서 구분선이 한 줄로 이어진다
+.date-wheel-sheet-wheels {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  width: 325px;
+  max-width: calc(100% - 40px);
+  margin: 24px auto 0;
+}
