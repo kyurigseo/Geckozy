@@ -28,6 +28,10 @@ public class AuthService {
             throw new BusinessException(ErrorCode.DUPLICATE_USERNAME);
         }
 
+        if (userRepository.existsByEmail(request.email())) {
+            throw new BusinessException(ErrorCode.DUPLICATE_EMAIL);
+        }
+
         if (!request.password().equals(request.passwordConfirm())) {
             throw new BusinessException(ErrorCode.INVALID_REQUEST);
         }

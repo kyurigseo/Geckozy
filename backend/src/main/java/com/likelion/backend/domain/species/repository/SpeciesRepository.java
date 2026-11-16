@@ -4,4 +4,6 @@ import com.likelion.backend.domain.species.entity.Species;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface SpeciesRepository extends JpaRepository<Species, Long> {
+
+    java.util.Optional<Species> findByName(String name);
 }
