@@ -22,6 +22,7 @@ public class EnclosureService {
     private final EnclosureCommandService enclosureCommandService;
     private final EnclosureRecommendationService enclosureRecommendationService;
     private final EnclosureEnvironmentService enclosureEnvironmentService;
+    private final EnclosureCoachService enclosureCoachService;
 
     public EnclosureCreateResponse createEnclosure(EnclosureCreateRequest request, Long currentUserId) {
         return enclosureCommandService.createEnclosure(request, currentUserId);
@@ -76,6 +77,10 @@ public class EnclosureService {
 
     public EnvironmentSummaryResponse getEnvironmentSummary(Long enclosureId, String dateStr, Long currentUserId) {
         return enclosureEnvironmentService.getEnvironmentSummary(enclosureId, dateStr, currentUserId);
+    }
+
+    public EnvironmentCoachResponse getEnvironmentCoach(Long enclosureId, Long currentUserId) {
+        return enclosureCoachService.getCoach(enclosureId, currentUserId);
     }
 
     public TemperaturePatternResponse getTemperaturePattern(Long enclosureId, Long currentUserId) {
