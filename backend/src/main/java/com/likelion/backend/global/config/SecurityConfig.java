@@ -111,6 +111,12 @@ public class SecurityConfig {
                                 "/auth/check-username"
                         ).permitAll()
 
+                        // IoT 센서 데이터 수집 (JWT 대신 X-Device-Id 헤더로 서비스에서 인증)
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/enclosures/*/sensor/readings"
+                        ).permitAll()
+
                         // Swagger
                         .requestMatchers(
                                 "/swagger-ui/**",

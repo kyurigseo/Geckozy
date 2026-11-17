@@ -3,6 +3,7 @@ package com.likelion.backend.domain.enclosure.dto.suggestion;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.likelion.backend.domain.enclosure.entity.Enclosure;
 import com.likelion.backend.domain.management.entity.ManagementSetting;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -13,7 +14,9 @@ import java.util.List;
 @NoArgsConstructor
 public class ManagementSettingRequest {
 
+    @NotNull(message = "분무 방식은 필수입니다.")
     private ManagementSetting.SprayingMethod sprayingMethod;
+    @NotNull(message = "분무 빈도는 필수입니다.")
     private ManagementSetting.SprayingFrequency sprayingFrequency;
     private List<ManagementSetting.SprayingTime> sprayingTimes;
 
@@ -25,6 +28,7 @@ public class ManagementSettingRequest {
     @JsonFormat(pattern = "HH:mm")
     private LocalTime lightingEndTime;
 
+    @NotNull(message = "열원 사용 방식은 필수입니다.")
     private ManagementSetting.HeatingUsageMode heatingUsageMode;
 
     @JsonFormat(pattern = "HH:mm")
