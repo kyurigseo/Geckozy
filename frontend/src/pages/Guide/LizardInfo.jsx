@@ -1,4 +1,5 @@
-import React, { useRef, useState } from 'react'
+import { getSpecies, getSpeciesGuide, getGuideProgress, getGuideStep, saveGuideContext } from '../../api/guide'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import board from '../../assets/guide/나무판자.svg'
@@ -22,6 +23,125 @@ const LizardInfo = ({ step, onClose }) => {
   const [sizeUnknown, setSizeUnknown] = useState(false)
   const [adoptionDateValue, setAdoptionDateValue] = useState('')
 
+  const [species, setSpecies] = useState([
+    { speciesId: null, name: '크레스티드 게코' },
+    { speciesId: null, name: '레오파드 게코' },
+    { speciesId: null, name: '비어디드 드래곤' },
+  ])
+  const [speciesId, setSpeciesId] = useState('')
+  const [sizeCm, setSizeCm] = useState('')
+  const [weightG, setWeightG] = useState('')
+  const submitting = useRef(false)
+
+  useEffect(() => {
+    const controller = new AbortController()
+
+    getSpecies(controller.signal)
+      .then((items) => {
+        if (controller.signal.aborted) return
+
+        if (Array.isArray(items) && items.length > 0) {
+          setSpecies(items)
+        }
+      })
+      .catch(() => {
+        // 조회 실패 시 기본 종 목록 유지
+      })
+
+    return () => controller.abort()
+  }, [])
+
+  const handleComplete = async () => {
+    if (submitting.current) return
+
+    playSfx('button')
+
+    if (!speciesId) {
+      window.alert('도마뱀 종을 선택해주세요.')
+      return
+    }
+
+    const selectedSpecies = species.find(
+      (item) =>
+        String(item.speciesId ?? item.name) === speciesId,
+    )
+
+    if (!selectedSpecies) {
+      window.alert('도마뱀 종을 다시 선택해주세요.')
+      return
+    }
+
+    const isCrested =
+      selectedSpecies.name.replace(/\s/g, '') ===
+      '크레스티드게코'
+
+    const lizardDraft = {
+      speciesId: selectedSpecies.speciesId ?? null,
+      speciesName: selectedSpecies.name,
+      birthDate: birthUnknown
+        ? null
+        : birthDateValue || null,
+      birthDateUnknown: birthUnknown,
+      sizeCm:
+        sizeUnknown || !sizeCm
+          ? null
+          : Number(sizeCm),
+      weightG:
+        sizeUnknown || !weightG
+          ? null
+          : Number(weightG),
+      sizeWeightUnknown: sizeUnknown,
+      adoptionDate: adoptionDateValue || null,
+    }
+
+    submitting.current = true
+
+    try {
+      if (!selectedSpecies.speciesId) {
+        throw new Error('종 정보를 서버에서 불러오지 못했습니다.')
+      }
+
+      const guide = await getSpeciesGuide(
+        selectedSpecies.speciesId,
+      )
+
+      if (!guide?.preGuideId) {
+        throw new Error('가이드 정보를 불러오지 못했습니다.')
+      }
+
+      saveGuideContext({
+        speciesId: selectedSpecies.speciesId,
+        preGuideId: guide.preGuideId,
+        guideMode: 'api',
+      })
+
+      await getGuideProgress()
+      await getGuideStep(step)
+
+      saveGuideContext({ lizardDraft })
+
+      navigate('/loading', { state: { step } })
+    } catch (error) {
+      if (isCrested) {
+        // 크레스티드 게코는 기존 하드코딩 화면으로 이동합니다.
+        // 이전에 선택한 다른 종의 가이드 ID는 사용하지 않습니다.
+        saveGuideContext({
+          speciesId: selectedSpecies.speciesId ?? null,
+          preGuideId: null,
+          guideMode: 'static',
+          lizardDraft,
+        })
+
+        navigate('/loading', { state: { step } })
+        return
+      }
+
+      window.alert(error.message)
+    } finally {
+      submitting.current = false
+    }
+  }
+
   const birthDateInput = useRef(null)
   const adoptionDateInput = useRef(null)
 
@@ -41,9 +161,32 @@ const LizardInfo = ({ step, onClose }) => {
             </div>
 
             <div className="select-box">
-              <select className="info-select" defaultValue="">
-                <option value="" disabled>해당하는 종을 선택해주세요.</option>
-                <option value="crested-gecko">크레스티드게코</option>
+              <select
+                className="info-select"
+                value={speciesId}
+                onChange={(e) => setSpeciesId(e.target.value)}
+              >
+                <option value="" disabled>
+                  해당하는 종을 선택해주세요.
+                </option>
+
+                {species
+                  .filter(
+                    (item, index, items) =>
+                      items.findIndex(
+                        (other) =>
+                          other.name.replace(/\s/g, '') ===
+                          item.name.replace(/\s/g, ''),
+                      ) === index,
+                  )
+                  .map((item) => (
+                    <option
+                      key={item.speciesId ?? item.name}
+                      value={item.speciesId ?? item.name}
+                    >
+                      {item.name}
+                    </option>
+                  ))}
               </select>
 
               <img className="select-arrow" src={arrowBtm} alt="" />
@@ -93,9 +236,9 @@ const LizardInfo = ({ step, onClose }) => {
             </div>
 
             <div className="size-row">
-              <input type="number" className="small-input" placeholder="크기    (cm)" disabled={sizeUnknown} />
+              <input type="number" className="small-input" placeholder="크기    (cm)" value={sizeCm} onChange={(e) => setSizeCm(e.target.value)} disabled={sizeUnknown} />
 
-              <input type="number" className="small-input" placeholder="체중    (g)" disabled={sizeUnknown} />
+              <input type="number" className="small-input" placeholder="체중    (g)" value={weightG} onChange={(e) => setWeightG(e.target.value)} disabled={sizeUnknown} />
 
               <label className="size-unknown">
                 <input type="checkbox" checked={sizeUnknown} onChange={() => setSizeUnknown(!sizeUnknown)} />
@@ -131,10 +274,7 @@ const LizardInfo = ({ step, onClose }) => {
 
             <button
             className="complete-button"
-            onClick={() => {
-              playSfx('button')
-              navigate('/loading', { state: { step: step } })
-            }}
+            onClick={handleComplete}
             >
             <img src={complete} alt="완료" />
             </button>

@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import Nav from '../../components/nav/Nav'
+import { getGuideContext, getGuideProgress } from '../../api/guide'
+import { useEffect, useState } from 'react'
 
 import LizardInfo from './LizardInfo' 
 
@@ -34,6 +34,17 @@ const Guide = () => {
   const [step, setStep] = useState(1)
   const [isModalOpen, setIsModalOpen] = useState(false) 
   const { isSoundOn, toggleSound, playSfx } = useSound()
+
+  useEffect(() => {
+    if (!getGuideContext().preGuideId) return
+    const controller = new AbortController()
+    Promise.resolve().then(() => getGuideProgress(controller.signal)).then(progress => {
+      setStep(Math.min(5, Math.max(1, progress.currentStep)))
+    }).catch(error => {
+      if (!controller.signal.aborted) window.alert(error.message)
+    })
+    return () => controller.abort()
+  }, [])
 
   const prevStep = () => {
     if (step > 1) {

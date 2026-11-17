@@ -1,4 +1,6 @@
-import React, { useState } from 'react'
+import { useRef } from 'react'
+import { saveGuideEnclosure } from '../../api/guide'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import leaf from '../../assets/guide/나뭇잎.svg'
@@ -24,7 +26,10 @@ const EnclosureInfo = ({ onClose }) => {
   const [customMaterial, setCustomMaterial] = useState('')
   const [ventilation, setVentilation] = useState('상단')
 
-  const handleComplete = () => {
+  const submitting = useRef(false)
+
+  const handleComplete = async () => {
+    if (submitting.current) return
     const enclosureInfo = {
       ...size,
       material,
@@ -32,8 +37,12 @@ const EnclosureInfo = ({ onClose }) => {
       ventilation,
     }
 
-    console.log('사육장 정보:', enclosureInfo)
-    navigate('/guide/enclosure-check', { state: enclosureInfo })
+    submitting.current = true
+    try {
+      await saveGuideEnclosure(enclosureInfo)
+      navigate('/guide/enclosure-check', { state: enclosureInfo })
+    } catch (error) { window.alert(error.message) }
+    finally { submitting.current = false }
   }
 
   return (

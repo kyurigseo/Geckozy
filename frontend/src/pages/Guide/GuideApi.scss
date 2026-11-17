@@ -1,0 +1,53 @@
+.api-guide-step {
+  box-sizing: border-box; position: relative; width: 393px; max-width: 100%; height: 738px;
+  margin: 0 auto; padding: 38px 22px 40px; overflow-y: auto; background-size: cover;
+  color: #493729; font-family: Pretendard, sans-serif;
+  header { text-align: center; position: relative; }
+  header p { font-size: 14px; }
+  .api-back { position: absolute; top: 0; left: 0; background: none; padding: 0; border: 0; }
+  .api-back img { width: 30px; }
+  ol { display: flex; justify-content: center; gap: 16px; padding: 8px 0 20px; list-style: none; }
+  ol li { border-radius: 50%; background: #ffdfbe; width: 24px; height: 24px; font-size: 13px; line-height: 24px; }
+  ol .active { background: #ff8088; color: white; }
+  .api-step-title { width: 270px; max-width: 100%; height: 45px; object-fit: contain; }
+  .api-card { margin: 22px 0; padding: 20px; border-radius: 20px; background: #fffaf0; box-shadow: 0 3px 0 #ead9c4; }
+  h2 { font-size: 19px; margin: 0 0 15px; }
+  h3, summary { font-size: 15px; font-weight: 700; }
+  summary { cursor: pointer; margin: 16px 0; }
+  p, li { white-space: pre-wrap; font-size: 14px; line-height: 1.7; overflow-wrap: anywhere; }
+  small { background: #ffe3ad; border-radius: 7px; padding: 4px; }
+  button { border: 0; border-radius: 15px; background: #f4dbb5; color: #493729; padding: 12px 16px; cursor: pointer; margin: 5px 0; }
+  button:disabled { opacity: .5; cursor: default; }
+  .api-primary { width: 100%; background: #ff828b; color: #fff; font-weight: 700; font-size: 17px; }
+  .api-check { display: flex; align-items: start; gap: 12px; padding: 12px 0; font-size: 14px; line-height: 1.5; }
+  input[type=checkbox] { accent-color: #ed727c; width: 19px; height: 19px; flex-shrink: 0; }
+  select, input:not([type=checkbox]) { box-sizing: border-box; width: 100%; padding: 12px; margin: 8px 0 14px; border: 1px solid #d7c6ac; border-radius: 8px; background: white; color: #493729; }
+  progress { width: 100%; accent-color: #ef818c; }
+}
+.guide-status { position: relative; z-index: 2; font-size: 14px; line-height: 1.5; }
+.guide-status [role=alert] { color: #a13232; background: #fff5ef; padding: 10px; border-radius: 8px; }
+.guide-draft-note { font-size: 12px; color: #705342; line-height: 1.5; }
+
+.species-details {
+  margin: 14px 0 24px; padding: 16px; border-radius: 14px; background: #fff8e9; color: #493729;
+  h3 { font-size: 16px; margin: 0 0 8px; }
+  p { font-size: 13px; line-height: 1.6; margin: 8px 0; }
+  dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 12px 0 0; }
+  dl div { display: flex; flex-wrap: wrap; gap: 5px; }
+  dt { font-size: 12px; color: #846a51; }
+  dd { margin: 0; font-size: 13px; font-weight: 700; }
+}
+.lizard-info-overlay .lizard-info-content {
+  height: 610px; overflow-y: auto; overflow-x: hidden; padding: 0 20px 36px;
+  .info-section { width: 100%; }
+  .select-box, .info-select { width: 100%; }
+  .guide-status { margin-top: 12px; }
+}
+.lizard-info-overlay .lizard-info-content {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.lizard-info-overlay .lizard-info-content::-webkit-scrollbar {
+  display: none;
+}

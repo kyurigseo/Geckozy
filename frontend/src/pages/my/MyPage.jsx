@@ -1,7 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { getMyProfile } from '../../api/my'
+import {
+  logoutAccount,
+  deleteMyAccount,
+} from '../../api/myManage'
 
 import geckoBeige from '../../assets/onboarding/gecko-beige.png'
 import geckoOrange from '../../assets/onboarding/gecko-orange.png'
@@ -28,7 +32,7 @@ const GECKO_IMAGES = {
   orange: geckoOrange,
   yellow: geckoYellow,
   green: geckoGreen,
-  blue: geckoBlue
+  blue: geckoBlue,
 }
 
 const MENU_SECTIONS = [
@@ -36,36 +40,78 @@ const MENU_SECTIONS = [
     key: 'manage',
     title: '관리',
     items: [
-      { key: 'gecko-custom', label: '도마뱀 커스텀', icon: [geckoIcon, 39, 29], path: '/my/gecko-custom' },
-      { key: 'tank-custom', label: '사육장 커스텀', icon: [tankIcon, 34, 29], path: '/my/tank-custom' },
-      { key: 'gecko-manage', label: '도마뱀 관리', icon: [documentIcon, 25, 27], path: '/my/lizard-manage' },
-      { key: 'scrap', label: '스크랩', icon: [leafIcon, 29, 20], path: '/my/scrap' }
-    ]
+      {
+        key: 'gecko-custom',
+        label: '도마뱀 커스텀',
+        icon: [geckoIcon, 39, 29],
+        path: '/my/gecko-custom',
+      },
+      {
+        key: 'tank-custom',
+        label: '사육장 커스텀',
+        icon: [tankIcon, 34, 29],
+        path: '/my/tank-custom',
+      },
+      {
+        key: 'gecko-manage',
+        label: '도마뱀 관리',
+        icon: [documentIcon, 25, 27],
+        path: '/my/lizard-manage',
+      },
+      {
+        key: 'scrap',
+        label: '스크랩',
+        icon: [leafIcon, 29, 20],
+        path: '/my/scrap',
+      },
+    ],
   },
   {
     key: 'sensor',
     title: '센서',
     items: [
-      { key: 'sensor', label: '연결된 센서', icon: [sensorIcon, 34, 32], path: '/my/sensor' }
-    ]
+      {
+        key: 'sensor',
+        label: '연결된 센서',
+        icon: [sensorIcon, 34, 32],
+        path: '/my/sensor',
+      },
+    ],
   },
   {
     key: 'setting',
     title: '설정',
     items: [
-      { key: 'version', label: '버전 정보', icon: [infoIcon, 26, 26], value: 'v1.0.0' },
-      { key: 'logout', label: '로그아웃', icon: [logoutIcon, 27, 25] },
-      { key: 'delete-account', label: '계정 삭제', icon: [deleteIcon, 26, 25] }
-    ]
-  }
+      {
+        key: 'version',
+        label: '버전 정보',
+        icon: [infoIcon, 26, 26],
+        value: 'v1.0.0',
+      },
+      {
+        key: 'logout',
+        label: '로그아웃',
+        icon: [logoutIcon, 27, 25],
+      },
+      {
+        key: 'delete-account',
+        label: '계정 삭제',
+        icon: [deleteIcon, 26, 25],
+      },
+    ],
+  },
 ]
 
 const MyPage = () => {
   const navigate = useNavigate()
   const { playSfx } = useSound()
+
   const [profile, setProfile] = useState(null)
   const [confirmType, setConfirmType] = useState(null)
 
+  const submitting = useRef(false)
+
+  // 기존 프로필 조회 유지
   useEffect(() => {
     let isCancelled = false
 
@@ -83,7 +129,10 @@ const MyPage = () => {
   }, [])
 
   const handleMenuClick = (item) => {
-    if (item.key === 'logout' || item.key === 'delete-account') {
+    if (
+      item.key === 'logout' ||
+      item.key === 'delete-account'
+    ) {
       playSfx('button')
       setConfirmType(item.key)
       return
@@ -92,37 +141,76 @@ const MyPage = () => {
     if (item.path) navigate(item.path)
   }
 
-  const handleConfirm = () => {
+  // 로그아웃·회원탈퇴 처리만 변경
+  const handleConfirm = async () => {
+    if (submitting.current) return
+
+    submitting.current = true
     playSfx('button')
-    if (confirmType === 'logout') {
+
+    try {
+      if (confirmType === 'logout') {
+        await logoutAccount()
+      } else if (confirmType === 'delete-account') {
+        await deleteMyAccount()
+      } else {
+        return
+      }
+
       setConfirmType(null)
-      navigate('/onboarding')
-      return
+
+      navigate('/onboarding', {
+        replace: true,
+      })
+    } catch (error) {
+      window.alert(error.message)
+    } finally {
+      submitting.current = false
     }
-
-    setConfirmType(null)
   }
-
-  const confirmTitle = confirmType === 'logout'
-    ? '로그아웃 하시겠습니까?'
-    : '계정을 삭제하시겠습니까?'
 
   return (
     <section className="my-page">
       <div className="my-page-profile">
         <div className="my-page-avatar">
           <span className="my-page-avatar-circle">
-            {profile && <img src={GECKO_IMAGES[profile.geckoColor] ?? geckoBeige} alt="" />}
+            {profile && (
+              <img
+                src={
+                  GECKO_IMAGES[profile.geckoColor] ??
+                  geckoBeige
+                }
+                alt=""
+              />
+            )}
           </span>
-          <img className="my-page-avatar-leaf" src={leafIcon} alt="" />
+
+          <img
+            className="my-page-avatar-leaf"
+            src={leafIcon}
+            alt=""
+          />
         </div>
-        <p className="my-page-name">{profile?.name}</p>
-        <p className="my-page-info">{profile && `${profile.species} • ${profile.tankName}`}</p>
+
+        <p className="my-page-name">
+          {profile?.name}
+        </p>
+
+        <p className="my-page-info">
+          {profile &&
+            `${profile.species} • ${profile.tankName}`}
+        </p>
       </div>
 
       {MENU_SECTIONS.map((section) => (
-        <section key={section.key} className="my-page-section">
-          <h2 className="my-page-section-title">{section.title}</h2>
+        <section
+          key={section.key}
+          className="my-page-section"
+        >
+          <h2 className="my-page-section-title">
+            {section.title}
+          </h2>
+
           <ul className="my-page-menu">
             {section.items.map((item) => {
               const [icon, width, height] = item.icon
@@ -132,17 +220,39 @@ const MyPage = () => {
               return (
                 <li key={item.key}>
                   <Tag
-                    {...(isStatic ? {} : { type: 'button', onClick: () => handleMenuClick(item) })}
+                    {...(
+                      isStatic
+                        ? {}
+                        : {
+                            type: 'button',
+                            onClick: () =>
+                              handleMenuClick(item),
+                          }
+                    )}
                     className="my-page-menu-item"
                   >
                     <span className="my-page-menu-icon">
-                      <img src={icon} alt="" style={{ width, height }} />
+                      <img
+                        src={icon}
+                        alt=""
+                        style={{ width, height }}
+                      />
                     </span>
-                    <span className="my-page-menu-label">{item.label}</span>
+
+                    <span className="my-page-menu-label">
+                      {item.label}
+                    </span>
+
                     {isStatic ? (
-                      <span className="my-page-menu-value">{item.value}</span>
+                      <span className="my-page-menu-value">
+                        {item.value}
+                      </span>
                     ) : (
-                      <img className="my-page-menu-chevron" src={chevronIcon} alt="" />
+                      <img
+                        className="my-page-menu-chevron"
+                        src={chevronIcon}
+                        alt=""
+                      />
                     )}
                   </Tag>
                 </li>
@@ -154,8 +264,16 @@ const MyPage = () => {
 
       {confirmType && (
         <SaveConfirmPopup
-          title={confirmType === 'logout' ? '로그아웃 하시겠습니까?' : '계정을 삭제하시겠습니까?'}
-          description={confirmType === 'delete-account' ? '삭제된 데이터는 복구가 불가능합니다.' : ''}
+          title={
+            confirmType === 'logout'
+              ? '로그아웃 하시겠습니까?'
+              : '계정을 삭제하시겠습니까?'
+          }
+          description={
+            confirmType === 'delete-account'
+              ? '삭제된 데이터는 복구가 불가능합니다.'
+              : ''
+          }
           onConfirm={handleConfirm}
           onDiscard={() => setConfirmType(null)}
           onClose={() => setConfirmType(null)}

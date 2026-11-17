@@ -206,3 +206,52 @@
     pointer-events: none;
   }
 }
+
+.enclosure-check .enclosure-check-match-title {
+  position: absolute;
+  top: 434px;
+  left: 21px;
+  width: 351px;
+
+  margin: 0;
+  padding: 0;
+  z-index: 3;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  text-align: center;
+  font-family: 'AndongKaturi', sans-serif;
+  font-size: 22px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 140%;
+  letter-spacing: -0.44px;
+
+  pointer-events: none;
+
+  > span {
+    display: block;
+    white-space: nowrap;
+  }
+
+  .enclosure-check-match-line {
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    gap: 0;
+  }
+
+  .enclosure-check-match-species {
+    color: #FFB8BD;
+    -webkit-text-stroke: 3px #5B3524;
+    paint-order: stroke fill;
+  }
+
+  .enclosure-check-match-result {
+    color: #5B3524;
+    -webkit-text-stroke: 2px #FFB8BD;
+    paint-order: stroke fill;
+  }
+}

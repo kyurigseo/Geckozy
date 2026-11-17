@@ -431,3 +431,11 @@
     }
   }
 }
+
+/* 홈 팝업 스타일이 Step1 상세설명창에 적용되지 않도록 차단 */
+.step1 .guide-popup {
+  display: block;
+  inset: auto;
+  height: auto;
+  animation: none;
+}

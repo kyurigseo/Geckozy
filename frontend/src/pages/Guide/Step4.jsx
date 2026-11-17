@@ -1,5 +1,12 @@
-import React from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import useGuideStep from './useGuideStep'
+
+import {
+  getEnvironmentCheck,
+  getEnvironmentSummary,
+  getSensorStatus,
+} from '../../api/guide'
 
 import background from '../../assets/guide/가이드 배경.svg'
 import stepTitle from '../../assets/guide/4단계 준비.svg'
@@ -19,18 +26,122 @@ import { useSound } from '../../sound/SoundProvider'
 
 const Step4 = () => {
   const navigate = useNavigate()
+  const location = useLocation()
   const { playSfx } = useSound()
 
-  const currentDay = 7
+  const entryStep = Number(location.state?.entryStep) || 4
+
+  const { finish } = useGuideStep(4)
+
+  const [environment, setEnvironment] = useState(null)
+  const [summary, setSummary] = useState(null)
+  const [sensor, setSensor] = useState(null)
+
+  const currentDay = Math.min(
+    7,
+    Math.max(1, environment?.elapsedDays || 1),
+  )
+
+  const isComplete = environment?.status === 'COMPLETED'
+
+  const formatTime = (value) =>
+    value ? new Date(value).toLocaleString('ko-KR') : '—'
+
+  const handleBack = () => {
+    if (entryStep === 4) {
+      navigate('/guide')
+    } else {
+      navigate('/guide/step3', {
+        state: { entryStep },
+      })
+    }
+  }
+
+  const handleNext = () => {
+    playSfx('button')
+
+    finish(() =>
+      navigate('/guide/step5', {
+        state: { entryStep },
+      }),
+    )
+  }
+
+  useEffect(() => {
+    const controller = new AbortController()
+    let lastError = ''
+
+    const refresh = async () => {
+      const results = await Promise.allSettled([
+        Promise.resolve().then(() =>
+          getEnvironmentCheck(controller.signal),
+        ),
+        Promise.resolve().then(() =>
+          getEnvironmentSummary(controller.signal),
+        ),
+        Promise.resolve().then(() =>
+          getSensorStatus(controller.signal),
+        ),
+      ])
+
+      if (controller.signal.aborted) return
+
+      const setters = [
+        setEnvironment,
+        setSummary,
+        setSensor,
+      ]
+
+      results.forEach((result, index) => {
+        if (result.status === 'fulfilled') {
+          setters[index](result.value)
+        } else {
+          setters[index](null)
+        }
+      })
+
+      const failure = results.find(
+        (result) => result.status === 'rejected',
+      )
+
+      if (
+        failure &&
+        failure.reason.message !== lastError
+      ) {
+        window.alert(failure.reason.message)
+      }
+
+      lastError = failure?.reason.message || ''
+    }
+
+    refresh()
+
+    const timer = setInterval(refresh, 30000)
+
+    return () => {
+      controller.abort()
+      clearInterval(timer)
+    }
+  }, [])
 
   return (
     <div className="step4">
-      <img className="step4-background" src={background} alt="" />
+      <img
+        className="step4-background"
+        src={background}
+        alt=""
+      />
 
       <div className="step4-scroll">
-        <div className={`step4-inner ${currentDay === 7 ? 'complete' : ''}`}>
-
-          <button className="step4-back" onClick={() => navigate('/guide/step3')}>
+        <div
+          className={`step4-inner ${
+            isComplete ? 'complete' : ''
+          }`}
+        >
+          <button
+            className="step4-back"
+            onClick={handleBack}
+          >
             <img src={back} alt="뒤로가기" />
           </button>
 
@@ -46,48 +157,81 @@ const Step4 = () => {
             <div className="progress-dot"></div>
           </div>
 
-          <img className="step4-title" src={stepTitle} alt="4단계 환경 사전 점검" />
+          <img
+            className="step4-title"
+            src={stepTitle}
+            alt="4단계 환경 사전 점검"
+          />
 
-          <img className="step4-title1" src={title1} alt="" />
+          <img
+            className="step4-title1"
+            src={title1}
+            alt=""
+          />
 
           <div className="step4-check-card">
             <div className="step4-check-title">
-                <img src={leaf} alt="" />
-                <strong>온습도 체크 중</strong>
+              <img src={leaf} alt="" />
+              <strong>온습도 체크 중</strong>
             </div>
 
-            <p>도마뱀을 데려오기 전, 센서로 온·습도 변화를 7일 동안 확인해요.</p>
-            <p>실제로 사육할 때처럼 조명과 분무 등을 관리해주세요.</p>
+            <p>
+              도마뱀을 데려오기 전, 센서로 온·습도 변화를 7일 동안 확인해요.
+            </p>
+            <p>
+              실제로 사육할 때처럼 조명과 분무 등을 관리해주세요.
+            </p>
 
             <div className="day-graph">
-                <img className="day-graph-image" src={dayGraph} alt="" />
+              <img
+                className="day-graph-image"
+                src={dayGraph}
+                alt=""
+              />
 
-                <div
-                    className="day-graph-fill"
-                    style={{ width: `${11 + (currentDay - 1) * 50}px` }}
-                ></div>
+              <div
+                className="day-graph-fill"
+                style={{
+                  width: `${
+                    11 + (currentDay - 1) * 50
+                  }px`,
+                }}
+              ></div>
 
-                <img
-                    className="day-graph-gecko"
-                    src={gecko}
-                    alt=""
-                    style={{ left: `${6 + (currentDay - 1) * 50}px` }}
-                />
+              <img
+                className="day-graph-gecko"
+                src={gecko}
+                alt=""
+                style={{
+                  left: `${
+                    6 + (currentDay - 1) * 50
+                  }px`,
+                }}
+              />
 
-                <div className="day-labels">
-                    {Array.from({ length: 7 }, (_, index) => {
+              <div className="day-labels">
+                {Array.from(
+                  { length: 7 },
+                  (_, index) => {
                     const day = index + 1
 
                     return (
-                        <span
+                      <span
                         key={day}
-                        className={day === currentDay ? 'current' : day > currentDay ? 'future' : ''}
-                        >
+                        className={
+                          day === currentDay
+                            ? 'current'
+                            : day > currentDay
+                              ? 'future'
+                              : ''
+                        }
+                      >
                         {day}일
-                        </span>
+                      </span>
                     )
-                    })}
-                </div>
+                  },
+                )}
+              </div>
             </div>
           </div>
 
@@ -96,7 +240,11 @@ const Step4 = () => {
               <img src={temperatureIcon} alt="" />
               <div>
                 <span>현재 온도</span>
-                <strong>24.1℃</strong>
+                <strong>
+                  {sensor?.lastTemperature == null
+                    ? '—'
+                    : `${sensor.lastTemperature}℃`}
+                </strong>
               </div>
             </div>
 
@@ -104,62 +252,107 @@ const Step4 = () => {
               <img src={humidityIcon} alt="" />
               <div>
                 <span>현재 습도</span>
-                <strong>54%</strong>
+                <strong>
+                  {sensor?.lastHumidity == null
+                    ? '—'
+                    : `${sensor.lastHumidity}%`}
+                </strong>
               </div>
             </div>
           </div>
 
-          <span className="last-measured">마지막 측정 14:30</span>
+          <span className="last-measured">
+            마지막 측정{' '}
+            {formatTime(
+              environment?.latestMeasuredAt ||
+              sensor?.lastMeasuredAt,
+            )}
+          </span>
 
-          <img className="step4-title2" src={title2} alt="" />
+          <img
+            className="step4-title2"
+            src={title2}
+            alt=""
+          />
 
           <div className="step4-result">
-
             <div className="result-section">
               <div className="result-title">
                 <span data-text="01">01</span>
                 <strong>온도</strong>
-                <b>22.8~25.6℃ 사이에서 유지됐어요</b>
+                <b>
+                  {summary?.sufficientData
+                    ? summary.temperatureSummary
+                    : summary?.guidance ||
+                      '환경 데이터를 기다리고 있어요.'}
+                </b>
               </div>
-              <p className='p_1'>낮에는 주로 24~25℃, 밤에는 23℃ 안팎으로 낮아졌어요.<br/>두 날 모두 급격하게 오르거나 내려가는 변화는 없었어요.</p>
+
+              <p className="p_1">
+                {summary?.sufficientData
+                  ? summary.dayNightSummary
+                  : '—'}
+              </p>
             </div>
 
             <div className="result-section">
               <div className="result-title">
                 <span data-text="02">02</span>
                 <strong>습도</strong>
-                <b>습윤-건조 흐름이 정상적으로 나타났어요</b>
+                <b>
+                  {summary?.sufficientData
+                    ? summary.humiditySummary
+                    : '—'}
+                </b>
               </div>
 
-              <p>분무 후 약 78~82%까지 상승한 뒤,<br/>시간이 지나면서 50~60%대까지 낮아졌어요.</p>
+              <p>
+                {summary?.sufficientData
+                  ? summary.durationSummary
+                  : '—'}
+              </p>
             </div>
 
-            {currentDay !== 7 && (
-            <div className="result-warning">
+            {(summary?.checkPoints?.length > 0 ||
+              environment?.missingData) && (
+              <div className="result-warning">
                 <div className="warning-title">
-                <span></span>
-                <strong>확인할 점</strong>
+                  <span></span>
+                  <strong>확인할 점</strong>
                 </div>
 
-                <p><strong>습도가 높은 상태로 오래 유지된 날</strong>이 있었어요.</p>
-                <p>2일차에는 분무 후 70% 이상인 상태가 약 5시간 지속됐어요.<br/>남은 기간에도 건조가 늦어지는 날이 반복되는지 확인해볼게요.</p>
-            </div>
-            )}
+                <p>
+                  <strong>
+                    {summary?.checkPoints?.[0] ||
+                      '센서 데이터 공백을 확인해주세요.'}
+                  </strong>
+                </p>
 
+                <p>
+                  {summary?.checkPoints
+                    ?.slice(1)
+                    .join(' ') ||
+                    summary?.guidance}
+                </p>
+              </div>
+            )}
           </div>
 
-          <span className="last-update">마지막 업데이트 9월 1일 00:01</span>
+          <span className="last-update">
+            마지막 업데이트{' '}
+            {formatTime(environment?.latestMeasuredAt)}
+          </span>
 
-            <img
+          <img
             className="step4-button"
-            src={currentDay === 7 ? finalButton : checkButton}
-            alt={currentDay === 7 ? '마지막 단계' : '환경 확인 중'}
-            onClick={currentDay === 7 ? () => {
-              playSfx('button')
-              navigate('/guide/step5')
-            } : undefined}
-            />
-
+            src={isComplete ? finalButton : checkButton}
+            alt={
+              isComplete
+                ? '마지막 단계'
+                : '환경 확인 중'
+            }
+            onClick={isComplete ? handleNext : undefined}
+          />
         </div>
       </div>
     </div>

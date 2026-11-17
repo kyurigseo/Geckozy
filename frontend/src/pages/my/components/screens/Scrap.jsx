@@ -1,7 +1,17 @@
-import { useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useState,
+} from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import GuidePopup from '../../../home/GuidePopup' // ← GuidePopup 위치에 맞게 수정
+import {
+  formatMyDate,
+  getMyScraps,
+  mediaUrl,
+} from '../../../../api/myManage'
+
+import ScrapGuidePopup from '../common/ScrapGuidePopup'
 
 import back from '../../../../assets/my/뒤로가기.svg'
 import scrapBackground from '../../../../assets/my/스크랩 배경.svg'
@@ -10,62 +20,154 @@ import checkImage from '../../../../assets/my/스크랩_확인할곳.svg'
 import sprayImage from '../../../../assets/my/스크랩_분무.svg'
 import waterImage from '../../../../assets/my/스크랩_물관리.svg'
 import hideoutImage from '../../../../assets/my/스크랩_은신처.svg'
+import leafImage from '../../../../assets/my/나뭇잎.svg'
 
 import './Scrap.scss'
 
-const SCRAPS = [
-  { id: 1, title: '사육장 환기 관리', date: '2026.09.01', image: ventilationImage, popup: 'ventilation' },
-  { id: 2, title: '환기할 때 확인할 것', date: '2026.08.14', image: checkImage },
-  { id: 3, title: '올바른 분무 주기', date: '2026.08.01', image: sprayImage },
-  { id: 4, title: '깨끗한 물그릇 관리', date: '2026.07.29', image: waterImage },
-  { id: 5, title: '은신처의 중요성', date: '2026.07.06', image: hideoutImage }
-]
+const LOCAL_IMAGES = {
+  '사육장 환기 관리': ventilationImage,
+  '환기할 때 확인할 것': checkImage,
+  '올바른 분무 주기': sprayImage,
+  '깨끗한 물그릇 관리': waterImage,
+  '은신처의 중요성': hideoutImage,
+}
 
 const Scrap = () => {
   const navigate = useNavigate()
+
+  const [scraps, setScraps] = useState([])
   const [openPopup, setOpenPopup] = useState(null)
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(true)
+
+  const closePopup = useCallback(() => {
+    setOpenPopup(null)
+  }, [])
+
+  useEffect(() => {
+    const controller = new AbortController()
+
+    getMyScraps(controller.signal)
+      .then((items) => {
+        if (!controller.signal.aborted) {
+          setScraps(items)
+        }
+      })
+      .catch((error) => {
+        if (!controller.signal.aborted) {
+          setError(error.message)
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) {
+          setLoading(false)
+        }
+      })
+
+    return () => controller.abort()
+  }, [])
+
+  const handleScrapChange = (result) => {
+    if (!result.scrapped) {
+      setScraps((prev) =>
+        prev.filter(
+          (item) =>
+            item.guidebookId !== result.guidebookId,
+        ),
+      )
+    } else {
+      setScraps((prev) => [
+        ...prev.filter(
+          (item) =>
+            item.guidebookId !== result.guidebookId,
+        ),
+        {
+          ...openPopup,
+          scrappedAt: result.scrappedAt,
+        },
+      ])
+    }
+  }
 
   return (
     <div className="scrap">
       <header className="scrap-header">
-        <button className="scrap-back" onClick={() => navigate('/my')}>
+        <button
+          className="scrap-back"
+          onClick={() => navigate('/my')}
+        >
           <img src={back} alt="뒤로가기" />
         </button>
+
         <h1>스크랩</h1>
       </header>
 
       <main className="scrap-content">
-        <div className="scrap-grid">
-          {SCRAPS.map((item) => {
-            const content = (
-              <>
-                <img className="scrap-card-background" src={scrapBackground} alt="" />
-                <img className="scrap-card-image" src={item.image} alt="" />
-                <strong className="scrap-card-title">{item.title}</strong>
-                <span className="scrap-card-date">{item.date}</span>
-              </>
-            )
+        {error && <p role="alert">{error}</p>}
 
-            return item.popup ? (
+        {loading && <p>불러오는 중이에요.</p>}
+
+        {!loading &&
+          !error &&
+          scraps.length === 0 && (
+            <p>스크랩한 도감이 없어요.</p>
+          )}
+
+        <div className="scrap-grid">
+          {scraps.map((item) => {
+            const fallback =
+              LOCAL_IMAGES[item.title] || leafImage
+
+            return (
               <button
                 type="button"
-                key={item.id}
+                key={item.guidebookId}
                 className="scrap-card scrap-card--clickable"
-                onClick={() => setOpenPopup(item.popup)}
+                onClick={() => setOpenPopup(item)}
               >
-                {content}
+                <img
+                  className="scrap-card-background"
+                  src={scrapBackground}
+                  alt=""
+                />
+
+                <img
+                  className="scrap-card-image"
+                  src={
+                    mediaUrl(item.thumbnailUrl) ||
+                    fallback
+                  }
+                  alt=""
+                  onError={(event) => {
+                    const image = event.currentTarget
+
+                    if (!image.dataset.fallback) {
+                      image.dataset.fallback = 'true'
+                      image.src = fallback
+                    }
+                  }}
+                />
+
+                <strong className="scrap-card-title">
+                  {item.title}
+                </strong>
+
+                <span className="scrap-card-date">
+                  {formatMyDate(item.scrappedAt)}
+                </span>
               </button>
-            ) : (
-              <article className="scrap-card" key={item.id}>
-                {content}
-              </article>
             )
           })}
         </div>
       </main>
 
-      {openPopup === 'ventilation' && (
-        <GuidePopup initialScrapped onClose={() => setOpenPopup(null)} />
+      {openPopup && (
+        <ScrapGuidePopup
+          key={openPopup.guidebookId}
+          guidebook={openPopup}
+          onClose={closePopup}
+          onScrapChange={handleScrapChange}
+        />
       )}
     </div>
   )

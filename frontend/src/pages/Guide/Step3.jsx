@@ -1,5 +1,11 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import useGuideStep from './useGuideStep'
+
+import {
+  getSensorStatus,
+  startEnvironmentCheck,
+} from '../../api/guide'
 
 import background from '../../assets/guide/가이드 배경.svg'
 import stepTitle from '../../assets/guide/3단계 준비.svg'
@@ -12,17 +18,98 @@ import { useSound } from '../../sound/SoundProvider'
 
 const Step3 = () => {
   const navigate = useNavigate()
+  const location = useLocation()
   const { playSfx } = useSound()
-  const [isSensorConnected, setIsSensorConnected] = useState(false)
+
+  const entryStep = Number(location.state?.entryStep) || 3
+
+  const {
+    checked,
+    handleCheck,
+    finish,
+    busy,
+  } = useGuideStep(3, 4)
+
+  const [sensor, setSensor] = useState(null)
+  const isSensorConnected = sensor?.status === 'CONNECTED'
+
+  const handleBack = () => {
+    if (entryStep === 3) {
+      navigate('/guide')
+    } else {
+      navigate('/guide/step2', {
+        state: { entryStep },
+      })
+    }
+  }
+
+  const handleNext = () => {
+    playSfx('button')
+
+    if (!isSensorConnected) {
+      window.alert('센서 연결을 확인해주세요.')
+      return
+    }
+
+    finish(async () => {
+      await startEnvironmentCheck()
+
+      navigate('/guide/step4', {
+        state: { entryStep },
+      })
+    })
+  }
+
+  useEffect(() => {
+    const controller = new AbortController()
+    let lastError = ''
+
+    const refresh = () => {
+      Promise.resolve()
+        .then(() => getSensorStatus(controller.signal))
+        .then((result) => {
+          if (controller.signal.aborted) return
+
+          setSensor(result)
+          lastError = ''
+        })
+        .catch((error) => {
+          if (controller.signal.aborted) return
+
+          setSensor(null)
+
+          if (lastError !== error.message) {
+            window.alert(error.message)
+          }
+
+          lastError = error.message
+        })
+    }
+
+    refresh()
+
+    const timer = setInterval(refresh, 30000)
+
+    return () => {
+      controller.abort()
+      clearInterval(timer)
+    }
+  }, [])
 
   return (
     <div className="step3">
-      <img className="step3-background" src={background} alt="" />
+      <img
+        className="step3-background"
+        src={background}
+        alt=""
+      />
 
       <div className="step3-scroll">
         <div className="step3-inner">
-
-          <button className="step3-back" onClick={() => navigate('/guide/step2')}>
+          <button
+            className="step3-back"
+            onClick={handleBack}
+          >
             <img src={back} alt="뒤로가기" />
           </button>
 
@@ -38,9 +125,17 @@ const Step3 = () => {
             <div className="progress-dot"></div>
           </div>
 
-          <img className="step3-title" src={stepTitle} alt="3단계 센서 설치" />
+          <img
+            className="step3-title"
+            src={stepTitle}
+            alt="3단계 센서 설치"
+          />
 
-          <img className="step3-intro" src={step3intro} alt="" />
+          <img
+            className="step3-intro"
+            src={step3intro}
+            alt=""
+          />
 
           <div className="step3-card card1">
             <div className="card-title">
@@ -52,19 +147,31 @@ const Step3 = () => {
               핸드폰의 블루투스를 통해 온습도 센서를 앱과 연결해주세요.
             </p>
 
-            <div className={`sensor-connect ${isSensorConnected ? 'connected' : ''}`}>
+            <div
+              className={`sensor-connect ${
+                isSensorConnected ? 'connected' : ''
+              }`}
+            >
               {isSensorConnected ? (
                 <>
                   <div className="sensor-name">
                     <span className="sensor-status"></span>
-                    <strong>Geckozy Sensor</strong>
+
+                    <strong>
+                      {sensor?.sensorId
+                        ? `Sensor ${sensor.sensorId}`
+                        : 'Sensor'}
+                    </strong>
                   </div>
 
                   <div className="sensor-info">
                     <span>연결됨</span>
                     <span>·</span>
                     <span className="battery-icon"></span>
-                    <span>&nbsp;배터리 92%</span>
+                    <span>
+                      {sensor?.message ||
+                        '센서 연결 상태 확인됨'}
+                    </span>
                   </div>
                 </>
               ) : (
@@ -84,7 +191,8 @@ const Step3 = () => {
             </p>
 
             <p>
-              센서 위치에 따라 측정값이 달라질 수 있으므로, 열원이나 보금자리가 직접 닿는 곳은 피해주세요.
+              센서 위치에 따라 측정값이 달라질 수 있으므로,
+              열원이나 보금자리가 직접 닿는 곳은 피해주세요.
             </p>
 
             <div className="sensor-check-box">
@@ -94,24 +202,58 @@ const Step3 = () => {
               </div>
 
               <div className="sensor-check-list">
-                <label><input type="checkbox" /> 센서가 열원 바로 아래에 있지 않아요</label>
-                <label><input type="checkbox" /> 몸무게 등이 센서에 직접 닿지 않아요</label>
-                <label><input type="checkbox" /> 물그릇 바로 옆처럼 습도가 과도적으로 높은 곳을 피했어요</label>
-                <label><input type="checkbox" /> 도마뱀의 센서를 떨어뜨리거나 손상시키지 않도록 주의했어요</label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={checked[0]}
+                    disabled={busy}
+                    onChange={() => handleCheck(0)}
+                  />{' '}
+                  센서가 열원 바로 아래에 있지 않아요
+                </label>
+
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={checked[1]}
+                    disabled={busy}
+                    onChange={() => handleCheck(1)}
+                  />{' '}
+                  몸무게 등이 센서에 직접 닿지 않아요
+                </label>
+
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={checked[2]}
+                    disabled={busy}
+                    onChange={() => handleCheck(2)}
+                  />{' '}
+                  물그릇 바로 옆처럼 습도가 과도적으로 높은 곳을 피했어요
+                </label>
+
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={checked[3]}
+                    disabled={busy}
+                    onChange={() => handleCheck(3)}
+                  />{' '}
+                  도마뱀의 센서를 떨어뜨리거나 손상시키지 않도록 주의했어요
+                </label>
               </div>
             </div>
           </div>
 
           <button
             className="step3-button"
-            onClick={() => {
-              playSfx('button')
-              navigate('/guide/step4')
-            }}
+            onClick={handleNext}
           >
-            <img src={sensorButton} alt="센서 측정 확인하기" />
+            <img
+              src={sensorButton}
+              alt="센서 측정 확인하기"
+            />
           </button>
-
         </div>
       </div>
     </div>
