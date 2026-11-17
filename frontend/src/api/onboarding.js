@@ -70,12 +70,12 @@ export const signup = async ({ id, password, passwordConfirm, email }) => {
 }
 
 // 종 이름 → 서버 종 번호 (speciesId)
-// TODO: 백엔드에 번호 확인 후 채우기. '종 목록 조회' API가 생기면 서버에서 받아오기
-// (2026-11-16 기준 서버 species 테이블이 비어 있어 어떤 번호든 SPECIES_NOT_FOUND)
+// 서버 DataInitializer가 넣는 순서대로 1~3 (2026-11-17 서버에서 확인)
+// TODO: '종 목록 조회' API가 생기면 서버에서 받아오기
 const SPECIES_IDS = {
-  '비어디드 드래곤': null,
-  '크레스티드 게코': null,
-  '레오파드 게코': null,
+  '비어디드 드래곤': 1,
+  '크레스티드 게코': 2,
+  '레오파드 게코': 3,
 }
 
 const toNumber = (value) => (value === '' || value === null || value === undefined ? null : Number(value))
