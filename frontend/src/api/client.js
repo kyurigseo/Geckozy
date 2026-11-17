@@ -40,6 +40,15 @@ export class ApiError extends Error {
   }
 }
 
+// 에러 → 화면에 보여줄 문구. messages: { 에러 코드: 문구 }, 없는 코드는 fallback
+// ApiError가 아니면 (코드 버그) 그대로 다시 던진다
+const NETWORK_MESSAGE = '서버에 연결할 수 없어요. 잠시 후 다시 시도해주세요.'
+export const errorMessage = (error, messages, fallback) => {
+  if (!(error instanceof ApiError)) throw error
+  if (error.code === 'NETWORK_ERROR') return NETWORK_MESSAGE
+  return messages[error.code] ?? fallback
+}
+
 // path: '/auth/login' 같은 경로, params: 쿼리스트링, body: JSON으로 보낼 값
 export const request = async (path, { method = 'GET', params, body } = {}) => {
   const url = new URL(path, BASE_URL)

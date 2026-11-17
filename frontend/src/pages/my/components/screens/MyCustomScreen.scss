@@ -9,3 +9,26 @@
   margin: 0 auto;
   overflow: hidden;
 }
+
+// 불러오기 실패 안내 (도마뱀·사육장 정보를 못 가져왔을 때)
+.my-custom-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  min-height: 100dvh;
+  padding: 0 24px;
+  color: $color-main-brown;
+  text-align: center;
+
+  button {
+    padding: 10px 20px;
+    border: 0;
+    border-radius: 12px;
+    background: $color-main-beige-3;
+    color: $color-main-brown;
+    font: inherit;
+    cursor: pointer;
+  }
+}
