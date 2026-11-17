@@ -12,6 +12,7 @@ import com.likelion.backend.domain.enclosure.dto.suggestion.ManagementSettingRes
 import com.likelion.backend.domain.enclosure.entity.Enclosure;
 import com.likelion.backend.domain.enclosure.entity.EnclosureComponent;
 import com.likelion.backend.domain.enclosure.entity.EnclosureConcern;
+import com.likelion.backend.domain.enclosure.entity.ManagementSprayingTime;
 import com.likelion.backend.domain.enclosure.repository.EnclosureComponentRepository;
 import com.likelion.backend.domain.enclosure.repository.EnclosureConcernRepository;
 import com.likelion.backend.domain.enclosure.repository.EnclosureRepository;
@@ -19,6 +20,7 @@ import com.likelion.backend.domain.lizard.entity.Lizard;
 import com.likelion.backend.domain.lizard.repository.LizardRepository;
 import com.likelion.backend.domain.management.entity.ManagementSetting;
 import com.likelion.backend.domain.management.repository.ManagementSettingRepository;
+import com.likelion.backend.domain.management.repository.ManagementSprayingTimeRepository;
 import com.likelion.backend.global.exception.BusinessException;
 import com.likelion.backend.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -39,10 +41,19 @@ public class EnclosureCommandService {
     private final EnclosureComponentRepository enclosureComponentRepository;
     private final EnclosureConcernRepository enclosureConcernRepository;
     private final ManagementSettingRepository managementSettingRepository;
+    private final ManagementSprayingTimeRepository managementSprayingTimeRepository;
 
-    public EnclosureCreateResponse createEnclosure(EnclosureCreateRequest request) {
+    public EnclosureCreateResponse createEnclosure(EnclosureCreateRequest request, Long currentUserId) {
         Lizard lizard = lizardRepository.findByLizardIdAndDeletedAtIsNull(request.getLizardId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.LIZARD_NOT_FOUND));
+
+        if (!lizard.getUser().getUserId().equals(currentUserId)) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+
+        if (enclosureRepository.findByLizard_LizardId(lizard.getLizardId()).isPresent()) {
+            throw new BusinessException(ErrorCode.ENCLOSURE_ALREADY_EXISTS);
+        }
 
         Enclosure savedEnclosure = enclosureRepository.save(request.toEntity(lizard));
 
@@ -63,12 +74,48 @@ public class EnclosureCommandService {
         return new EnclosureCreateResponse(savedEnclosure.getId(), lizard.getLizardId());
     }
 
-    public ManagementSettingResponse updateManagementSetting(Long enclosureId, ManagementSettingRequest request) {
+    public ManagementSettingResponse updateManagementSetting(Long enclosureId, ManagementSettingRequest request, Long currentUserId) {
+        Enclosure enclosure = findMyEnclosure(enclosureId, currentUserId);
+
+        // PUT: 기존 설정이 있으면 수정, 없으면 생성 (enclosure_id unique)
+        ManagementSetting setting = managementSettingRepository.findByEnclosure_Id(enclosureId)
+                .map(existing -> {
+                    existing.update(
+                            request.getSprayingMethod(),
+                            request.getSprayingFrequency(),
+                            request.getLightingStartTime(),
+                            request.getLightingEndTime(),
+                            request.getLightingEnabled(),
+                            request.getHeatingUsageMode(),
+                            request.getHeatingStartTime(),
+                            request.getHeatingEndTime()
+                    );
+                    return existing;
+                })
+                .orElseGet(() -> managementSettingRepository.save(request.toEntity(enclosure)));
+
+        // 분무 시간대: 기존 값 삭제 후 요청 값으로 교체
+        managementSprayingTimeRepository.deleteByManagementSetting(setting);
+        if (request.getSprayingTimes() != null) {
+            managementSprayingTimeRepository.saveAll(
+                    request.getSprayingTimes().stream()
+                            .distinct()
+                            .map(t -> new ManagementSprayingTime(setting, ManagementSprayingTime.SprayingTime.valueOf(t.name())))
+                            .toList()
+            );
+        }
+
+        return new ManagementSettingResponse(setting.getId());
+    }
+
+    private Enclosure findMyEnclosure(Long enclosureId, Long currentUserId) {
         Enclosure enclosure = enclosureRepository.findById(enclosureId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENCLOSURE_NOT_FOUND));
 
-        ManagementSetting savedSetting = managementSettingRepository.save(request.toEntity(enclosure));
-        return new ManagementSettingResponse(savedSetting.getId());
+        if (!enclosure.getLizard().getUser().getUserId().equals(currentUserId)) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+        return enclosure;
     }
 
     @Transactional(readOnly = true)

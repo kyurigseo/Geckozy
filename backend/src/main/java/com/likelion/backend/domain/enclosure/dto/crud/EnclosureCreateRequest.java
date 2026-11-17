@@ -3,6 +3,7 @@ package com.likelion.backend.domain.enclosure.dto.crud;
 import com.likelion.backend.domain.enclosure.entity.Enclosure;
 import com.likelion.backend.domain.enclosure.entity.EnclosureComponent;
 import com.likelion.backend.domain.lizard.entity.Lizard;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -13,11 +14,17 @@ import java.util.List;
 @NoArgsConstructor
 public class EnclosureCreateRequest {
 
+    @NotNull(message = "도마뱀 ID는 필수입니다.")
     private Long lizardId;
+    @NotNull(message = "사육장 가로 크기는 필수입니다.")
     private BigDecimal width;
+    @NotNull(message = "사육장 높이 크기는 필수입니다.")
     private BigDecimal height;
+    @NotNull(message = "사육장 세로 크기는 필수입니다.")
     private BigDecimal depth;
+    @NotNull(message = "사육장 재질은 필수입니다.")
     private Enclosure.Material material;
+    @NotNull(message = "환기 구조는 필수입니다.")
     private Enclosure.Ventilation ventilation;
     private String materialOther;
 

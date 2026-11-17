@@ -17,6 +17,7 @@ import com.likelion.backend.domain.species.entity.SpeciesEnvironmentStandard;
 import com.likelion.backend.domain.species.repository.SpeciesEnvironmentStandardRepository;
 import com.likelion.backend.global.exception.BusinessException;
 import com.likelion.backend.global.exception.ErrorCode;
+import com.likelion.backend.global.util.KstTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -43,62 +45,6 @@ public class EnclosureEnvironmentService {
     private final SensorMeasurementRepository sensorMeasurementRepository;
     private final ManagementSettingRepository managementSettingRepository;
     private final SpeciesEnvironmentStandardRepository speciesEnvironmentStandardRepository;
-
-    public TemperatureStatusResponse getTemperatureStatus(Long enclosureId) {
-        Enclosure enclosure = enclosureRepository.findById(enclosureId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.ENCLOSURE_NOT_FOUND));
-
-        Lizard lizard = enclosure.getLizard();
-        Species species = lizard.getSpecies();
-
-        Optional<Sensor> sensorOpt = sensorRepository.findByEnclosure_Id(enclosureId);
-        if (sensorOpt.isEmpty() || sensorOpt.get().getStatus() == Sensor.Status.DISCONNECTED) {
-            return TemperatureStatusResponse.ofSensorError(enclosureId, lizard.getName(), species.getName());
-        }
-
-        Optional<SensorMeasurement> measurementOpt = sensorMeasurementRepository
-                .findTopBySensor_SensorIdOrderByMeasuredAtDesc(sensorOpt.get().getSensorId());
-
-        if (measurementOpt.isEmpty() || measurementOpt.get().getTemperature() == null) {
-            return TemperatureStatusResponse.ofSensorError(enclosureId, lizard.getName(), species.getName());
-        }
-
-        BigDecimal currentTemp = measurementOpt.get().getTemperature();
-        boolean isDaytime = checkIsDaytime(enclosureId);
-        TemperatureStatusResponse.TimeOfDay timeOfDay = isDaytime
-                ? TemperatureStatusResponse.TimeOfDay.DAYTIME
-                : TemperatureStatusResponse.TimeOfDay.NIGHTTIME;
-
-        Optional<SpeciesEnvironmentStandard> standardOpt = speciesEnvironmentStandardRepository.findBySpecies_SpeciesId(species.getSpeciesId());
-        if (standardOpt.isEmpty()) {
-            return TemperatureStatusResponse.ofUnknown(enclosureId, lizard.getName(), species.getName(), currentTemp, timeOfDay, null);
-        }
-
-        SpeciesEnvironmentStandard standard = standardOpt.get();
-        BigDecimal minTemp = isDaytime ? standard.getDayTemperatureMin() : standard.getNightTemperatureMin();
-        BigDecimal maxTemp = isDaytime ? standard.getDayTemperatureMax() : standard.getNightTemperatureMax();
-
-        if (minTemp == null || maxTemp == null) {
-            return TemperatureStatusResponse.ofUnknown(enclosureId, lizard.getName(), species.getName(), currentTemp, timeOfDay, standard.getTemperatureCaution());
-        }
-
-        TemperatureStatusResponse.StandardTemperature standardTemp = TemperatureStatusResponse.StandardTemperature.builder()
-                .min(minTemp)
-                .max(maxTemp)
-                .build();
-
-        return TemperatureStatusResponse.of(
-                enclosureId,
-                lizard.getName(),
-                species.getName(),
-                currentTemp,
-                timeOfDay,
-                standardTemp,
-                determineStatus(currentTemp, minTemp, maxTemp),
-                standard.getTemperatureCaution(),
-                generateDisplayMessage(currentTemp, minTemp, maxTemp, isDaytime)
-        );
-    }
 
     public TemperatureStatusResponse getTemperatureStatus(Long enclosureId, Long currentUserId) {
         Enclosure enclosure = enclosureRepository.findById(enclosureId)
@@ -127,7 +73,7 @@ public class EnclosureEnvironmentService {
         BigDecimal currentTemp = measurementOpt.get().getTemperature();
         Optional<SpeciesEnvironmentStandard> standardOpt = speciesEnvironmentStandardRepository.findBySpecies_SpeciesId(species.getSpeciesId());
 
-        Optional<ManagementSetting> settingOpt = managementSettingRepository.findById(enclosureId);
+        Optional<ManagementSetting> settingOpt = managementSettingRepository.findByEnclosure_Id(enclosureId);
         String timeOfDayStr = determineTimeOfDay(settingOpt.orElse(null));
         TemperatureStatusResponse.TimeOfDay timeOfDay = "DAYTIME".equals(timeOfDayStr)
                 ? TemperatureStatusResponse.TimeOfDay.DAYTIME
@@ -207,7 +153,7 @@ public class EnclosureEnvironmentService {
         Lizard lizard = enclosure.getLizard();
         Species species = lizard.getSpecies();
 
-        Optional<Sensor> sensorOpt = sensorRepository.findById(enclosureId);
+        Optional<Sensor> sensorOpt = sensorRepository.findByEnclosure_Id(enclosureId);
         List<SensorMeasurement> measurements = sensorOpt
                 .map(sensor -> sensorMeasurementRepository.findTop10BySensor_SensorIdOrderByMeasuredAtDesc(sensor.getSensorId()))
                 .orElse(Collections.emptyList());
@@ -294,7 +240,14 @@ public class EnclosureEnvironmentService {
                     .build();
         }
 
-        String displayMessage = String.format("최근 분무 이후 습도가 %s 흐름이며, 적정 습윤 사이클 내에 있습니다.", trendText);
+        String displayMessage;
+        if (currentHumidity.compareTo(standardHumidity.getMax()) > 0) {
+            displayMessage = String.format("습도가 %s 흐름이며, 권장 범위보다 높은 상태입니다. 환기 상태를 확인해 주세요.", trendText);
+        } else if (currentHumidity.compareTo(standardHumidity.getMin()) < 0) {
+            displayMessage = String.format("습도가 %s 흐름이며, 권장 범위보다 낮은 상태입니다. 바닥재 수분을 확인해 주세요.", trendText);
+        } else {
+            displayMessage = String.format("최근 분무 이후 습도가 %s 흐름이며, 적정 습윤 사이클 내에 있습니다.", trendText);
+        }
 
         return HumidityStatusResponse.builder()
                 .enclosureId(enclosureId)
@@ -320,7 +273,7 @@ public class EnclosureEnvironmentService {
 
         List<AlertResponse.AlertDetail> alerts = new ArrayList<>();
 
-        Optional<Sensor> sensorOpt = sensorRepository.findById(enclosureId);
+        Optional<Sensor> sensorOpt = sensorRepository.findByEnclosure_Id(enclosureId);
         if (sensorOpt.isPresent()) {
             Sensor sensor = sensorOpt.get();
             if ("DISCONNECTED".equals(sensor.getStatus().name())) {
@@ -336,7 +289,7 @@ public class EnclosureEnvironmentService {
 
         try {
             TemperatureStatusResponse tempStatus = getTemperatureStatus(enclosureId, currentUserId);
-            if ("HIGH".equals(tempStatus.getStatus())) {
+            if (tempStatus.getStatus() == TemperatureStatusResponse.Status.HIGH) {
                 alerts.add(AlertResponse.AlertDetail.builder()
                         .code("COACH-012")
                         .type("HIGH_TEMPERATURE")
@@ -344,7 +297,7 @@ public class EnclosureEnvironmentService {
                         .message("현재 온도가 권장 범위보다 높아요.")
                         .detailType("TEMPERATURE")
                         .build());
-            } else if ("LOW".equals(tempStatus.getStatus())) {
+            } else if (tempStatus.getStatus() == TemperatureStatusResponse.Status.LOW) {
                 alerts.add(AlertResponse.AlertDetail.builder()
                         .code("COACH-011")
                         .type("LOW_TEMPERATURE")
@@ -411,7 +364,7 @@ public class EnclosureEnvironmentService {
         }
 
         LocalDate targetDate = (dateStr != null && !dateStr.isBlank())
-                ? LocalDate.parse(dateStr)
+                ? parseDate(dateStr)
                 : LocalDate.now();
 
         LocalDateTime startOfDay = targetDate.atStartOfDay();
@@ -422,7 +375,7 @@ public class EnclosureEnvironmentService {
                 ? now
                 : endOfDay;
 
-        Optional<Sensor> sensorOpt = sensorRepository.findById(enclosureId);
+        Optional<Sensor> sensorOpt = sensorRepository.findByEnclosure_Id(enclosureId);
         List<TemperatureHistoryResponse.ActualTemperatureDto> actualList = new ArrayList<>();
 
         if (sensorOpt.isPresent()) {
@@ -433,7 +386,7 @@ public class EnclosureEnvironmentService {
             actualList = measurements.stream()
                     .filter(m -> m.getTemperature() != null)
                     .map(m -> TemperatureHistoryResponse.ActualTemperatureDto.builder()
-                            .measuredAt(m.getMeasuredAt().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+                            .measuredAt(m.getMeasuredAt().atZone(KstTime.ZONE).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
                             .value(m.getTemperature())
                             .build())
                     .toList();
@@ -469,7 +422,7 @@ public class EnclosureEnvironmentService {
         }
 
         LocalDate targetDate = (dateStr != null && !dateStr.isBlank())
-                ? LocalDate.parse(dateStr)
+                ? parseDate(dateStr)
                 : LocalDate.now();
 
         LocalDateTime startOfDay = targetDate.atStartOfDay();
@@ -480,7 +433,7 @@ public class EnclosureEnvironmentService {
                 ? now
                 : endOfDay;
 
-        Optional<Sensor> sensorOpt = sensorRepository.findById(enclosureId);
+        Optional<Sensor> sensorOpt = sensorRepository.findByEnclosure_Id(enclosureId);
         List<HumidityHistoryResponse.ActualHumidityDto> actualList = new ArrayList<>();
 
         if (sensorOpt.isPresent()) {
@@ -491,7 +444,7 @@ public class EnclosureEnvironmentService {
             actualList = measurements.stream()
                     .filter(m -> m.getHumidity() != null)
                     .map(m -> HumidityHistoryResponse.ActualHumidityDto.builder()
-                            .measuredAt(m.getMeasuredAt().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+                            .measuredAt(m.getMeasuredAt().atZone(KstTime.ZONE).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
                             .value(m.getHumidity())
                             .build())
                     .toList();
@@ -544,7 +497,7 @@ public class EnclosureEnvironmentService {
         }
 
         LocalDate targetDate = (dateStr != null && !dateStr.isBlank())
-                ? LocalDate.parse(dateStr)
+                ? parseDate(dateStr)
                 : LocalDate.now();
 
         LocalDateTime startAt = targetDate.atStartOfDay();
@@ -555,7 +508,7 @@ public class EnclosureEnvironmentService {
                 ? now
                 : endOfDay;
 
-        Optional<Sensor> sensorOpt = sensorRepository.findById(enclosureId);
+        Optional<Sensor> sensorOpt = sensorRepository.findByEnclosure_Id(enclosureId);
         List<SensorMeasurement> measurements = new ArrayList<>();
 
         if (sensorOpt.isPresent()) {
@@ -565,8 +518,8 @@ public class EnclosureEnvironmentService {
         }
 
         int dataCount = measurements.size();
-        String startAtIso = startAt.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-        String endAtIso = endAt.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        String startAtIso = startAt.atZone(KstTime.ZONE).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        String endAtIso = endAt.atZone(KstTime.ZONE).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
 
         if (dataCount < 3) {
             return EnvironmentSummaryResponse.builder()
@@ -607,9 +560,13 @@ public class EnclosureEnvironmentService {
                 .build();
     }
 
-    public TemperaturePatternResponse getTemperaturePattern(Long enclosureId) {
+    public TemperaturePatternResponse getTemperaturePattern(Long enclosureId, Long currentUserId) {
         Enclosure enclosure = enclosureRepository.findById(enclosureId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENCLOSURE_NOT_FOUND));
+
+        if (!enclosure.getLizard().getUser().getUserId().equals(currentUserId)) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
 
         Sensor sensor = sensorRepository.findByEnclosure_Id(enclosureId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.SENSOR_NOT_FOUND));
@@ -705,32 +662,6 @@ public class EnclosureEnvironmentService {
                 .build();
     }
 
-    private boolean checkIsDaytime(Long enclosureId) {
-        LocalTime now = LocalTime.now();
-        return managementSettingRepository.findByEnclosure_Id(enclosureId)
-                .filter(s -> s.getLightingStartTime() != null && s.getLightingEndTime() != null)
-                .map(s -> {
-                    LocalTime start = s.getLightingStartTime();
-                    LocalTime end = s.getLightingEndTime();
-                    return start.isBefore(end)
-                            ? !now.isBefore(start) && now.isBefore(end)
-                            : !now.isBefore(start) || now.isBefore(end);
-                })
-                .orElseGet(() -> !now.isBefore(LocalTime.of(8, 0)) && now.isBefore(LocalTime.of(20, 0)));
-    }
-
-    private TemperatureStatusResponse.Status determineStatus(BigDecimal current, BigDecimal min, BigDecimal max) {
-        if (current.compareTo(min) < 0) return TemperatureStatusResponse.Status.LOW;
-        if (current.compareTo(max) > 0) return TemperatureStatusResponse.Status.HIGH;
-        return TemperatureStatusResponse.Status.OPTIMAL;
-    }
-
-    private String generateDisplayMessage(BigDecimal current, BigDecimal min, BigDecimal max, boolean isDaytime) {
-        if (current.compareTo(min) < 0) return "현재 온도가 적정 범주보다 낮습니다. 난방 장치를 점검해 주세요.";
-        if (current.compareTo(max) > 0) return "현재 온도가 적정 범주보다 높습니다. 통풍 및 환기를 실시해 주세요.";
-        return String.format("현재 온도가 %s 적정 범위를 잘 유지하고 있습니다.", isDaytime ? "주간" : "야간");
-    }
-
     private String determineTimeOfDay(ManagementSetting setting) {
         if (setting == null || setting.getLightingStartTime() == null || setting.getLightingEndTime() == null) {
             LocalTime now = LocalTime.now();
@@ -745,6 +676,14 @@ public class EnclosureEnvironmentService {
             return (now.isAfter(start) && now.isBefore(end)) ? "DAYTIME" : "NIGHTTIME";
         } else {
             return (now.isAfter(start) || now.isBefore(end)) ? "DAYTIME" : "NIGHTTIME";
+        }
+    }
+
+    private LocalDate parseDate(String dateStr) {
+        try {
+            return LocalDate.parse(dateStr);
+        } catch (DateTimeParseException e) {
+            throw new BusinessException(ErrorCode.INVALID_REQUEST);
         }
     }
 

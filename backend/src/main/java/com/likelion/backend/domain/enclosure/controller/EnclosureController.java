@@ -26,9 +26,10 @@ public class EnclosureController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<Map<String, Long>>> createEnclosure(
-            @Valid @RequestBody EnclosureCreateRequest request
+            @Valid @RequestBody EnclosureCreateRequest request,
+            @AuthenticationPrincipal Long currentUserId
     ) {
-        EnclosureCreateResponse response = enclosureService.createEnclosure(request);
+        EnclosureCreateResponse response = enclosureService.createEnclosure(request, currentUserId);
         Map<String, Long> data = Map.of("enclosureId", response.getEnclosureId());
 
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -38,9 +39,10 @@ public class EnclosureController {
     @PutMapping("/{enclosureId}/management")
     public ResponseEntity<ApiResponse<ManagementSettingResponse>> updateManagementSetting(
             @PathVariable("enclosureId") Long enclosureId,
-            @Valid @RequestBody ManagementSettingRequest request) {
+            @Valid @RequestBody ManagementSettingRequest request,
+            @AuthenticationPrincipal Long currentUserId) {
 
-        ManagementSettingResponse response = enclosureService.updateManagementSetting(enclosureId, request);
+        ManagementSettingResponse response = enclosureService.updateManagementSetting(enclosureId, request, currentUserId);
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }
@@ -48,25 +50,28 @@ public class EnclosureController {
 
     @GetMapping("/{enclosureId}/temperatures/suggestions")
     public ResponseEntity<ApiResponse<EnclosureTemperatureSuggestionResponse>> getTemperatureSuggestions(
-            @PathVariable("enclosureId") Long enclosureId
+            @PathVariable("enclosureId") Long enclosureId,
+            @AuthenticationPrincipal Long currentUserId
     ) {
-        EnclosureTemperatureSuggestionResponse response = enclosureService.getTemperatureSuggestions(enclosureId);
+        EnclosureTemperatureSuggestionResponse response = enclosureService.getTemperatureSuggestions(enclosureId, currentUserId);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @GetMapping("/{enclosureId}/humidities/suggestions")
     public ResponseEntity<ApiResponse<EnclosureHumiditySuggestionResponse>> getHumiditySuggestions(
-            @PathVariable("enclosureId") Long enclosureId
+            @PathVariable("enclosureId") Long enclosureId,
+            @AuthenticationPrincipal Long currentUserId
     ) {
-        EnclosureHumiditySuggestionResponse response = enclosureService.getHumiditySuggestions(enclosureId);
+        EnclosureHumiditySuggestionResponse response = enclosureService.getHumiditySuggestions(enclosureId, currentUserId);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @GetMapping("/{enclosureId}/guidebooks/recommendations")
     public ResponseEntity<ApiResponse<EnclosureGuidebookRecommendationResponse>> getGuidebookRecommendations(
-            @PathVariable("enclosureId") Long enclosureId
+            @PathVariable("enclosureId") Long enclosureId,
+            @AuthenticationPrincipal Long currentUserId
     ) {
-        EnclosureGuidebookRecommendationResponse response = enclosureService.getGuidebookRecommendations(enclosureId);
+        EnclosureGuidebookRecommendationResponse response = enclosureService.getGuidebookRecommendations(enclosureId, currentUserId);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
@@ -155,10 +160,11 @@ public class EnclosureController {
     }
 
     @GetMapping("/{enclosureId}/temperatures/patterns")
-    public ApiResponse<TemperaturePatternResponse> getTemperaturePattern(
-            @PathVariable("enclosureId") Long enclosureId
+    public ResponseEntity<ApiResponse<TemperaturePatternResponse>> getTemperaturePattern(
+            @PathVariable("enclosureId") Long enclosureId,
+            @AuthenticationPrincipal Long currentUserId
     ) {
-        TemperaturePatternResponse response = enclosureService.getTemperaturePattern(enclosureId);
-        return ApiResponse.success(response);
+        TemperaturePatternResponse response = enclosureService.getTemperaturePattern(enclosureId, currentUserId);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 }

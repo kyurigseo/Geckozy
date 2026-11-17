@@ -3,6 +3,10 @@ package com.likelion.backend.domain.enclosure.service;
 import com.likelion.backend.domain.enclosure.dto.suggestion.EnclosureGuidebookRecommendationResponse;
 import com.likelion.backend.domain.enclosure.dto.suggestion.EnclosureHumiditySuggestionResponse;
 import com.likelion.backend.domain.enclosure.dto.suggestion.EnclosureTemperatureSuggestionResponse;
+import com.likelion.backend.domain.enclosure.entity.Enclosure;
+import com.likelion.backend.domain.enclosure.repository.EnclosureRepository;
+import com.likelion.backend.global.exception.BusinessException;
+import com.likelion.backend.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +19,10 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class EnclosureRecommendationService {
 
-    public EnclosureTemperatureSuggestionResponse getTemperatureSuggestions(Long enclosureId) {
+    private final EnclosureRepository enclosureRepository;
+
+    public EnclosureTemperatureSuggestionResponse getTemperatureSuggestions(Long enclosureId, Long currentUserId) {
+        checkOwner(enclosureId, currentUserId);
         return EnclosureTemperatureSuggestionResponse.builder()
                 .enclosureId(enclosureId)
                 .primaryAction("CHECK_SENSOR_LOCATION_AND_VENTILATE")
@@ -30,7 +37,8 @@ public class EnclosureRecommendationService {
                 .build();
     }
 
-    public EnclosureHumiditySuggestionResponse getHumiditySuggestions(Long enclosureId) {
+    public EnclosureHumiditySuggestionResponse getHumiditySuggestions(Long enclosureId, Long currentUserId) {
+        checkOwner(enclosureId, currentUserId);
         return EnclosureHumiditySuggestionResponse.builder()
                 .enclosureId(enclosureId)
                 .primaryAction("CHECK_SUBSTRATE_MOISTURE_BEFORE_SPRAYING")
@@ -43,7 +51,8 @@ public class EnclosureRecommendationService {
                 .build();
     }
 
-    public EnclosureGuidebookRecommendationResponse getGuidebookRecommendations(Long enclosureId) {
+    public EnclosureGuidebookRecommendationResponse getGuidebookRecommendations(Long enclosureId, Long currentUserId) {
+        checkOwner(enclosureId, currentUserId);
         if (enclosureId != null && enclosureId.equals(999L)) {
             return EnclosureGuidebookRecommendationResponse.of(Collections.emptyList());
         }
@@ -65,5 +74,13 @@ public class EnclosureRecommendationService {
                                 .build()
                 )
         );
+    }
+
+    private void checkOwner(Long enclosureId, Long currentUserId) {
+        Enclosure enclosure = enclosureRepository.findById(enclosureId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENCLOSURE_NOT_FOUND));
+        if (!enclosure.getLizard().getUser().getUserId().equals(currentUserId)) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
     }
 }
