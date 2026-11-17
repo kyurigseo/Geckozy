@@ -2,18 +2,24 @@ import {
   configureGuideSession,
   getGuideContext,
   saveGuideContext,
+  getGuideLizards,
+  getSelectedLizard,
+  loadGuideAccountContext,
 } from './guide.js'
 
+import {
+  getAccessToken,
+  clearAccessToken,
+} from './client'
+
 export const MY_API_BASE = (
-  import.meta.env?.VITE_API_BASE_URL ||
-  import.meta.env?.VITE_GUIDE_API_BASE_URL ||
+  import.meta.env.VITE_API_URL ||
+  import.meta.env.VITE_API_BASE_URL ||
+  import.meta.env.VITE_GUIDE_API_BASE_URL ||
   'http://34.64.99.93:8080'
 ).replace(/\/$/, '')
 
-const getToken = () =>
-  getGuideContext().accessToken ||
-  sessionStorage.getItem('accessToken') ||
-  localStorage.getItem('accessToken')
+const getToken = () => getAccessToken()
 
 export async function myRequest(
   path,
@@ -22,7 +28,9 @@ export async function myRequest(
   const accessToken = getToken()
 
   if (!accessToken) {
-    throw new Error('로그인이 필요합니다. 다시 로그인해주세요.')
+    throw new Error(
+      '로그인이 필요합니다. 다시 로그인해주세요.',
+    )
   }
 
   let response
@@ -74,7 +82,9 @@ export async function myRequest(
   }
 
   if (!result || !Object.hasOwn(result, 'data')) {
-    throw new Error('서버 응답을 확인할 수 없습니다.')
+    throw new Error(
+      '서버 응답을 확인할 수 없습니다.',
+    )
   }
 
   return result.data
@@ -111,17 +121,19 @@ export function formatMyDate(value) {
 
 // 도마뱀 관리
 export async function getManagedLizards(signal) {
-  const list = await myRequest('/lizards', { signal })
+  const list = await getGuideLizards(signal)
+  const selected = getSelectedLizard(list)
 
-  if (!Array.isArray(list)) {
-    throw new Error('도마뱀 목록 응답을 확인해주세요.')
-  }
-
-  const context = getGuideContext()
-  const colors = ['beige', 'orange', 'yellow', 'green', 'blue']
+  const colors = [
+    'beige',
+    'orange',
+    'yellow',
+    'green',
+    'blue',
+  ]
 
   const items = await Promise.all(
-    list.map(async (item) => {
+    list.map(async (item, index) => {
       const detail = await myRequest(
         `/lizards/${encodeURIComponent(item.lizardId)}`,
         { signal },
@@ -135,16 +147,13 @@ export async function getManagedLizards(signal) {
         id: item.lizardId,
         name: detail.name ?? item.name,
         species: detail.species ?? item.species,
-        color: colors.includes(color) ? color : 'beige',
-        tankName:
-          context.enclosures?.find(
-            (tank) =>
-              String(tank.lizardId) ===
-              String(item.lizardId),
-          )?.name || '—',
+        color: colors.includes(color)
+          ? color
+          : 'beige',
+        tankName: `${index + 1}번 사육장`,
         selected:
           String(item.lizardId) ===
-          String(context.lizardId),
+          String(selected?.lizardId),
       }
     }),
   )
@@ -155,18 +164,21 @@ export async function getManagedLizards(signal) {
 
   if (
     items.length &&
-    !items.some((item) => item.selected)
+    String(getGuideContext().lizardId) !==
+      String(selected?.lizardId)
   ) {
-    items[0].selected = true
-
-    saveGuideContext({
-      lizardId: items[0].id,
-      enclosureId: null,
-      enclosureInfo: null,
-    })
+    await loadGuideAccountContext(
+      signal,
+      selected.lizardId,
+    )
   }
 
   return items
+}
+
+// 카드 선택 시 서버의 실제 개체·사육장 정보를 연결합니다.
+export async function selectManagedLizard(id) {
+  await loadGuideAccountContext(undefined, id)
 }
 
 export async function deleteManagedLizard(id) {
@@ -178,7 +190,8 @@ export async function deleteManagedLizard(id) {
   const context = getGuideContext()
 
   const enclosures = context.enclosures?.filter(
-    (tank) => String(tank.lizardId) !== String(id),
+    (tank) =>
+      String(tank.lizardId) !== String(id),
   )
 
   const selected =
@@ -199,10 +212,15 @@ export async function deleteManagedLizard(id) {
 
 export async function getManagedProfile(signal) {
   const lizards = await getManagedLizards(signal)
-  const selected = lizards.find((item) => item.selected)
+  const selected = lizards.find(
+    (item) => item.selected,
+  )
 
   return selected
-    ? { ...selected, geckoColor: selected.color }
+    ? {
+        ...selected,
+        geckoColor: selected.color,
+      }
     : null
 }
 
@@ -214,7 +232,9 @@ export async function getMyScraps(signal) {
   )
 
   if (!Array.isArray(data?.guidebooks)) {
-    throw new Error('스크랩 목록 응답을 확인해주세요.')
+    throw new Error(
+      '스크랩 목록 응답을 확인해주세요.',
+    )
   }
 
   return data.guidebooks
@@ -247,7 +267,7 @@ export function getMyEnclosures() {
     ? [
         {
           enclosureId: context.enclosureId,
-          name: '선택한 사육장',
+          name: context.tankName || '선택한 사육장',
         },
       ]
     : []
@@ -257,7 +277,9 @@ export async function getMySensors(signal) {
   const enclosures = getMyEnclosures()
 
   if (!enclosures.length) {
-    throw new Error('사육장 정보를 먼저 연결해주세요.')
+    throw new Error(
+      '사육장 정보를 먼저 연결해주세요.',
+    )
   }
 
   const records = await Promise.all(
@@ -278,7 +300,9 @@ export async function getMySensors(signal) {
       }
 
       if (!data?.sensorId) {
-        throw new Error('센서 상태 응답을 확인해주세요.')
+        throw new Error(
+          '센서 상태 응답을 확인해주세요.',
+        )
       }
 
       return {
@@ -292,11 +316,15 @@ export async function getMySensors(signal) {
   return records.filter(Boolean)
 }
 
-export async function connectMySensor(deviceIdentifier) {
+export async function connectMySensor(
+  deviceIdentifier,
+) {
   const { enclosureId } = getGuideContext()
 
   if (!enclosureId) {
-    throw new Error('연결할 사육장을 먼저 선택해주세요.')
+    throw new Error(
+      '연결할 사육장을 먼저 선택해주세요.',
+    )
   }
 
   const data = await myRequest(
@@ -310,12 +338,15 @@ export async function connectMySensor(deviceIdentifier) {
   )
 
   if (!data?.sensorId) {
-    throw new Error('센서 연결 응답을 확인해주세요.')
+    throw new Error(
+      '센서 연결 응답을 확인해주세요.',
+    )
   }
 
   const tank = getMyEnclosures().find(
     (item) =>
-      String(item.enclosureId) === String(enclosureId),
+      String(item.enclosureId) ===
+      String(enclosureId),
   )
 
   return {
@@ -325,8 +356,9 @@ export async function connectMySensor(deviceIdentifier) {
   }
 }
 
-// 로그아웃·회원탈퇴 후 개인정보 및 온보딩 진행값 정리
+// 로그아웃·탈퇴 후 개인정보 정리
 export function clearMySession() {
+  clearAccessToken()
   configureGuideSession(null)
 
   const exact = [
@@ -337,7 +369,10 @@ export function clearMySession() {
     'geckozy-onboarding',
   ]
 
-  for (const storage of [sessionStorage, localStorage]) {
+  for (const storage of [
+    sessionStorage,
+    localStorage,
+  ]) {
     const keys = Array.from(
       { length: storage.length },
       (_, index) => storage.key(index),
@@ -370,7 +405,7 @@ export async function logoutAccount() {
       serverLoggedOut = true
     }
   } catch {
-    // 서버 요청이 실패해도 기기의 로그인 정보는 제거합니다.
+    // 서버 요청이 실패해도 기기에서는 로그아웃합니다.
   } finally {
     clearMySession()
   }
@@ -379,7 +414,7 @@ export async function logoutAccount() {
 }
 
 export async function deleteMyAccount() {
-  // 실패하면 아래 정리 코드는 실행되지 않습니다.
+  // 실제 탈퇴 성공 시에만 로그인 정보를 삭제합니다.
   await myRequest('/users/me', {
     method: 'DELETE',
   })

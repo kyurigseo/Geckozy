@@ -1,6 +1,7 @@
-import { getSpecies, getSpeciesGuide, getGuideProgress, getGuideStep, saveGuideContext } from '../../api/guide'
+import { getSpecies, getSpeciesGuide, getGuideProgress, getGuideStep, loadGuideAccountContext, saveGuideContext } from '../../api/guide'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { toSpeciesId } from '../../api/species'
 
 import board from '../../assets/guide/나무판자.svg'
 import leaf from '../../assets/guide/나뭇잎.svg'
@@ -23,11 +24,17 @@ const LizardInfo = ({ step, onClose }) => {
   const [sizeUnknown, setSizeUnknown] = useState(false)
   const [adoptionDateValue, setAdoptionDateValue] = useState('')
 
-  const [species, setSpecies] = useState([
-    { speciesId: null, name: '크레스티드 게코' },
-    { speciesId: null, name: '레오파드 게코' },
-    { speciesId: null, name: '비어디드 드래곤' },
-  ])
+  const [species, setSpecies] = useState(
+    [
+      '크레스티드 게코',
+      '레오파드 게코',
+      '비어디드 드래곤',
+    ].map((name) => ({
+      name,
+      speciesId: toSpeciesId(name),
+    })),
+  )
+
   const [speciesId, setSpeciesId] = useState('')
   const [sizeCm, setSizeCm] = useState('')
   const [weightG, setWeightG] = useState('')
@@ -36,16 +43,31 @@ const LizardInfo = ({ step, onClose }) => {
   useEffect(() => {
     const controller = new AbortController()
 
-    getSpecies(controller.signal)
-      .then((items) => {
-        if (controller.signal.aborted) return
+    loadGuideAccountContext(controller.signal)
+      .then(({ lizard }) => {
+        if (controller.signal.aborted || !lizard) return
 
-        if (Array.isArray(items) && items.length > 0) {
-          setSpecies(items)
-        }
+        setSpeciesId(String(lizard.speciesId))
+        setBirthUnknown(Boolean(lizard.birthDateUnknown))
+        setBirthDateValue(
+          lizard.birthDateUnknown ? '' : lizard.birthDate ?? '',
+        )
+        setSizeUnknown(Boolean(lizard.sizeWeightUnknown))
+        setSizeCm(
+          lizard.sizeWeightUnknown
+            ? ''
+            : String(lizard.sizeCm ?? ''),
+        )
+        setWeightG(
+          lizard.sizeWeightUnknown
+            ? ''
+            : String(lizard.weightG ?? ''),
+        )
       })
-      .catch(() => {
-        // 조회 실패 시 기본 종 목록 유지
+      .catch((error) => {
+        if (!controller.signal.aborted) {
+          window.alert(error.message)
+        }
       })
 
     return () => controller.abort()

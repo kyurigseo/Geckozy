@@ -1,7 +1,9 @@
-import { useRef } from 'react'
-import { saveGuideEnclosure } from '../../api/guide'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import {
+  getGuideContext,
+  saveGuideEnclosure,
+} from '../../api/guide'
 
 import leaf from '../../assets/guide/나뭇잎.svg'
 import sizeTitle from '../../assets/guide/크기.svg'
@@ -16,20 +18,33 @@ const EnclosureInfo = ({ onClose }) => {
   const navigate = useNavigate()
   const { playSfx } = useSound()
 
-  const [size, setSize] = useState({
-    width: '',
-    depth: '',
-    height: '',
-  })
+  const [initialInfo] = useState(
+    () => getGuideContext().enclosureInfo ?? {},
+  )
 
-  const [material, setMaterial] = useState('유리')
-  const [customMaterial, setCustomMaterial] = useState('')
-  const [ventilation, setVentilation] = useState('상단')
+  const [size, setSize] = useState(() => ({
+    width: initialInfo.width ?? '',
+    depth: initialInfo.depth ?? '',
+    height: initialInfo.height ?? '',
+  }))
+
+  const [material, setMaterial] = useState(
+    initialInfo.material ?? '유리',
+  )
+
+  const [customMaterial, setCustomMaterial] = useState(
+    initialInfo.customMaterial ?? '',
+  )
+
+  const [ventilation, setVentilation] = useState(
+    initialInfo.ventilation ?? '상단',
+  )
 
   const submitting = useRef(false)
 
   const handleComplete = async () => {
     if (submitting.current) return
+
     const enclosureInfo = {
       ...size,
       material,
@@ -38,63 +53,154 @@ const EnclosureInfo = ({ onClose }) => {
     }
 
     submitting.current = true
+
     try {
       await saveGuideEnclosure(enclosureInfo)
-      navigate('/guide/enclosure-check', { state: enclosureInfo })
-    } catch (error) { window.alert(error.message) }
-    finally { submitting.current = false }
+
+      navigate('/guide/enclosure-check', {
+        state: enclosureInfo,
+      })
+    } catch (error) {
+      window.alert(error.message)
+    } finally {
+      submitting.current = false
+    }
   }
 
   return (
     <div className="enclosure-overlay" onClick={onClose}>
-      <div className="enclosure-modal" onClick={(e) => e.stopPropagation()}>
-
+      <div
+        className="enclosure-modal"
+        onClick={(e) => e.stopPropagation()}
+      >
         <section className="enclosure-section">
           <h3 className="enclosure-title">
             <img className="enclosure-leaf" src={leaf} alt="" />
-            <img className="enclosure-title-text" src={sizeTitle} alt="크기" />
+            <img
+              className="enclosure-title-text"
+              src={sizeTitle}
+              alt="크기"
+            />
           </h3>
 
           <div className="enclosure-size-row">
-            <input type="number" placeholder="가로 (cm)" value={size.width} onChange={(e) => setSize({ ...size, width: e.target.value })} />
+            <input
+              type="number"
+              placeholder="가로 (cm)"
+              value={size.width}
+              onChange={(e) =>
+                setSize((prev) => ({
+                  ...prev,
+                  width: e.target.value,
+                }))
+              }
+            />
+
             <span>×</span>
-            <input type="number" placeholder="세로 (cm)" value={size.depth} onChange={(e) => setSize({ ...size, depth: e.target.value })} />
+
+            <input
+              type="number"
+              placeholder="세로 (cm)"
+              value={size.depth}
+              onChange={(e) =>
+                setSize((prev) => ({
+                  ...prev,
+                  depth: e.target.value,
+                }))
+              }
+            />
+
             <span>×</span>
-            <input type="number" placeholder="높이 (cm)" value={size.height} onChange={(e) => setSize({ ...size, height: e.target.value })} />
+
+            <input
+              type="number"
+              placeholder="높이 (cm)"
+              value={size.height}
+              onChange={(e) =>
+                setSize((prev) => ({
+                  ...prev,
+                  height: e.target.value,
+                }))
+              }
+            />
           </div>
         </section>
 
         <section className="enclosure-section">
           <h3 className="enclosure-title">
             <img className="enclosure-leaf" src={leaf} alt="" />
-            <img className="enclosure-title-text" src={materialTitle} alt="소재" />
+            <img
+              className="enclosure-title-text"
+              src={materialTitle}
+              alt="소재"
+            />
           </h3>
 
           <div className="enclosure-options material-options">
-            {['유리', '아크릴', 'PVC', '메쉬', '직접 입력'].map((item) => (
-              <label key={item} className={`enclosure-option ${item === '메쉬' || item === '직접 입력' ? 'enclosure-option-break' : ''}`}>
-                <input type="radio" name="material" value={item} checked={material === item} onChange={() => setMaterial(item)} />
-                <span>{item}</span>
-              </label>
-            ))}
+            {['유리', '아크릴', 'PVC', '메쉬', '직접 입력'].map(
+              (item) => (
+                <label
+                  key={item}
+                  className={`enclosure-option ${
+                    item === '메쉬' || item === '직접 입력'
+                      ? 'enclosure-option-break'
+                      : ''
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="material"
+                    value={item}
+                    checked={material === item}
+                    onChange={() => setMaterial(item)}
+                  />
+                  <span>{item}</span>
+                </label>
+              ),
+            )}
           </div>
 
-          <input className="enclosure-custom-input" type="text" placeholder="소재를 입력해주세요." value={customMaterial} onChange={(e) => setCustomMaterial(e.target.value)} />
+          <input
+            className="enclosure-custom-input"
+            type="text"
+            placeholder="소재를 입력해주세요."
+            value={customMaterial}
+            onChange={(e) => setCustomMaterial(e.target.value)}
+          />
         </section>
 
         <section className="enclosure-section">
           <h3 className="enclosure-title">
             <img className="enclosure-leaf" src={leaf} alt="" />
-            <img className="enclosure-title-text" src={ventilationTitle} alt="환기 구조" />
+            <img
+              className="enclosure-title-text"
+              src={ventilationTitle}
+              alt="환기 구조"
+            />
           </h3>
 
           <div className="enclosure-options ventilation-options">
-            {['상단', '측면', '둘 다', '잘 모르겠어요'].map((item) => (
-              <label key={item} className={`enclosure-option ${item === '잘 모르겠어요' ? 'enclosure-option-break' : ''}`}>
-                <input type="radio" name="ventilation" value={item} checked={ventilation === item} onChange={() => setVentilation(item)} />
-                <span>{item}</span>
-              </label>
-            ))}
+            {['상단', '측면', '둘 다', '잘 모르겠어요'].map(
+              (item) => (
+                <label
+                  key={item}
+                  className={`enclosure-option ${
+                    item === '잘 모르겠어요'
+                      ? 'enclosure-option-break'
+                      : ''
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="ventilation"
+                    value={item}
+                    checked={ventilation === item}
+                    onChange={() => setVentilation(item)}
+                  />
+                  <span>{item}</span>
+                </label>
+              ),
+            )}
           </div>
         </section>
 
@@ -107,7 +213,6 @@ const EnclosureInfo = ({ onClose }) => {
         >
           <img src={complete} alt="완료" />
         </button>
-
       </div>
     </div>
   )

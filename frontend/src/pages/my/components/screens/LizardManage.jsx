@@ -1,9 +1,15 @@
-import { useEffect, useRef, useState } from 'react'
+import {
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
+
 import { useNavigate } from 'react-router-dom'
 
 import {
   getManagedLizards,
   deleteManagedLizard,
+  selectManagedLizard,
 } from '../../../../api/myManage'
 
 import geckoBeige from '../../../../assets/onboarding/gecko-beige.png'
@@ -38,12 +44,17 @@ const LizardManage = () => {
   const [error, setError] = useState('')
 
   const deleting = useRef(false)
+  const selecting = useRef(false)
 
   useEffect(() => {
     const controller = new AbortController()
 
     getManagedLizards(controller.signal)
-      .then(setLizards)
+      .then((items) => {
+        if (!controller.signal.aborted) {
+          setLizards(items)
+        }
+      })
       .catch((error) => {
         if (!controller.signal.aborted) {
           setError(error.message)
@@ -53,7 +64,43 @@ const LizardManage = () => {
     return () => controller.abort()
   }, [])
 
+  const handleSelect = async (lizard) => {
+    if (
+      selecting.current ||
+      deleting.current ||
+      deleteTarget !== null ||
+      lizard.selected
+    ) {
+      return
+    }
+
+    selecting.current = true
+    playSfx('button')
+
+    try {
+      await selectManagedLizard(lizard.id)
+
+      setLizards((prev) =>
+        prev.map((item) => ({
+          ...item,
+          selected:
+            String(item.id) === String(lizard.id),
+        })),
+      )
+
+      setError('')
+    } catch (error) {
+      setError(error.message)
+    } finally {
+      selecting.current = false
+    }
+  }
+
   const handleDelete = (id) => {
+    if (selecting.current || deleting.current) {
+      return
+    }
+
     playSfx('button')
     setDeleteTarget(id)
   }
@@ -121,6 +168,7 @@ const LizardManage = () => {
               lizard.selected ? 'selected' : ''
             }`}
             key={lizard.id}
+            onClick={() => handleSelect(lizard)}
           >
             <div className="lizard-manage-info">
               <div className="lizard-manage-avatar">
@@ -155,9 +203,10 @@ const LizardManage = () => {
 
             <button
               className="lizard-manage-delete"
-              onClick={() =>
+              onClick={(event) => {
+                event.stopPropagation()
                 handleDelete(lizard.id)
-              }
+              }}
             >
               <img
                 src={deleteButton}

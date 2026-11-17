@@ -1,6 +1,9 @@
 import useGuideStep from './useGuideStep'
 import { getGuideContext } from '../../api/guide'
-import { useLocation, useNavigate } from 'react-router-dom'
+import {
+  useLocation,
+  useNavigate,
+} from 'react-router-dom'
 
 import './EnclosureCheck.scss'
 
@@ -18,6 +21,8 @@ const EnclosureCheck = () => {
   const { state } = useLocation()
   const { finish } = useGuideStep(1)
 
+  const context = getGuideContext()
+
   const {
     width,
     depth,
@@ -25,10 +30,36 @@ const EnclosureCheck = () => {
     material,
     customMaterial,
     ventilation,
-  } = state || getGuideContext().enclosureInfo || {}
+  } = state || context.enclosureInfo || {}
 
   const selectedMaterial =
-    material === '직접 입력' ? customMaterial : material
+    material === '직접 입력'
+      ? customMaterial
+      : material
+
+  const dimensions = [
+    width,
+    depth,
+    height,
+  ].map(Number)
+
+  const valid = dimensions.every(
+    (value) =>
+      Number.isFinite(value) && value > 0,
+  )
+
+  // 요청 기준:
+  // 가로 45 이하, 세로 45 이하, 높이 60 이하 중
+  // 하나라도 해당하면 부적합입니다.
+  const suitable =
+    valid &&
+    dimensions[0] > 45 &&
+    dimensions[1] > 45 &&
+    dimensions[2] > 60
+
+  const speciesName =
+    context.lizardDraft?.speciesName ||
+    '크레스티드 게코'
 
   const handleNext = () => {
     playSfx('button')
@@ -85,21 +116,35 @@ const EnclosureCheck = () => {
       <h2 className="enclosure-check-match-title">
         <span className="enclosure-check-match-line">
           <span className="enclosure-check-match-species">
-            성체 크레스티드 게코
+            성체 {speciesName}
           </span>
+
           <span className="enclosure-check-match-result">
             의
           </span>
         </span>
 
         <span className="enclosure-check-match-result">
-          기본 권장 크기에 적합해요.
+          {!valid
+            ? '사육장 크기를 확인해주세요.'
+            : suitable
+              ? '기본 권장 크기에 적합해요.'
+              : '기본 권장 크기에 부적합해요.'}
         </span>
       </h2>
 
       <p className="enclosure-check-match-p">
-        사육장 안에 이동 구조물을 배치할 수 있는<br />
-        높이도 충분한지 함께 확인해주세요.
+        {suitable ? (
+          <>
+            사육장 안에 이동 구조물을 배치할 수 있는<br />
+            높이도 충분한지 함께 확인해주세요.
+          </>
+        ) : (
+          <>
+            가로 45cm·세로 45cm·높이 60cm를<br />
+            각각 초과하는 크기로 준비해주세요.
+          </>
+        )}
       </p>
 
       <button
