@@ -1,12 +1,5 @@
-import { ApiError, request, setAccessToken } from './client'
-
-// 에러 코드 → 화면에 보여줄 문구. 없는 코드는 각 함수의 기본 문구
-const NETWORK_MESSAGE = '서버에 연결할 수 없어요. 잠시 후 다시 시도해주세요.'
-const errorMessage = (error, messages, fallback) => {
-  if (!(error instanceof ApiError)) throw error
-  if (error.code === 'NETWORK_ERROR') return NETWORK_MESSAGE
-  return messages[error.code] ?? fallback
-}
+import { ApiError, errorMessage, request, setAccessToken } from './client'
+import { UNSUPPORTED_SPECIES_MESSAGE, toSpeciesId } from './species'
 
 // 도마뱀의 사육장 (없으면 null)
 const findEnclosure = async (lizardId) => {
@@ -82,22 +75,13 @@ export const signup = async ({ id, password, passwordConfirm, email }) => {
   }
 }
 
-// 종 이름 → 서버 종 번호 (speciesId)
-// 서버 DataInitializer가 넣는 순서대로 1~3 (2026-11-17 서버에서 확인)
-// TODO: '종 목록 조회' API가 생기면 서버에서 받아오기
-const SPECIES_IDS = {
-  '비어디드 드래곤': 1,
-  '크레스티드 게코': 2,
-  '레오파드 게코': 3,
-}
-
 const toNumber = (value) => (value === '' || value === null || value === undefined ? null : Number(value))
 
 // 온보딩 form.gecko → POST /lizards
 const toLizardRequest = (gecko) => {
   const birthDateUnknown = gecko.birthKnown !== 'known'
   return {
-    speciesId: SPECIES_IDS[gecko.species] ?? null,
+    speciesId: toSpeciesId(gecko.species),
     name: gecko.name,
     birthDate: birthDateUnknown ? null : gecko.birthDate,
     birthDateUnknown,
@@ -190,8 +174,8 @@ const saveEnclosure = async (lizardId, enclosureRequest) => {
 // TODO: 관리 방식이 저장됐는데 응답만 못 받은 경우, 다시 보내면 서버가 409 (PUT을 두 번 받지 못함)
 export const saveOnboarding = async ({ gecko, tank, care, concerns, concernText }) => {
   // 번호가 없는 종을 null로 보내면 서버가 본문 없는 403을 돌려줘서, 요청 전에 막는다
-  if (SPECIES_IDS[gecko.species] == null) {
-    return { success: false, message: '아직 지원하지 않는 종이에요.' }
+  if (toSpeciesId(gecko.species) === null) {
+    return { success: false, message: UNSUPPORTED_SPECIES_MESSAGE }
   }
   try {
     const lizardId = await saveLizard(gecko)
@@ -204,7 +188,7 @@ export const saveOnboarding = async ({ gecko, tank, care, concerns, concernText 
       success: false,
       message: errorMessage(
         error,
-        { SPECIES_NOT_FOUND: '아직 지원하지 않는 종이에요.' },
+        { SPECIES_NOT_FOUND: UNSUPPORTED_SPECIES_MESSAGE },
         '정보 저장에 실패했어요. 다시 시도해주세요.',
       ),
     }

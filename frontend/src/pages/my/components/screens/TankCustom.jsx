@@ -17,14 +17,20 @@ const TankCustom = () => {
   const [tank, setTank] = useState(null)
   const [isPopupOpen, setIsPopupOpen] = useState(false)
   const [notice, setNotice] = useState('')
+  const [loadError, setLoadError] = useState('')
 
   useEffect(() => {
     let isCancelled = false
-    getMyTank().then((data) => {
-      if (isCancelled) return
-      setOriginal(data)
-      setTank(data)
-    })
+    getMyTank()
+      .then((data) => {
+        if (isCancelled) return
+        setOriginal(data)
+        setTank(data)
+      })
+      .catch((error) => {
+        console.error('tank 불러오기 실패:', error)
+        if (!isCancelled) setLoadError('정보를 불러오지 못했어요. 잠시 후 다시 시도해주세요.')
+      })
     return () => {
       isCancelled = true
     }
@@ -49,11 +55,25 @@ const TankCustom = () => {
       setNotice(TANK_REQUIRED_MESSAGE)
       return
     }
-    // TODO: 저장 실패 시 처리
-    await updateMyTank(tank)
+    const result = await updateMyTank(tank)
+    if (!result.success) {
+      setIsPopupOpen(false)
+      setNotice(result.message)
+      return
+    }
     goBackToMy()
   }
 
+  if (loadError) {
+    return (
+      <div className="my-custom my-custom-error">
+        <p>{loadError}</p>
+        <button type="button" onClick={goBackToMy}>
+          마이로 돌아가기
+        </button>
+      </div>
+    )
+  }
   if (!tank) return <div className="my-custom" />
 
   return (
