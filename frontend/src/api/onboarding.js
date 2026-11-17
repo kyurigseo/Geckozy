@@ -8,14 +8,27 @@ const errorMessage = (error, messages, fallback) => {
   return messages[error.code] ?? fallback
 }
 
-// 로그인. 토큰을 저장하고, 등록한 도마뱀이 있으면 온보딩을 마친 사용자로 본다
-// TODO: 서버에 온보딩 완료 여부가 생기면 그 값으로 교체 ('아직 준비 중이에요'로 둘러보기한 사용자는 지금은 매번 온보딩으로 감)
+// 도마뱀의 사육장 (없으면 null)
+const findEnclosure = async (lizardId) => {
+  try {
+    return await request('/enclosures', { params: { lizardId } })
+  } catch (error) {
+    if (error instanceof ApiError && error.code === 'ENCLOSURE_NOT_FOUND') return null
+    throw error
+  }
+}
+
+// 로그인. 토큰을 저장하고, 도마뱀과 사육장까지 등록돼 있으면 온보딩을 마친 사용자로 본다
+// (저장이 중간에 실패해 도마뱀만 있는 경우는 온보딩으로 보내서 이어서 저장하게 한다)
+// TODO: 서버에 온보딩 완료 여부가 생기면 그 값으로 교체. 관리 방식 저장 여부는 조회 API가 없어 확인 못 함
+// ('아직 준비 중이에요'로 둘러보기한 사용자는 지금은 매번 온보딩으로 감)
 export const login = async ({ email, password }) => {
   try {
     const { accessToken } = await request('/auth/login', { method: 'POST', body: { email, password } })
     setAccessToken(accessToken)
     const lizards = await request('/lizards')
-    return { success: true, user: { email, isOnboardingCompleted: lizards.length > 0 } }
+    const isOnboardingCompleted = lizards.length > 0 && (await findEnclosure(lizards[0].lizardId)) !== null
+    return { success: true, user: { email, isOnboardingCompleted } }
   } catch (error) {
     return {
       success: false,
@@ -145,20 +158,45 @@ const toConcernIds = async (concerns) => {
   return concerns.map((name) => serverConcerns.find((concern) => concern.name === name)?.concernId).filter(Boolean)
 }
 
-// 온보딩 입력값 저장: 도마뱀 등록 → 사육장 등록(고민 포함) → 관리 방식 등록 (계정 정보는 보내지 않음)
-// TODO: 중간에 실패하면 다시 시도할 때 도마뱀이 두 번 등록되지 않게 처리
+// 도마뱀: 지난 저장에서 이미 만들어졌으면 지금 입력값으로 수정, 없으면 새로 등록
+// (온보딩에 들어온 사용자의 도마뱀은 중간에 실패한 저장에서 남은 것뿐)
+const saveLizard = async (gecko) => {
+  const [existing] = await request('/lizards')
+  if (!existing) {
+    const { lizardId } = await request('/lizards', { method: 'POST', body: toLizardRequest(gecko) })
+    return lizardId
+  }
+  const updateBody = toLizardRequest(gecko)
+  delete updateBody.sizeWeightUnknown // 수정 API는 이 값을 받지 않음
+  await request(`/lizards/${existing.lizardId}`, { method: 'PATCH', body: updateBody })
+  return existing.lizardId
+}
+
+// 사육장: 이미 있으면 수정 (수정은 고민까지 요청 값으로 덮어씀), 없으면 새로 등록
+const saveEnclosure = async (lizardId, enclosureRequest) => {
+  const existing = await findEnclosure(lizardId)
+  if (!existing) {
+    const { enclosureId } = await request('/enclosures', { method: 'POST', body: enclosureRequest })
+    return enclosureId
+  }
+  const updateBody = { ...enclosureRequest }
+  delete updateBody.lizardId // 수정 API는 주소의 사육장 번호로 찾음
+  await request(`/enclosures/${existing.enclosureId}`, { method: 'PATCH', body: updateBody })
+  return existing.enclosureId
+}
+
+// 온보딩 입력값 저장: 도마뱀 → 사육장(고민 포함) → 관리 방식 (계정 정보는 보내지 않음)
+// 중간에 실패해도 다시 부르면 이미 만든 도마뱀·사육장을 이어서 쓰므로 두 번 등록되지 않는다
+// TODO: 관리 방식이 저장됐는데 응답만 못 받은 경우, 다시 보내면 서버가 409 (PUT을 두 번 받지 못함)
 export const saveOnboarding = async ({ gecko, tank, care, concerns, concernText }) => {
   // 번호가 없는 종을 null로 보내면 서버가 본문 없는 403을 돌려줘서, 요청 전에 막는다
   if (SPECIES_IDS[gecko.species] == null) {
     return { success: false, message: '아직 지원하지 않는 종이에요.' }
   }
   try {
-    const { lizardId } = await request('/lizards', { method: 'POST', body: toLizardRequest(gecko) })
+    const lizardId = await saveLizard(gecko)
     const concernIds = await toConcernIds(concerns)
-    const { enclosureId } = await request('/enclosures', {
-      method: 'POST',
-      body: toEnclosureRequest({ tank, lizardId, concernIds, concernText }),
-    })
+    const enclosureId = await saveEnclosure(lizardId, toEnclosureRequest({ tank, lizardId, concernIds, concernText }))
     await request(`/enclosures/${enclosureId}/management`, { method: 'PUT', body: toManagementRequest(care) })
     return { success: true, lizardId, enclosureId }
   } catch (error) {
