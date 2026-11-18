@@ -7,6 +7,8 @@ import com.likelion.backend.domain.lizard.dto.response.LizardListResponse;
 import com.likelion.backend.domain.lizard.dto.response.LizardResponse;
 import com.likelion.backend.global.response.ApiResponse;
 import com.likelion.backend.domain.lizard.service.LizardService;
+import com.likelion.backend.domain.lizard.dto.response.LizardHomeResponse;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -55,6 +57,21 @@ public class LizardController {
     ) {
         LizardResponse response =
                 lizardService.getLizard(userId, lizardId);
+
+        return ResponseEntity.ok(
+                ApiResponse.success(response)
+        );
+    }
+
+    // 사육개체 선택 및 홈 정보 조회
+    @GetMapping("/{lizardId}/home")
+    public ResponseEntity<ApiResponse<LizardHomeResponse>> getLizardHome(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable("lizardId") Long lizardId
+    ) {
+
+        LizardHomeResponse response =
+                lizardService.getLizardHome(userId, lizardId);
 
         return ResponseEntity.ok(
                 ApiResponse.success(response)

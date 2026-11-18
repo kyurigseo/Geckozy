@@ -66,4 +66,9 @@ public class User {
         this.password = password;
         this.status = UserStatus.ACTIVE;
     }
+
+    public void delete() {
+        this.status = UserStatus.DELETED;
+        this.deletedAt = LocalDateTime.now();
+    }
 }

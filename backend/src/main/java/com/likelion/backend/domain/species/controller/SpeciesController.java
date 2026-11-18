@@ -4,12 +4,16 @@ import com.likelion.backend.domain.species.dto.SpeciesHumidityCycleGuideResponse
 import com.likelion.backend.domain.species.dto.SpeciesTemperatureStandardResponse;
 import com.likelion.backend.domain.species.service.SpeciesService;
 import com.likelion.backend.global.response.ApiResponse;
-import lombok.RequiredArgsConstructor;
+import com.likelion.backend.domain.species.dto.SpeciesListResponse;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import lombok.RequiredArgsConstructor;
+import java.util.List;
 
 @RestController
 @RequestMapping("/species")
@@ -17,6 +21,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class SpeciesController {
 
     private final SpeciesService speciesService;
+
+    // 도마뱀 종 목록 조회
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<SpeciesListResponse>>> getSpeciesList() {
+
+        List<SpeciesListResponse> response =
+                speciesService.getSpeciesList();
+
+        return ResponseEntity.ok(
+                ApiResponse.success(response)
+        );
+    }
 
     @GetMapping("/{speciesId}/temperature-standards")
     public ResponseEntity<ApiResponse<SpeciesTemperatureStandardResponse>> getTemperatureStandards(

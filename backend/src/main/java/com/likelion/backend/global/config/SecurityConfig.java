@@ -88,6 +88,9 @@ public class SecurityConfig {
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .formLogin(form -> form.disable())
 
+                // 기본 로그아웃 방식 비활성화
+                .logout(logout -> logout.disable())
+
                 // 세션 사용하지 않음
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
