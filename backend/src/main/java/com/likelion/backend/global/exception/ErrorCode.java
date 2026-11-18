@@ -32,6 +32,8 @@ public enum ErrorCode {
     SCRAP_NOT_FOUND(HttpStatus.NOT_FOUND, "SCRAP_NOT_FOUND"),
     SENSOR_NOT_FOUND(HttpStatus.NOT_FOUND, "SENSOR_NOT_FOUND"),
     CARE_RECORD_NOT_FOUND(HttpStatus.NOT_FOUND, "CARE_RECORD_NOT_FOUND"),
+    METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "허용되지 않은 HTTP 메서드입니다."),
+    RESOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, "요청한 리소스를 찾을 수 없습니다."),
 
     // 409 Conflict
     DUPLICATE_USERNAME(HttpStatus.CONFLICT, "DUPLICATE_USERNAME"),

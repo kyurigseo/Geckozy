@@ -13,7 +13,6 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.context.SecurityContext;
@@ -33,7 +32,6 @@ import com.likelion.backend.domain.carerecord.entity.CareRecord;
 import com.likelion.backend.domain.carerecord.entity.enums.CareRecordType;
 
 import java.time.LocalDateTime;
-
 import java.time.LocalDate;
 import java.util.List;
 
@@ -55,9 +53,6 @@ class CareRecordControllerTest {
 
     @MockitoBean
     private JwtProvider jwtProvider;
-
-    @MockitoBean
-    private JpaMetamodelMappingContext jpaMappingContext;
 
     private final Long userId = 1L;
     private final Long lizardId = 1L;
