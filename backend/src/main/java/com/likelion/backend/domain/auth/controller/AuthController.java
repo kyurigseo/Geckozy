@@ -64,4 +64,18 @@ public class AuthController {
                 )
         );
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<Void>> logout(
+            @RequestHeader("Authorization") String authorization
+    ) {
+
+        String accessToken = authorization.substring(7);
+
+        authService.logout(accessToken);
+
+        return ResponseEntity.ok(
+                ApiResponse.success(null)
+        );
+    }
 }

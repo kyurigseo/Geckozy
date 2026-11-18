@@ -7,6 +7,10 @@ import com.likelion.backend.global.exception.BusinessException;
 import com.likelion.backend.global.exception.ErrorCode;
 import com.likelion.backend.domain.user.entity.User;
 import com.likelion.backend.domain.user.repository.UserRepository;
+import com.likelion.backend.domain.auth.jwt.JwtTokenBlacklist;
+import com.likelion.backend.domain.user.entity.UserStatus;
+import java.time.LocalDateTime;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,6 +24,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
+    private final JwtTokenBlacklist jwtTokenBlacklist;
 
     @Transactional
     public Long signup(SignupRequest request) {
@@ -59,19 +64,47 @@ public class AuthService {
         User user = userRepository
                 .findByEmail(request.email())
                 .orElseThrow(() ->
-                        new BusinessException(ErrorCode.INVALID_CREDENTIALS)
+                        new BusinessException(
+                                ErrorCode.INVALID_CREDENTIALS
+                        )
                 );
 
+        // 회원 상태 검증
+        if (user.getStatus() != UserStatus.ACTIVE
+                || user.getDeletedAt() != null) {
+
+            throw new BusinessException(
+                    ErrorCode.INVALID_CREDENTIALS
+            );
+        }
+
+        // 비밀번호 검증
         if (!passwordEncoder.matches(
                 request.password(),
                 user.getPassword()
         )) {
-            throw new BusinessException(ErrorCode.INVALID_CREDENTIALS);
+
+            throw new BusinessException(
+                    ErrorCode.INVALID_CREDENTIALS
+            );
         }
 
+        // JWT 발급
         return jwtProvider.generateToken(
                 user.getUserId(),
                 user.getUsername()
+        );
+    }
+
+    @Transactional
+    public void logout(String accessToken) {
+
+        LocalDateTime expiresAt =
+                jwtProvider.getExpiration(accessToken);
+
+        jwtTokenBlacklist.add(
+                accessToken,
+                expiresAt
         );
     }
 }

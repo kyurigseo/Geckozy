@@ -4,6 +4,9 @@ import com.likelion.backend.domain.auth.jwt.JwtProvider;
 import com.likelion.backend.domain.carerecord.dto.response.*;
 import com.likelion.backend.domain.carerecord.service.CareRecordService;
 import com.likelion.backend.domain.lizard.entity.Lizard;
+import com.likelion.backend.domain.auth.jwt.JwtTokenBlacklist;
+import com.likelion.backend.domain.user.repository.UserRepository;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -53,6 +56,12 @@ class CareRecordControllerTest {
 
     @MockitoBean
     private JwtProvider jwtProvider;
+
+    @MockitoBean
+    private JwtTokenBlacklist jwtTokenBlacklist;
+
+    @MockitoBean
+    private UserRepository userRepository;
 
     private final Long userId = 1L;
     private final Long lizardId = 1L;
