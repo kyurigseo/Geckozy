@@ -1,5 +1,7 @@
 package com.likelion.backend.domain.preadoptionguide.service;
 
+import com.likelion.backend.domain.preadoptionguide.dto.request.PreAdoptionGuideCheckSaveRequest;
+import com.likelion.backend.domain.preadoptionguide.dto.response.PreAdoptionGuideCheckSaveResponse;
 import com.likelion.backend.domain.preadoptionguide.dto.response.PreAdoptionGuideStepResponse;
 import com.likelion.backend.domain.preadoptionguide.dto.response.PreAdoptionGuideStepResponse.BlockDto;
 import com.likelion.backend.domain.preadoptionguide.dto.response.PreAdoptionGuideStepResponse.BlockItemDto;
@@ -12,10 +14,12 @@ import com.likelion.backend.domain.preadoptionguide.repository.*;
 import com.likelion.backend.domain.user.repository.UserRepository;
 import com.likelion.backend.global.exception.BusinessException;
 import com.likelion.backend.global.exception.ErrorCode;
+import com.likelion.backend.global.util.KstTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -61,6 +65,53 @@ public class PreAdoptionGuideStepService {
                 .sections(buildSections(step.getStepId()))
                 .checkItems(buildCheckItems(userId, step.getStepId()))
                 .build();
+    }
+
+    /*
+     * 단계별 체크리스트 상태 저장
+     * - 요청한 체크 항목이 모두 해당 가이드의 해당 단계에 속해야 한다. 하나라도 아니면 CHECK_ITEM_NOT_FOUND
+     * - 같은 항목이 요청에 두 번 들어오면 어느 값을 저장할지 모호하므로 INVALID_REQUEST
+     * - 저장은 항목별 upsert (없으면 생성, 있으면 덮어쓰기)
+     */
+    @Transactional
+    public PreAdoptionGuideCheckSaveResponse saveChecks(
+            Long userId,
+            Long preGuideId,
+            Integer stepNumber,
+            PreAdoptionGuideCheckSaveRequest request
+    ) {
+
+        if (!userRepository.existsById(userId)) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+
+        if (!preAdoptionGuideRepository.existsById(preGuideId)) {
+            throw new BusinessException(ErrorCode.PRE_ADOPTION_GUIDE_NOT_FOUND);
+        }
+
+        Set<Long> requestedIds = request.checks().stream()
+                .map(PreAdoptionGuideCheckSaveRequest.CheckDto::checkItemId)
+                .collect(Collectors.toSet());
+
+        if (requestedIds.size() != request.checks().size()) {
+            throw new BusinessException(ErrorCode.INVALID_REQUEST);
+        }
+
+        List<PreAdoptionGuideCheckItem> checkItems = checkItemRepository
+                .findAllByCheckItemIdInAndStep_PreAdoptionGuide_PreGuideIdAndStep_StepNumber(
+                        requestedIds, preGuideId, stepNumber
+                );
+
+        if (checkItems.size() != requestedIds.size()) {
+            throw new BusinessException(ErrorCode.CHECK_ITEM_NOT_FOUND);
+        }
+
+        LocalDateTime now = KstTime.now();
+        request.checks().forEach(check ->
+                userCheckRepository.upsert(userId, check.checkItemId(), check.checked(), now)
+        );
+
+        return new PreAdoptionGuideCheckSaveResponse(request.checks().size());
     }
 
     private List<SectionDto> buildSections(Long stepId) {
