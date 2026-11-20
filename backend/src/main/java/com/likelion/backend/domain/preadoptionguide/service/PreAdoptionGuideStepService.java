@@ -56,6 +56,8 @@ public class PreAdoptionGuideStepService {
         return PreAdoptionGuideStepResponse.builder()
                 .preGuideId(preGuideId)
                 .stepNumber(step.getStepNumber())
+                .title(step.getTitle())
+                .description(step.getDescription())
                 .sections(buildSections(step.getStepId()))
                 .checkItems(buildCheckItems(userId, step.getStepId()))
                 .build();
@@ -165,7 +167,9 @@ public class PreAdoptionGuideStepService {
         return checkItems.stream()
                 .map(item -> CheckItemDto.builder()
                         .checkItemId(item.getCheckItemId())
+                        .groupTitle(item.getGroupTitle())
                         .checkTitle(item.getCheckTitle())
+                        .checkDescription(item.getCheckDescription())
                         .itemOrder(item.getItemOrder())
                         .checked(checkedIds.contains(item.getCheckItemId()))
                         .build())

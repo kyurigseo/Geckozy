@@ -111,11 +111,13 @@ class PreAdoptionGuideSeeder {
             });
         });
 
-        forEachIndexed(seed.checkItems(), (checkTitle, itemOrder) ->
+        forEachIndexed(seed.checkItems(), (checkSeed, itemOrder) ->
                 checkItemRepository.save(
                         PreAdoptionGuideCheckItem.builder()
                                 .step(step)
-                                .checkTitle(checkTitle)
+                                .groupTitle(checkSeed.group())
+                                .checkTitle(checkSeed.title())
+                                .checkDescription(checkSeed.description())
                                 .itemOrder(itemOrder)
                                 .required(true)
                                 .build()

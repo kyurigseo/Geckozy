@@ -13,6 +13,8 @@ public class PreAdoptionGuideStepResponse {
 
     private Long preGuideId;
     private Integer stepNumber;
+    private String title;
+    private String description;
     private List<SectionDto> sections;
     private List<CheckItemDto> checkItems;
 
@@ -65,7 +67,9 @@ public class PreAdoptionGuideStepResponse {
     @AllArgsConstructor
     public static class CheckItemDto {
         private Long checkItemId;
+        private String groupTitle;
         private String checkTitle;
+        private String checkDescription;
         private Integer itemOrder;
         private Boolean checked;
     }

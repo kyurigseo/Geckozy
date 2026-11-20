@@ -30,7 +30,13 @@ final class PreAdoptionGuideSeedData {
     record Section(String title, String content, List<Detail> details) {
     }
 
-    record Step(int number, String title, String description, List<Section> sections, List<String> checkItems) {
+    record CheckItem(String group, String title, String description) {
+        static CheckItem of(String title) {
+            return new CheckItem(null, title, null);
+        }
+    }
+
+    record Step(int number, String title, String description, List<Section> sections, List<CheckItem> checkItems) {
     }
 
     static final List<Step> STEPS = List.of(
@@ -159,11 +165,11 @@ final class PreAdoptionGuideSeedData {
                             )
                     ),
                     List.of(
-                            "가지와 덩굴을 여러 높이에 연결해 설치했어요",
-                            "몸을 충분히 가릴 수 있는 은신 공간을 마련했어요",
-                            "성장 단계와 관리 방식에 맞는 바닥재를 준비했어요",
-                            "물과 먹이에 편하게 접근할 수 있는 공간을 마련했어요",
-                            "낮과 밤을 구분할 수 있는 조명을 준비했어요"
+                            new CheckItem(null, "가지와 덩굴을 여러 높이에 연결해 설치했어요", "위아래로 이동할 수 있는 경로가 있어요."),
+                            new CheckItem(null, "몸을 충분히 가릴 수 있는 은신 공간을 마련했어요", "잎이나 은신처처럼 편하게 숨어 쉴 공간이 있어요."),
+                            new CheckItem(null, "성장 단계와 관리 방식에 맞는 바닥재를 준비했어요", "바닥재가 지나치게 젖어 있거나 오염되어 있지 않아요."),
+                            new CheckItem(null, "물과 먹이에 편하게 접근할 수 있는 공간을 마련했어요", "그릇이 쉽게 넘어지지 않도록 안정적으로 배치했어요."),
+                            new CheckItem(null, "낮과 밤을 구분할 수 있는 조명을 준비했어요", "일정한 주기로 조명을 켜고 끌 수 있어요.")
                     )
             ),
             new Step(
@@ -183,10 +189,10 @@ final class PreAdoptionGuideSeedData {
                             )
                     ),
                     List.of(
-                            "센서가 열원 바로 아래에 있지 않아요",
-                            "분무 시 물이 센서에 직접 닿지 않아요",
-                            "물그릇 바로 옆처럼 습도가 국소적으로 높은 곳을 피했어요",
-                            "도마뱀이 센서를 떨어뜨리거나 손상시키지 않도록 고정했어요"
+                            CheckItem.of("센서가 열원 바로 아래에 있지 않아요"),
+                            CheckItem.of("분무 시 물이 센서에 직접 닿지 않아요"),
+                            CheckItem.of("물그릇 바로 옆처럼 습도가 국소적으로 높은 곳을 피했어요"),
+                            CheckItem.of("도마뱀이 센서를 떨어뜨리거나 손상시키지 않도록 고정했어요")
                     )
             ),
             new Step(
@@ -208,14 +214,14 @@ final class PreAdoptionGuideSeedData {
                     "도마뱀을 데려오기 전 사육환경이 잘 준비되었는지 최종 확인해요.",
                     List.of(),
                     List.of(
-                            "문과 잠금장치가 잘 닫혀 있어요",
-                            "가지와 은신처가 흔들리지 않게 고정되어 있어요",
-                            "깨끗한 물과 물그릇을 준비했어요",
-                            "먹이와 급여 방법을 미리 확인했어요",
-                            "입양 직후 편하게 숨을 수 있는 공간을 마련했어요",
-                            "센서가 정상적으로 연결되어 있어요",
-                            "센서가 처음 설치한 위치에 잘 고정되어 있어요",
-                            "7일간 온·습도 변화 확인을 완료했어요"
+                            new CheckItem("사육장", "문과 잠금장치가 잘 닫혀 있어요", null),
+                            new CheckItem("사육장", "가지와 은신처가 흔들리지 않게 고정되어 있어요", null),
+                            new CheckItem("생활 준비", "깨끗한 물과 물그릇을 준비했어요", null),
+                            new CheckItem("생활 준비", "먹이와 급여 방법을 미리 확인했어요", null),
+                            new CheckItem("생활 준비", "입양 직후 편하게 숨을 수 있는 공간을 마련했어요", null),
+                            new CheckItem("환경 및 센서", "센서가 정상적으로 연결되어 있어요", null),
+                            new CheckItem("환경 및 센서", "센서가 처음 설치한 위치에 잘 고정되어 있어요", null),
+                            new CheckItem("환경 및 센서", "7일간 온·습도 변화 확인을 완료했어요", null)
                     )
             )
     );

@@ -73,6 +73,8 @@ class PreAdoptionGuideStepServiceTest {
 
         assertThat(response.getPreGuideId()).isEqualTo(preGuideId);
         assertThat(response.getStepNumber()).isEqualTo(1);
+        assertThat(response.getTitle()).isEqualTo("사육장 준비");
+        assertThat(response.getDescription()).isEqualTo("도마뱀에게 맞는 사육장의 크기와 소재를 확인해요.");
         assertThat(response.getSections())
                 .extracting(SectionDto::getTitle)
                 .containsExactly("사육장 형태", "사육장 크기", "소재와 환기", "설치 위치");
@@ -110,6 +112,21 @@ class PreAdoptionGuideStepServiceTest {
         assertThat(response.getCheckItems()).hasSize(5);
         assertThat(response.getCheckItems()).extracting(CheckItemDto::getItemOrder).containsExactly(1, 2, 3, 4, 5);
         assertThat(response.getCheckItems()).allMatch(item -> !item.getChecked());
+        assertThat(response.getCheckItems()).allMatch(item -> item.getGroupTitle() == null);
+        assertThat(response.getCheckItems().get(0).getCheckTitle()).isEqualTo("가지와 덩굴을 여러 높이에 연결해 설치했어요");
+        assertThat(response.getCheckItems().get(0).getCheckDescription()).isEqualTo("위아래로 이동할 수 있는 경로가 있어요.");
+    }
+
+    @Test
+    @DisplayName("2-1. 5단계: 체크 항목이 그룹(사육장 / 생활 준비 / 환경 및 센서)별로 순서대로 반환")
+    void getStep_Step5_ReturnsCheckItemGroups() {
+        PreAdoptionGuideStepResponse response = stepService.getStep(user.getUserId(), preGuideId, 5);
+
+        assertThat(response.getTitle()).isEqualTo("준비 상태 확인");
+        assertThat(response.getCheckItems()).extracting(CheckItemDto::getGroupTitle)
+                .containsExactly("사육장", "사육장", "생활 준비", "생활 준비", "생활 준비",
+                        "환경 및 센서", "환경 및 센서", "환경 및 센서");
+        assertThat(response.getCheckItems()).allMatch(item -> item.getCheckDescription() == null);
     }
 
     @Test
