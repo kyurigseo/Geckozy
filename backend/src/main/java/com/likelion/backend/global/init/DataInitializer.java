@@ -2,6 +2,8 @@ package com.likelion.backend.global.init;
 
 import com.likelion.backend.domain.concern.entity.Concern;
 import com.likelion.backend.domain.concern.repository.ConcernRepository;
+import com.likelion.backend.domain.preadoptionguide.entity.PreAdoptionGuide;
+import com.likelion.backend.domain.preadoptionguide.repository.PreAdoptionGuideRepository;
 import com.likelion.backend.domain.species.entity.Species;
 import com.likelion.backend.domain.species.entity.SpeciesEnvironmentStandard;
 import com.likelion.backend.domain.species.repository.SpeciesEnvironmentStandardRepository;
@@ -17,7 +19,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * 서버 시작 시 기준 데이터(종, 환경 기준, 고민 항목)를 넣는다.
+ * 서버 시작 시 기준 데이터(종, 환경 기준, 사전 입양 가이드, 고민 항목)를 넣는다.
  * 이름 기준으로 없을 때만 INSERT 하므로 여러 번 재시작해도 중복되지 않는다.
  *
  * 빈 DB 기준 ID
@@ -32,6 +34,7 @@ public class DataInitializer implements ApplicationRunner {
     private final SpeciesRepository speciesRepository;
     private final SpeciesEnvironmentStandardRepository standardRepository;
     private final ConcernRepository concernRepository;
+    private final PreAdoptionGuideRepository preAdoptionGuideRepository;
 
     private static final List<String> CONCERNS = List.of(
             "온도 관리",
@@ -85,6 +88,7 @@ public class DataInitializer implements ApplicationRunner {
     @Transactional
     public void run(ApplicationArguments args) {
         seedSpecies();
+        seedPreAdoptionGuides();
         seedConcerns();
     }
 
@@ -112,6 +116,23 @@ public class DataInitializer implements ApplicationRunner {
                                 .build()
                 );
             }
+        }
+    }
+
+    private void seedPreAdoptionGuides() {
+        for (SpeciesSeed seed : SPECIES) {
+            speciesRepository.findByName(seed.name()).ifPresent(species -> {
+                if (preAdoptionGuideRepository.findBySpecies_SpeciesId(species.getSpeciesId()).isEmpty()) {
+                    log.info("[DataInitializer] 사전 입양 가이드 추가: {}", seed.name());
+                    preAdoptionGuideRepository.save(
+                            PreAdoptionGuide.builder()
+                                    .species(species)
+                                    .title(seed.name() + " 입양 준비")
+                                    .description("입양 전 사육 환경을 준비해요.")
+                                    .build()
+                    );
+                }
+            });
         }
     }
 
