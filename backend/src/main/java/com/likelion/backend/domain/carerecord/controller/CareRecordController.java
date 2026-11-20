@@ -79,7 +79,7 @@ public class CareRecordController {
     ) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 ApiResponse.success(
-                        careRecordService.addPhoto(userId, recordId, file)
+                        careRecordService.addPhoto(userId, lizardId, recordId, file)
                 )
         );
     }
@@ -92,7 +92,7 @@ public class CareRecordController {
             @PathVariable Long recordId,
             @RequestBody CareRecordMemoUpdateRequest request
     ) {
-        careRecordService.updateMemo(userId, recordId, request.getMemo());
+        careRecordService.updateMemo(userId, lizardId, recordId, request.getMemo());
 
         return ResponseEntity.ok(ApiResponse.success(null));
     }
@@ -106,7 +106,7 @@ public class CareRecordController {
     ) {
         return ResponseEntity.ok(
                 ApiResponse.success(
-                        careRecordService.getEnvironment(userId, recordId)
+                        careRecordService.getEnvironment(userId, lizardId, recordId)
                 )
         );
     }
@@ -120,7 +120,7 @@ public class CareRecordController {
     ) {
         return ResponseEntity.ok(
                 ApiResponse.success(
-                        careRecordService.getRecordDetail(userId, recordId)
+                        careRecordService.getRecordDetail(userId, lizardId, recordId)
                 )
         );
     }
@@ -137,7 +137,7 @@ public class CareRecordController {
         return ResponseEntity.ok(
                 ApiResponse.success(
                         careRecordService.getEnvironmentGraph(
-                                userId, recordId, beforeMinutes, afterMinutes
+                                userId, lizardId, recordId, beforeMinutes, afterMinutes
                         )
                 )
         );
@@ -152,7 +152,7 @@ public class CareRecordController {
     ) {
         return ResponseEntity.ok(
                 ApiResponse.success(
-                        careRecordService.getNearestEnvironment(userId, recordId)
+                        careRecordService.getNearestEnvironment(userId, lizardId, recordId)
                 )
         );
     }
@@ -166,7 +166,7 @@ public class CareRecordController {
     ) {
         return ResponseEntity.ok(
                 ApiResponse.success(
-                        careRecordService.getEnvironmentSummary(userId, recordId)
+                        careRecordService.getEnvironmentSummary(userId, lizardId, recordId)
                 )
         );
     }
