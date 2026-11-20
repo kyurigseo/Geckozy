@@ -259,10 +259,15 @@ public class CareRecordService {
     @Transactional
     public CareRecordPhotoResponse addPhoto(
             Long userId,
+            Long lizardId,
             Long recordId,
             MultipartFile file
     ) {
-        CareRecord record = validateRecordOwner(userId, recordId);
+        CareRecord record = validateRecordOwner(
+                userId, lizardId, recordId
+        );
+
+        // 이하 기존 코드 유지
 
         if (file == null || file.isEmpty()) {
             throw new BusinessException(ErrorCode.INVALID_PHOTO);
@@ -348,10 +353,14 @@ public class CareRecordService {
     @Transactional
     public void updateMemo(
             Long userId,
+            Long lizardId,
             Long recordId,
             String memo
     ) {
-        CareRecord record = validateRecordOwner(userId, recordId);
+        CareRecord record = validateRecordOwner(
+                userId, lizardId, recordId
+        );
+
         record.updateMemo(memo);
     }
 
@@ -370,10 +379,20 @@ public class CareRecordService {
         return lizard;
     }
 
-    private CareRecord validateRecordOwner(Long userId, Long recordId) {
+    private CareRecord validateRecordOwner(
+            Long userId,
+            Long lizardId,
+            Long recordId
+    ) {
         return careRecordRepository
-                .findByRecordIdAndLizard_User_UserId(recordId, userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.CARE_RECORD_NOT_FOUND));
+                .findByRecordIdAndLizard_LizardIdAndLizard_User_UserIdAndLizard_DeletedAtIsNull(
+                        recordId,
+                        lizardId,
+                        userId
+                )
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.CARE_RECORD_NOT_FOUND
+                ));
     }
 
     // -----------------------------
@@ -445,9 +464,12 @@ public class CareRecordService {
     // -----------------------------
     public EnvironmentResponse getEnvironment(
             Long userId,
+            Long lizardId,
             Long recordId
     ) {
-        CareRecord record = validateRecordOwner(userId, recordId);
+        CareRecord record = validateRecordOwner(
+                userId, lizardId, recordId
+        );
 
         SensorMeasurement measurement = findNearestMeasurement(record);
 
@@ -508,14 +530,15 @@ public class CareRecordService {
                 .orElse(null);
     }
 
-    // -----------------------------
-// REC-15. 기록 상세 조회
-// -----------------------------
+    // REC-15. 기록 상세 조회
     public CareRecordDetailResponse getRecordDetail(
             Long userId,
+            Long lizardId,
             Long recordId
     ) {
-        CareRecord record = validateRecordOwner(userId, recordId);
+        CareRecord record = validateRecordOwner(
+                userId, lizardId, recordId
+        );
 
         // 기록 유형별 상세 정보
         Map<String, Object> typeDetail = getTypeDetail(record);
@@ -530,7 +553,7 @@ public class CareRecordService {
 
         // 기록 시점 환경 정보
         EnvironmentResponse environment =
-                getEnvironment(userId, recordId);
+                getEnvironment(userId, lizardId, recordId);
 
         return new CareRecordDetailResponse(
                 record,
@@ -605,11 +628,15 @@ public class CareRecordService {
     // -----------------------------
     public List<EnvironmentGraphResponse> getEnvironmentGraph(
             Long userId,
+            Long lizardId,
             Long recordId,
             int beforeMinutes,
             int afterMinutes
     ) {
-        CareRecord record = validateRecordOwner(userId, recordId);
+        CareRecord record = validateRecordOwner(
+                userId, lizardId, recordId
+        );
+
 
         if (beforeMinutes < 0 || afterMinutes < 0) {
             throw new BusinessException(ErrorCode.INVALID_REQUEST);
@@ -654,9 +681,12 @@ public class CareRecordService {
     // -----------------------------
     public EnvironmentResponse getNearestEnvironment(
             Long userId,
+            Long lizardId,
             Long recordId
     ) {
-        CareRecord record = validateRecordOwner(userId, recordId);
+        CareRecord record = validateRecordOwner(
+                userId, lizardId, recordId
+        );
 
         SensorMeasurement measurement = findNearestMeasurement(record);
 
@@ -672,9 +702,13 @@ public class CareRecordService {
     // -----------------------------
     public EnvironmentSummaryResponse getEnvironmentSummary(
             Long userId,
+            Long lizardId,
             Long recordId
     ) {
-        CareRecord record = validateRecordOwner(userId, recordId);
+        CareRecord record = validateRecordOwner(
+                userId, lizardId, recordId
+        );
+
 
         Enclosure enclosure = enclosureRepository
                 .findByLizard_LizardId(record.getLizard().getLizardId())

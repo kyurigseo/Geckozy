@@ -1,59 +1,44 @@
 package com.likelion.backend.domain.carerecord.service;
 
+import com.likelion.backend.domain.carerecord.dto.request.CareRecordCreateRequest;
 import com.likelion.backend.domain.carerecord.dto.response.*;
 import com.likelion.backend.domain.carerecord.entity.*;
 import com.likelion.backend.domain.carerecord.entity.enums.*;
 import com.likelion.backend.domain.carerecord.repository.*;
 import com.likelion.backend.domain.enclosure.entity.Enclosure;
 import com.likelion.backend.domain.enclosure.repository.EnclosureRepository;
+import com.likelion.backend.domain.lizard.entity.Lizard;
 import com.likelion.backend.domain.lizard.repository.LizardRepository;
 import com.likelion.backend.domain.sensor.entity.Sensor;
 import com.likelion.backend.domain.sensor.entity.SensorMeasurement;
 import com.likelion.backend.domain.sensor.repository.SensorMeasurementRepository;
 import com.likelion.backend.domain.sensor.repository.SensorRepository;
-import org.junit.jupiter.api.io.TempDir;
-import org.mockito.ArgumentCaptor;
-import org.springframework.mock.web.MockMultipartFile;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.JsonNode;
-
+import com.likelion.backend.domain.user.entity.User;
 import com.likelion.backend.global.exception.BusinessException;
-
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
-import com.likelion.backend.domain.carerecord.dto.request.CareRecordCreateRequest;
-
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-import static org.assertj.core.api.Assertions.assertThat;
-
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import com.likelion.backend.domain.lizard.entity.Lizard;
-import com.likelion.backend.domain.user.entity.User;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-import static org.mockito.ArgumentMatchers.*;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
-import java.time.LocalDate;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CareRecordServiceTest {
@@ -946,11 +931,16 @@ class CareRecordServiceTest {
 
     // 기록 소유권 검증을 통과하도록 Mock 설정
     private CareRecord givenOwnedRecord(
-            Long userId, Long recordId
+            Long userId,
+            Long lizardId,
+            Long recordId
     ) {
         CareRecord record = mock(CareRecord.class);
 
-        when(careRecordRepository.findByRecordIdAndLizard_User_UserId(recordId, userId))
+        when(careRecordRepository
+                .findByRecordIdAndLizard_LizardIdAndLizard_User_UserIdAndLizard_DeletedAtIsNull(
+                        recordId, lizardId, userId
+                ))
                 .thenReturn(Optional.of(record));
 
         return record;
@@ -1012,9 +1002,10 @@ class CareRecordServiceTest {
     void addPhoto() throws Exception {
         // given
         Long userId = 1L;
+        Long lizardId = 1L;
         Long recordId = 10L;
 
-        CareRecord record = givenOwnedRecord(userId, recordId);
+        CareRecord record = givenOwnedRecord(userId, lizardId, recordId);
 
         when(careRecordPhotoRepository.countByCareRecord_RecordId(recordId))
                 .thenReturn(0L);
@@ -1039,7 +1030,7 @@ class CareRecordServiceTest {
 
         // when
         CareRecordPhotoResponse response =
-                careRecordService.addPhoto(userId, recordId, file);
+                careRecordService.addPhoto(userId, lizardId, recordId, file);
 
         // then
         assertThat(response.getPhotoId()).isEqualTo(1L);
@@ -1060,13 +1051,14 @@ class CareRecordServiceTest {
     void updateMemo_success() {
         // given
         Long userId = 1L;
+        Long lizardId = 1L;
         Long recordId = 10L;
         String updatedMemo = "수정된 메모";
 
-        CareRecord record = givenOwnedRecord(userId, recordId);
+        CareRecord record = givenOwnedRecord(userId, lizardId, recordId);
 
         // when
-        careRecordService.updateMemo(userId, recordId, updatedMemo);
+        careRecordService.updateMemo(userId, lizardId, recordId, updatedMemo);
 
         // then
         verify(record).updateMemo(updatedMemo);
@@ -1082,7 +1074,7 @@ class CareRecordServiceTest {
 
         LocalDateTime recordedAt = LocalDateTime.of(2026, 11, 3, 10, 0);
 
-        CareRecord record = givenOwnedRecord(userId, recordId);
+        CareRecord record = givenOwnedRecord(userId, lizardId, recordId);
 
         Lizard lizard = mock(Lizard.class);
         when(record.getLizard()).thenReturn(lizard);
@@ -1109,7 +1101,7 @@ class CareRecordServiceTest {
 
         // when
         EnvironmentResponse response =
-                careRecordService.getEnvironment(userId, recordId);
+                careRecordService.getEnvironment(userId, lizardId, recordId);
 
         // then
         assertThat(response).isNotNull();
@@ -1129,7 +1121,7 @@ class CareRecordServiceTest {
         Long lizardId = 1L;
 
         // 1. 소유한 기록 조회
-        CareRecord record = givenOwnedRecord(userId, recordId);
+        CareRecord record = givenOwnedRecord(userId, lizardId, recordId);
 
         when(record.getRecordId()).thenReturn(recordId);
         when(record.getRecordType()).thenReturn(CareRecordType.WEIGHT);
@@ -1157,7 +1149,7 @@ class CareRecordServiceTest {
 
         // 실행
         CareRecordDetailResponse response =
-                careRecordService.getRecordDetail(userId, recordId);
+                careRecordService.getRecordDetail(userId, lizardId, recordId);
 
         // 검증
         assertThat(response).isNotNull();
@@ -1181,10 +1173,10 @@ class CareRecordServiceTest {
                 LocalDateTime.of(2026, 11, 3, 10, 0);
 
         // 1. 소유한 기록 조회
-        CareRecord record = givenOwnedRecord(userId, recordId);
+        CareRecord record = givenOwnedRecord(userId, lizardId, recordId);
 
-        when(record.getLizard()).thenReturn(mock(Lizard.class));
-        Lizard lizard = record.getLizard();
+        Lizard lizard = mock(Lizard.class);
+        when(record.getLizard()).thenReturn(lizard);
         when(lizard.getLizardId()).thenReturn(lizardId);
         when(record.getRecordedAt()).thenReturn(recordedAt);
 
@@ -1219,7 +1211,7 @@ class CareRecordServiceTest {
         // 실행: 기록 시각 기준 이전 30분, 이후 30분
         List<EnvironmentGraphResponse> response =
                 careRecordService.getEnvironmentGraph(
-                        userId, recordId, 30, 30
+                        userId, lizardId, recordId, 30, 30
                 );
 
         // 검증
@@ -1244,7 +1236,7 @@ class CareRecordServiceTest {
                 LocalDateTime.of(2026, 11, 3, 10, 0);
 
         // 1. 소유한 기록 조회
-        CareRecord record = givenOwnedRecord(userId, recordId);
+        CareRecord record = givenOwnedRecord(userId, lizardId, recordId);
 
         Lizard lizard = mock(Lizard.class);
         when(record.getLizard()).thenReturn(lizard);
@@ -1273,7 +1265,7 @@ class CareRecordServiceTest {
 
         // 실행
         EnvironmentResponse response =
-                careRecordService.getNearestEnvironment(userId, recordId);
+                careRecordService.getNearestEnvironment(userId, lizardId, recordId);
 
         // 검증
         assertThat(response).isNotNull();
@@ -1318,7 +1310,7 @@ class CareRecordServiceTest {
                 LocalDateTime.of(2026, 11, 3, 10, 0);
 
         // 1. 소유한 기록 조회
-        CareRecord record = givenOwnedRecord(userId, recordId);
+        CareRecord record = givenOwnedRecord(userId, lizardId, recordId);
 
         Lizard lizard = mock(Lizard.class);
         when(record.getLizard()).thenReturn(lizard);
@@ -1355,7 +1347,7 @@ class CareRecordServiceTest {
 
         // 실행
         EnvironmentSummaryResponse response =
-                careRecordService.getEnvironmentSummary(userId, recordId);
+                careRecordService.getEnvironmentSummary(userId, lizardId, recordId);
 
         // 검증
         assertThat(response).isNotNull();
@@ -1537,15 +1529,16 @@ class CareRecordServiceTest {
     void getNonexistentRecord() {
         // given
         Long userId = 1L;
+        Long lizardId = 1L;
         Long recordId = 999L;
 
         when(careRecordRepository
-                .findByRecordIdAndLizard_User_UserId(recordId, userId))
+                .findByRecordIdAndLizard_LizardIdAndLizard_User_UserIdAndLizard_DeletedAtIsNull(recordId, lizardId, userId))
                 .thenReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() ->
-                careRecordService.updateMemo(userId, recordId, "수정 메모")
+                careRecordService.updateMemo(userId, lizardId, recordId, "수정 메모")
         ).isInstanceOf(BusinessException.class);
 
         verify(careRecordRepository, never()).save(any(CareRecord.class));
@@ -1556,9 +1549,10 @@ class CareRecordServiceTest {
     void addEmptyPhoto() {
         // given
         Long userId = 1L;
+        Long lizardId = 1L;
         Long recordId = 10L;
 
-        givenOwnedRecord(userId, recordId);
+        givenOwnedRecord(userId, lizardId, recordId);
 
         MockMultipartFile file = new MockMultipartFile(
                 "file",
@@ -1569,7 +1563,7 @@ class CareRecordServiceTest {
 
         // when & then
         assertThatThrownBy(() ->
-                careRecordService.addPhoto(userId, recordId, file)
+                careRecordService.addPhoto(userId, lizardId, recordId, file)
         ).isInstanceOf(BusinessException.class);
 
         verify(careRecordPhotoRepository, never())
@@ -1581,9 +1575,10 @@ class CareRecordServiceTest {
     void addPhotoWithInvalidExtension() {
         // given
         Long userId = 1L;
+        Long lizardId = 1L;
         Long recordId = 10L;
 
-        givenOwnedRecord(userId, recordId);
+        givenOwnedRecord(userId, lizardId, recordId);
 
         when(careRecordPhotoRepository.countByCareRecord_RecordId(recordId))
                 .thenReturn(0L);
@@ -1597,7 +1592,7 @@ class CareRecordServiceTest {
 
         // when & then
         assertThatThrownBy(() ->
-                careRecordService.addPhoto(userId, recordId, file)
+                careRecordService.addPhoto(userId, lizardId, recordId, file)
         ).isInstanceOf(BusinessException.class);
 
         verify(careRecordPhotoRepository, never())
@@ -1609,9 +1604,10 @@ class CareRecordServiceTest {
     void addPhotoExceedingMaxCount() {
         // given
         Long userId = 1L;
+        Long lizardId = 1L;
         Long recordId = 10L;
 
-        givenOwnedRecord(userId, recordId);
+        givenOwnedRecord(userId, lizardId, recordId);
 
         when(careRecordPhotoRepository.countByCareRecord_RecordId(recordId))
                 .thenReturn(3L);
@@ -1625,7 +1621,7 @@ class CareRecordServiceTest {
 
         // when & then
         assertThatThrownBy(() ->
-                careRecordService.addPhoto(userId, recordId, file)
+                careRecordService.addPhoto(userId, lizardId, recordId, file)
         ).isInstanceOf(BusinessException.class);
 
         verify(careRecordPhotoRepository, never())
@@ -1637,14 +1633,15 @@ class CareRecordServiceTest {
     void getEnvironmentGraphWithNegativeBeforeMinutes() {
         // given
         Long userId = 1L;
+        Long lizardId = 1L;
         Long recordId = 10L;
 
-        givenOwnedRecord(userId, recordId);
+        givenOwnedRecord(userId, lizardId, recordId);
 
         // when & then
         assertThatThrownBy(() ->
                 careRecordService.getEnvironmentGraph(
-                        userId, recordId, -1, 30
+                        userId, lizardId, recordId, -1, 30
                 )
         ).isInstanceOf(BusinessException.class);
 
@@ -1715,6 +1712,27 @@ class CareRecordServiceTest {
                 );
     }
 
+    @Test
+    @DisplayName("REC-15. 기록과 도마뱀 ID가 일치하지 않으면 조회 실패")
+    void getRecordDetail_wrongLizardId() {
+        // given
+        Long userId = 1L;
+        Long lizardId = 999L;
+        Long recordId = 10L;
 
+        when(careRecordRepository
+                .findByRecordIdAndLizard_LizardIdAndLizard_User_UserIdAndLizard_DeletedAtIsNull(
+                        recordId, lizardId, userId
+                ))
+                .thenReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() ->
+                careRecordService.getRecordDetail(
+                        userId, lizardId, recordId
+                )
+        ).isInstanceOf(BusinessException.class)
+                .hasMessage("CARE_RECORD_NOT_FOUND");
+    }
 
 }
