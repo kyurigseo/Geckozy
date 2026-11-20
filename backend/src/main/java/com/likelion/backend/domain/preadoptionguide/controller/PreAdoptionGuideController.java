@@ -4,6 +4,8 @@ import com.likelion.backend.domain.preadoptionguide.dto.request.PreAdoptionGuide
 import com.likelion.backend.domain.preadoptionguide.dto.request.PreAdoptionGuideStepCompleteRequest;
 import com.likelion.backend.domain.preadoptionguide.dto.response.PreAdoptionGuideStepCompleteResponse;
 import com.likelion.backend.domain.preadoptionguide.dto.response.EnvironmentCheckStartResponse;
+import com.likelion.backend.domain.preadoptionguide.dto.response.EnvironmentCheckStatusResponse;
+import com.likelion.backend.domain.preadoptionguide.service.PreAdoptionEnvironmentCheckService;
 import com.likelion.backend.domain.preadoptionguide.dto.response.PreAdoptionGuideCheckSaveResponse;
 import com.likelion.backend.domain.preadoptionguide.dto.response.PreAdoptionGuideProgressResponse;
 import com.likelion.backend.domain.preadoptionguide.dto.response.PreAdoptionGuideResponse;
@@ -33,6 +35,7 @@ public class PreAdoptionGuideController {
 
     private final PreAdoptionGuideService preAdoptionGuideService;
     private final PreAdoptionGuideStepService preAdoptionGuideStepService;
+    private final PreAdoptionEnvironmentCheckService preAdoptionEnvironmentCheckService;
 
     // 해당 종 사전 입양 가이드 조회
     @GetMapping("/species/{speciesId}/pre-adoption-guide")
@@ -74,6 +77,16 @@ public class PreAdoptionGuideController {
         EnvironmentCheckStartResponse response = preAdoptionGuideService.startEnvironmentCheck(userId, preGuideId);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.created(response));
+    }
+
+    // 환경 점검 진행 상태 조회
+    @GetMapping("/pre-adoption-guides/{preGuideId}/environment-check")
+    public ResponseEntity<ApiResponse<EnvironmentCheckStatusResponse>> getEnvironmentCheckStatus(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable("preGuideId") @Positive Long preGuideId
+    ) {
+        EnvironmentCheckStatusResponse response = preAdoptionEnvironmentCheckService.getStatus(userId, preGuideId);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     // 단계별 사전 입양 가이드 조회
