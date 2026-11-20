@@ -5,6 +5,7 @@ import com.likelion.backend.domain.preadoptionguide.dto.request.PreAdoptionGuide
 import com.likelion.backend.domain.preadoptionguide.dto.response.PreAdoptionGuideStepCompleteResponse;
 import com.likelion.backend.domain.preadoptionguide.dto.response.EnvironmentCheckStartResponse;
 import com.likelion.backend.domain.preadoptionguide.dto.response.EnvironmentCheckStatusResponse;
+import com.likelion.backend.domain.preadoptionguide.dto.response.EnvironmentSummaryResponse;
 import com.likelion.backend.domain.preadoptionguide.service.PreAdoptionEnvironmentCheckService;
 import com.likelion.backend.domain.preadoptionguide.dto.response.PreAdoptionGuideCheckSaveResponse;
 import com.likelion.backend.domain.preadoptionguide.dto.response.PreAdoptionGuideProgressResponse;
@@ -86,6 +87,16 @@ public class PreAdoptionGuideController {
             @PathVariable("preGuideId") @Positive Long preGuideId
     ) {
         EnvironmentCheckStatusResponse response = preAdoptionEnvironmentCheckService.getStatus(userId, preGuideId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    // 환경 데이터 중간 요약 조회
+    @GetMapping("/pre-adoption-guides/{preGuideId}/environment-check/summary")
+    public ResponseEntity<ApiResponse<EnvironmentSummaryResponse>> getEnvironmentSummary(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable("preGuideId") @Positive Long preGuideId
+    ) {
+        EnvironmentSummaryResponse response = preAdoptionEnvironmentCheckService.getSummary(userId, preGuideId);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

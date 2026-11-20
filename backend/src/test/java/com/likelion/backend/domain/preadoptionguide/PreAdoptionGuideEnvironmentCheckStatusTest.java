@@ -311,6 +311,61 @@ class PreAdoptionGuideEnvironmentCheckStatusTest {
         assertThat(response.getMissingData()).isFalse();
     }
 
+    // ---------------------------------------------------------------- 환경 데이터 중간 요약
+
+    @Test
+    @DisplayName("12. 요약: 점검을 시작하지 않았으면 ENVIRONMENT_CHECK_NOT_FOUND")
+    void summary_NotStarted() {
+        assertThatThrownBy(() -> environmentCheckService.getSummary(user.getUserId(), preGuideId))
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.ENVIRONMENT_CHECK_NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("13. 요약: 시작 직후에는 데이터 부족, 추가 관찰 안내")
+    void summary_Insufficient() {
+        registerEnclosure(crestedGecko);
+        startCheck(2);
+
+        var summary = environmentCheckService.getSummary(user.getUserId(), preGuideId);
+
+        assertThat(summary.getSufficientData()).isFalse();
+        assertThat(summary.getTemperatureSummary()).isNull();
+        assertThat(summary.getCheckPoints()).isEmpty();
+        assertThat(summary.getGuidance()).isEqualTo("데이터가 더 쌓이면 환경을 판단할 수 있어요.");
+    }
+
+    @Test
+    @DisplayName("14. 요약: 30시간 데이터면 요약하고, 크레스티드 게코 권장 범위(낮 22~26℃)로 확인할 점 판단")
+    void summary_UsesSpeciesStandard() {
+        Enclosure enclosure = registerEnclosure(crestedGecko);
+        LocalDateTime startedAt = startCheck(30);
+        Sensor sensor = connectSensor(enclosure, startedAt);
+
+        // 낮(08~20시) 28℃로 권장 범위 초과, 밤 23℃, 습도 60%
+        List<SensorMeasurement> measurements = new ArrayList<>();
+        for (LocalDateTime t = startedAt; t.isBefore(KstTime.now()); t = t.plusMinutes(10)) {
+            boolean day = t.getHour() >= 8 && t.getHour() < 20;
+            measurements.add(SensorMeasurement.builder()
+                    .sensor(sensor)
+                    .temperature(new BigDecimal(day ? "28.0" : "23.0"))
+                    .humidity(new BigDecimal("60.0"))
+                    .measuredAt(t)
+                    .build());
+        }
+        measurementRepository.saveAll(measurements);
+
+        var summary = environmentCheckService.getSummary(user.getUserId(), preGuideId);
+
+        assertThat(summary.getSufficientData()).isTrue();
+        assertThat(summary.getTemperatureSummary()).isEqualTo("23.0~28.0℃ 사이에서 유지됐어요.");
+        assertThat(summary.getDayNightSummary()).isEqualTo("낮에는 주로 28℃, 밤에는 23℃ 안팎으로 낮아졌어요.");
+        assertThat(summary.getHumiditySummary()).isEqualTo("분무 후 습도가 오르는 흐름이 아직 확인되지 않았어요.");
+        assertThat(summary.getCheckPoints()).contains("온도가 권장 범위를 벗어난 시간이 있었어요.");
+        assertThat(summary.getGuidance()).isNull();
+    }
+
     @Test
     @DisplayName("11. 존재하지 않는 가이드면 PRE_ADOPTION_GUIDE_NOT_FOUND, 사용자가 없으면 UNAUTHORIZED")
     void notFoundAndUnauthorized() {
