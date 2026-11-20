@@ -14,6 +14,8 @@ public interface PreAdoptionGuideUserCheckRepository extends JpaRepository<PreAd
 
     List<PreAdoptionGuideUserCheck> findAllByUser_UserIdAndCheckItem_CheckItemIdIn(Long userId, Collection<Long> checkItemIds);
 
+    long countByUser_UserIdAndCheckItem_CheckItemIdInAndCheckedTrue(Long userId, Collection<Long> checkItemIds);
+
     /*
      * 체크 상태 저장 (없으면 INSERT, 있으면 UPDATE).
      * 체크박스를 빠르게 여러 번 누르면 같은 항목 저장 요청이 동시에 올 수 있어서,

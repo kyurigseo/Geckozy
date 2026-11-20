@@ -23,6 +23,7 @@ import java.time.LocalDateTime;
 public class PreAdoptionGuideProgress {
 
     public static final int FIRST_STEP = 1;
+    public static final int LAST_STEP = 5;
     public static final int NOT_COMPLETED = 0;
 
     @Id
@@ -46,6 +47,10 @@ public class PreAdoptionGuideProgress {
     @Column(name = "completed_step", nullable = false)
     private Integer completedStep;
 
+    // 가이드 전체 완료 여부 (입양 전 가이드 완료 API에서 true로 변경)
+    @Column(name = "completed", nullable = false)
+    private boolean completed;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -59,10 +64,22 @@ public class PreAdoptionGuideProgress {
         this.preAdoptionGuide = preAdoptionGuide;
         this.currentStep = FIRST_STEP;
         this.completedStep = NOT_COMPLETED;
+        this.completed = false;
     }
 
     // 첫 단계부터 시작하는 초기 진행 상태 생성
     public static PreAdoptionGuideProgress start(User user, PreAdoptionGuide preAdoptionGuide) {
         return new PreAdoptionGuideProgress(user, preAdoptionGuide);
+    }
+
+    // 다음에 완료할 수 있는 단계 (순서대로만 완료)
+    public int nextStepToComplete() {
+        return completedStep + 1;
+    }
+
+    // 단계 완료 처리 후 다음 단계로 이동 (마지막 단계에서는 그대로 머묾)
+    public void completeStep(int stepNumber) {
+        this.completedStep = stepNumber;
+        this.currentStep = Math.min(stepNumber + 1, LAST_STEP);
     }
 }

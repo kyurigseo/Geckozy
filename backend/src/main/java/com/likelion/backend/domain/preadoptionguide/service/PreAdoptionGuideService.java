@@ -2,10 +2,14 @@ package com.likelion.backend.domain.preadoptionguide.service;
 
 import com.likelion.backend.domain.preadoptionguide.dto.response.PreAdoptionGuideProgressResponse;
 import com.likelion.backend.domain.preadoptionguide.dto.response.PreAdoptionGuideResponse;
+import com.likelion.backend.domain.preadoptionguide.dto.response.PreAdoptionGuideStepCompleteResponse;
 import com.likelion.backend.domain.preadoptionguide.entity.PreAdoptionGuide;
+import com.likelion.backend.domain.preadoptionguide.entity.PreAdoptionGuideCheckItem;
 import com.likelion.backend.domain.preadoptionguide.entity.PreAdoptionGuideProgress;
+import com.likelion.backend.domain.preadoptionguide.repository.PreAdoptionGuideCheckItemRepository;
 import com.likelion.backend.domain.preadoptionguide.repository.PreAdoptionGuideProgressRepository;
 import com.likelion.backend.domain.preadoptionguide.repository.PreAdoptionGuideRepository;
+import com.likelion.backend.domain.preadoptionguide.repository.PreAdoptionGuideUserCheckRepository;
 import com.likelion.backend.domain.species.repository.SpeciesRepository;
 import com.likelion.backend.domain.user.repository.UserRepository;
 import com.likelion.backend.global.exception.BusinessException;
@@ -16,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -28,6 +33,11 @@ public class PreAdoptionGuideService {
     private final PreAdoptionGuideProgressRepository preAdoptionGuideProgressRepository;
     private final UserRepository userRepository;
     private final PreAdoptionGuideProgressCreator preAdoptionGuideProgressCreator;
+    private final PreAdoptionGuideCheckItemRepository checkItemRepository;
+    private final PreAdoptionGuideUserCheckRepository userCheckRepository;
+
+    private static final int ENCLOSURE_STEP = 1;
+    private static final int ENVIRONMENT_CHECK_STEP = 4;
 
     // 해당 종 사전 입양 가이드 조회
     public PreAdoptionGuideResponse getGuideBySpecies(Long speciesId) {
@@ -66,6 +76,95 @@ public class PreAdoptionGuideService {
                 .orElseGet(() -> createOrFindProgress(userId, preGuideId));
 
         return PreAdoptionGuideProgressResponse.of(progress, preGuideId);
+    }
+
+    /*
+     * 단계 완료 및 다음 단계 이동
+     * - 순서대로만 완료할 수 있다 (완료한 마지막 단계 + 1). 이미 완료한 단계를 다시 보내면 현재 상태를 그대로 반환한다.
+     * - 5단계 완료는 입양 전 가이드 완료 API에서 처리하므로 여기서는 받지 않는다.
+     * - 단계별 완료 조건: 해당 단계의 필수 체크 항목 전부 체크
+     *     + 1단계: 가이드 종의 도마뱀에 사육장 등록
+     *     + 4단계: 7일 환경 점검 완료
+     */
+    @Transactional
+    public PreAdoptionGuideStepCompleteResponse completeStep(Long userId, Long preGuideId, int stepNumber) {
+
+        if (!userRepository.existsById(userId)) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+
+        if (!preAdoptionGuideRepository.existsById(preGuideId)) {
+            throw new BusinessException(ErrorCode.PRE_ADOPTION_GUIDE_NOT_FOUND);
+        }
+
+        if (stepNumber >= PreAdoptionGuideProgress.LAST_STEP) {
+            throw new BusinessException(ErrorCode.INVALID_REQUEST);
+        }
+
+        PreAdoptionGuideProgress progress = findProgressForUpdate(userId, preGuideId);
+
+        // 이미 완료한 단계 (완료 버튼 연타 등): 변경 없이 현재 상태 반환
+        if (stepNumber <= progress.getCompletedStep()) {
+            return PreAdoptionGuideStepCompleteResponse.of(progress);
+        }
+
+        // 단계를 건너뛰는 경우
+        if (stepNumber != progress.nextStepToComplete()) {
+            throw new BusinessException(ErrorCode.INVALID_REQUEST);
+        }
+
+        validateStepCompletable(userId, preGuideId, stepNumber);
+
+        progress.completeStep(stepNumber);
+
+        return PreAdoptionGuideStepCompleteResponse.of(progress);
+    }
+
+    private void validateStepCompletable(Long userId, Long preGuideId, int stepNumber) {
+
+        List<Long> requiredItemIds = checkItemRepository
+                .findAllByStep_PreAdoptionGuide_PreGuideIdAndStep_StepNumberAndRequiredTrue(preGuideId, stepNumber)
+                .stream()
+                .map(PreAdoptionGuideCheckItem::getCheckItemId)
+                .toList();
+
+        if (!requiredItemIds.isEmpty()
+                && userCheckRepository.countByUser_UserIdAndCheckItem_CheckItemIdInAndCheckedTrue(userId, requiredItemIds)
+                < requiredItemIds.size()) {
+            throw new BusinessException(ErrorCode.REQUIRED_CHECKS_INCOMPLETE);
+        }
+
+        if (stepNumber == ENCLOSURE_STEP
+                && !preAdoptionGuideRepository.existsEnclosureForGuideSpecies(userId, preGuideId)) {
+            throw new BusinessException(ErrorCode.ENCLOSURE_NOT_REGISTERED);
+        }
+
+        if (stepNumber == ENVIRONMENT_CHECK_STEP && !isEnvironmentCheckCompleted(userId, preGuideId)) {
+            throw new BusinessException(ErrorCode.ENVIRONMENT_CHECK_INCOMPLETE);
+        }
+    }
+
+    // TODO: 7일 환경 점검 API(점검 시작 / 진행 상태 / 중간 요약) 구현 시 실제 점검 완료 여부로 교체.
+    //       그 전까지는 점검을 시작할 방법이 없으므로 4단계는 완료할 수 없다.
+    private boolean isEnvironmentCheckCompleted(Long userId, Long preGuideId) {
+        return false;
+    }
+
+    // 진행 상태를 잠금 조회. 아직 없으면 (첫 조회 없이 바로 완료 요청한 경우) 생성 후 다시 잠금 조회
+    private PreAdoptionGuideProgress findProgressForUpdate(Long userId, Long preGuideId) {
+        return preAdoptionGuideProgressRepository.findForUpdate(userId, preGuideId)
+                .orElseGet(() -> {
+                    try {
+                        preAdoptionGuideProgressCreator.create(userId, preGuideId);
+                    } catch (DataIntegrityViolationException e) {
+                        // 동시에 들어온 다른 요청이 먼저 생성한 경우: 그 기록을 사용.
+                        // 그런 기록이 없으면 중복이 아닌 다른 제약 위반이므로 원래 예외를 그대로 던진다.
+                        return preAdoptionGuideProgressRepository.findForUpdate(userId, preGuideId)
+                                .orElseThrow(() -> e);
+                    }
+                    return preAdoptionGuideProgressRepository.findForUpdate(userId, preGuideId)
+                            .orElseThrow(() -> new IllegalStateException("생성한 진행 상태를 찾을 수 없음"));
+                });
     }
 
     private PreAdoptionGuideProgress createOrFindProgress(Long userId, Long preGuideId) {
