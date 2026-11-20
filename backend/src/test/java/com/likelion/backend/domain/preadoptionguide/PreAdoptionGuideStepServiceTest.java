@@ -85,6 +85,7 @@ class PreAdoptionGuideStepServiceTest {
         assertThat(verticalDetail.getBlocks()).isEmpty();
 
         assertThat(response.getSections().get(1).getDetails()).isEmpty();
+        assertThat(response.getSections()).allMatch(section -> section.getBlocks().isEmpty());
 
         DetailDto materialDetail = response.getSections().get(2).getDetails().get(0);
         assertThat(materialDetail.getBlocks()).hasSize(1);
@@ -115,6 +116,31 @@ class PreAdoptionGuideStepServiceTest {
         assertThat(response.getCheckItems()).allMatch(item -> item.getGroupTitle() == null);
         assertThat(response.getCheckItems().get(0).getCheckTitle()).isEqualTo("가지와 덩굴을 여러 높이에 연결해 설치했어요");
         assertThat(response.getCheckItems().get(0).getCheckDescription()).isEqualTo("위아래로 이동할 수 있는 경로가 있어요.");
+    }
+
+    @Test
+    @DisplayName("2-2. 3단계: 설치 확인 안내는 체크 항목이 아니라 카드(섹션)에 붙은 강조 블록으로 반환")
+    void getStep_Step3_ReturnsSectionBlockWithoutCheckItems() {
+        PreAdoptionGuideStepResponse response = stepService.getStep(user.getUserId(), preGuideId, 3);
+
+        assertThat(response.getCheckItems()).isEmpty();
+        assertThat(response.getSections()).extracting(SectionDto::getTitle)
+                .containsExactly("센서 연결하기", "센서 설치하기");
+
+        SectionDto installSection = response.getSections().get(1);
+        assertThat(installSection.getDetails()).isEmpty();
+        assertThat(installSection.getBlocks()).hasSize(1);
+        assertThat(installSection.getBlocks().get(0).getBlockTitle()).isEqualTo("설치할 때 확인해주세요");
+        assertThat(installSection.getBlocks().get(0).getItems())
+                .extracting("itemContent")
+                .containsExactly(
+                        "센서가 열원 바로 아래에 있지 않아요",
+                        "분무 시 물이 센서에 직접 닿지 않아요",
+                        "물그릇 바로 옆처럼 습도가 국소적으로 높은 곳을 피했어요",
+                        "도마뱀이 센서를 떨어뜨리거나 손상시키지 않도록 고정했어요"
+                );
+
+        assertThat(response.getSections().get(0).getBlocks()).isEmpty();
     }
 
     @Test

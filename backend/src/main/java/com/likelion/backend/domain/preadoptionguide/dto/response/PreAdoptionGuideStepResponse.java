@@ -25,6 +25,8 @@ public class PreAdoptionGuideStepResponse {
         private Long sectionId;
         private String title;
         private String content;
+        // 카드 안에 바로 보이는 강조 블록 (예: 설치할 때 확인해주세요)
+        private List<BlockDto> blocks;
         private List<DetailDto> details;
     }
 

@@ -20,7 +20,7 @@ public class PreAdoptionGuideBlockItem {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "block_id", nullable = false)
-    private PreAdoptionGuideDetailBlock block;
+    private PreAdoptionGuideBlock block;
 
     @Column(name = "item_content", columnDefinition = "TEXT")
     private String itemContent;
@@ -30,7 +30,7 @@ public class PreAdoptionGuideBlockItem {
 
     @Builder
     public PreAdoptionGuideBlockItem(
-            PreAdoptionGuideDetailBlock block,
+            PreAdoptionGuideBlock block,
             String itemContent,
             Integer itemOrder
     ) {

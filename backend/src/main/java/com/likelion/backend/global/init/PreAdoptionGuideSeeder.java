@@ -25,7 +25,7 @@ class PreAdoptionGuideSeeder {
     private final PreAdoptionGuideSectionRepository sectionRepository;
     private final PreAdoptionGuideDetailRepository detailRepository;
     private final PreAdoptionGuideDetailContentRepository contentRepository;
-    private final PreAdoptionGuideDetailBlockRepository blockRepository;
+    private final PreAdoptionGuideBlockRepository blockRepository;
     private final PreAdoptionGuideBlockItemRepository blockItemRepository;
     private final PreAdoptionGuideCheckItemRepository checkItemRepository;
 
@@ -70,6 +70,9 @@ class PreAdoptionGuideSeeder {
                             .build()
             );
 
+            forEachIndexed(sectionSeed.blocks(), (blockSeed, blockOrder) ->
+                    saveBlock(PreAdoptionGuideBlock.ofSection(section, blockSeed.title(), blockOrder), blockSeed));
+
             forEachIndexed(sectionSeed.details(), (detailSeed, detailOrder) -> {
                 PreAdoptionGuideDetail detail = detailRepository.save(
                         PreAdoptionGuideDetail.builder()
@@ -90,24 +93,8 @@ class PreAdoptionGuideSeeder {
                                         .build()
                         ));
 
-                forEachIndexed(detailSeed.blocks(), (blockSeed, blockOrder) -> {
-                    PreAdoptionGuideDetailBlock block = blockRepository.save(
-                            PreAdoptionGuideDetailBlock.builder()
-                                    .detail(detail)
-                                    .blockTitle(blockSeed.title())
-                                    .blockOrder(blockOrder)
-                                    .build()
-                    );
-
-                    forEachIndexed(blockSeed.items(), (itemContent, itemOrder) ->
-                            blockItemRepository.save(
-                                    PreAdoptionGuideBlockItem.builder()
-                                            .block(block)
-                                            .itemContent(itemContent)
-                                            .itemOrder(itemOrder)
-                                            .build()
-                            ));
-                });
+                forEachIndexed(detailSeed.blocks(), (blockSeed, blockOrder) ->
+                        saveBlock(PreAdoptionGuideBlock.ofDetail(detail, blockSeed.title(), blockOrder), blockSeed));
             });
         });
 
@@ -120,6 +107,19 @@ class PreAdoptionGuideSeeder {
                                 .checkDescription(checkSeed.description())
                                 .itemOrder(itemOrder)
                                 .required(true)
+                                .build()
+                ));
+    }
+
+    private void saveBlock(PreAdoptionGuideBlock newBlock, PreAdoptionGuideSeedData.Block seed) {
+        PreAdoptionGuideBlock block = blockRepository.save(newBlock);
+
+        forEachIndexed(seed.items(), (itemContent, itemOrder) ->
+                blockItemRepository.save(
+                        PreAdoptionGuideBlockItem.builder()
+                                .block(block)
+                                .itemContent(itemContent)
+                                .itemOrder(itemOrder)
                                 .build()
                 ));
     }

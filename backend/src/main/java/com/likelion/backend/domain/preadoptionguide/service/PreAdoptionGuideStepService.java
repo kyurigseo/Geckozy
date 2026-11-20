@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,7 +38,7 @@ public class PreAdoptionGuideStepService {
     private final PreAdoptionGuideSectionRepository sectionRepository;
     private final PreAdoptionGuideDetailRepository detailRepository;
     private final PreAdoptionGuideDetailContentRepository contentRepository;
-    private final PreAdoptionGuideDetailBlockRepository blockRepository;
+    private final PreAdoptionGuideBlockRepository blockRepository;
     private final PreAdoptionGuideBlockItemRepository blockItemRepository;
     private final PreAdoptionGuideCheckItemRepository checkItemRepository;
     private final PreAdoptionGuideUserCheckRepository userCheckRepository;
@@ -133,11 +134,17 @@ public class PreAdoptionGuideStepService {
                 ? List.of()
                 : contentRepository.findAllByDetail_DetailIdInOrderByContentOrderAsc(detailIds);
 
-        List<PreAdoptionGuideDetailBlock> blocks = detailIds.isEmpty()
+        // 강조 블록은 안내 카드에 바로 붙은 것과 세부 안내 팝업 안에 있는 것 두 종류
+        List<PreAdoptionGuideBlock> sectionBlocks = blockRepository.findAllBySection_SectionIdInOrderByBlockOrderAsc(
+                ids(sections, PreAdoptionGuideSection::getSectionId)
+        );
+
+        List<PreAdoptionGuideBlock> detailBlocks = detailIds.isEmpty()
                 ? List.of()
                 : blockRepository.findAllByDetail_DetailIdInOrderByBlockOrderAsc(detailIds);
 
-        List<Long> blockIds = ids(blocks, PreAdoptionGuideDetailBlock::getBlockId);
+        List<Long> blockIds = new ArrayList<>(ids(sectionBlocks, PreAdoptionGuideBlock::getBlockId));
+        blockIds.addAll(ids(detailBlocks, PreAdoptionGuideBlock::getBlockId));
 
         List<PreAdoptionGuideBlockItem> blockItems = blockIds.isEmpty()
                 ? List.of()
@@ -148,8 +155,10 @@ public class PreAdoptionGuideStepService {
                 groupBy(details, detail -> detail.getSection().getSectionId());
         Map<Long, List<PreAdoptionGuideDetailContent>> contentsByDetail =
                 groupBy(contents, content -> content.getDetail().getDetailId());
-        Map<Long, List<PreAdoptionGuideDetailBlock>> blocksByDetail =
-                groupBy(blocks, block -> block.getDetail().getDetailId());
+        Map<Long, List<PreAdoptionGuideBlock>> blocksBySection =
+                groupBy(sectionBlocks, block -> block.getSection().getSectionId());
+        Map<Long, List<PreAdoptionGuideBlock>> blocksByDetail =
+                groupBy(detailBlocks, block -> block.getDetail().getDetailId());
         Map<Long, List<PreAdoptionGuideBlockItem>> itemsByBlock =
                 groupBy(blockItems, item -> item.getBlock().getBlockId());
 
@@ -158,6 +167,7 @@ public class PreAdoptionGuideStepService {
                         .sectionId(section.getSectionId())
                         .title(section.getTitle())
                         .content(section.getContent())
+                        .blocks(toBlockDtos(blocksBySection.getOrDefault(section.getSectionId(), List.of()), itemsByBlock))
                         .details(detailsBySection.getOrDefault(section.getSectionId(), List.of()).stream()
                                 .map(detail -> toDetailDto(detail, contentsByDetail, blocksByDetail, itemsByBlock))
                                 .toList())
@@ -168,7 +178,7 @@ public class PreAdoptionGuideStepService {
     private DetailDto toDetailDto(
             PreAdoptionGuideDetail detail,
             Map<Long, List<PreAdoptionGuideDetailContent>> contentsByDetail,
-            Map<Long, List<PreAdoptionGuideDetailBlock>> blocksByDetail,
+            Map<Long, List<PreAdoptionGuideBlock>> blocksByDetail,
             Map<Long, List<PreAdoptionGuideBlockItem>> itemsByBlock
     ) {
         List<ContentDto> contents = contentsByDetail.getOrDefault(detail.getDetailId(), List.of()).stream()
@@ -180,7 +190,18 @@ public class PreAdoptionGuideStepService {
                         .build())
                 .toList();
 
-        List<BlockDto> blocks = blocksByDetail.getOrDefault(detail.getDetailId(), List.of()).stream()
+        return DetailDto.builder()
+                .question(detail.getQuestion())
+                .contents(contents)
+                .blocks(toBlockDtos(blocksByDetail.getOrDefault(detail.getDetailId(), List.of()), itemsByBlock))
+                .build();
+    }
+
+    private List<BlockDto> toBlockDtos(
+            List<PreAdoptionGuideBlock> blocks,
+            Map<Long, List<PreAdoptionGuideBlockItem>> itemsByBlock
+    ) {
+        return blocks.stream()
                 .map(block -> BlockDto.builder()
                         .blockTitle(block.getBlockTitle())
                         .items(itemsByBlock.getOrDefault(block.getBlockId(), List.of()).stream()
@@ -188,12 +209,6 @@ public class PreAdoptionGuideStepService {
                                 .toList())
                         .build())
                 .toList();
-
-        return DetailDto.builder()
-                .question(detail.getQuestion())
-                .contents(contents)
-                .blocks(blocks)
-                .build();
     }
 
     private List<CheckItemDto> buildCheckItems(Long userId, Long stepId) {

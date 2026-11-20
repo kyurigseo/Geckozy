@@ -27,13 +27,14 @@ final class PreAdoptionGuideSeedData {
     record Detail(String question, List<Content> contents, List<Block> blocks) {
     }
 
-    record Section(String title, String content, List<Detail> details) {
+    // blocks: 카드 안에 바로 보이는 강조 블록, details: 카드의 세부 안내 팝업
+    record Section(String title, String content, List<Block> blocks, List<Detail> details) {
+        Section(String title, String content, List<Detail> details) {
+            this(title, content, List.of(), details);
+        }
     }
 
     record CheckItem(String group, String title, String description) {
-        static CheckItem of(String title) {
-            return new CheckItem(null, title, null);
-        }
     }
 
     record Step(int number, String title, String description, List<Section> sections, List<CheckItem> checkItems) {
@@ -185,15 +186,19 @@ final class PreAdoptionGuideSeedData {
                             new Section(
                                     "센서 설치하기",
                                     "도마뱀이 주로 생활하는 환경을 확인할 수 있는 위치에 설치해주세요.\n\n센서 위치에 따라 측정값이 달라질 수 있으므로, 열원이나 분무가 직접 닿는 곳처럼 특정 영향을 지나치게 크게 받는 위치는 피해주세요.",
+                                    List.of(new Block(
+                                            "설치할 때 확인해주세요",
+                                            List.of(
+                                                    "센서가 열원 바로 아래에 있지 않아요",
+                                                    "분무 시 물이 센서에 직접 닿지 않아요",
+                                                    "물그릇 바로 옆처럼 습도가 국소적으로 높은 곳을 피했어요",
+                                                    "도마뱀이 센서를 떨어뜨리거나 손상시키지 않도록 고정했어요"
+                                            )
+                                    )),
                                     List.of()
                             )
                     ),
-                    List.of(
-                            CheckItem.of("센서가 열원 바로 아래에 있지 않아요"),
-                            CheckItem.of("분무 시 물이 센서에 직접 닿지 않아요"),
-                            CheckItem.of("물그릇 바로 옆처럼 습도가 국소적으로 높은 곳을 피했어요"),
-                            CheckItem.of("도마뱀이 센서를 떨어뜨리거나 손상시키지 않도록 고정했어요")
-                    )
+                    List.of()
             ),
             new Step(
                     4,

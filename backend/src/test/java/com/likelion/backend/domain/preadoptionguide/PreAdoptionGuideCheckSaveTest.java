@@ -106,11 +106,11 @@ class PreAdoptionGuideCheckSaveTest {
     @Test
     @DisplayName("4. 다른 단계의 체크 항목이면 CHECK_ITEM_NOT_FOUND, 아무것도 저장하지 않음")
     void saveChecks_ItemFromOtherStep() {
-        Long step3ItemId = stepService.getStep(user.getUserId(), preGuideId, 3).getCheckItems().get(0).getCheckItemId();
+        Long step5ItemId = stepService.getStep(user.getUserId(), preGuideId, 5).getCheckItems().get(0).getCheckItemId();
 
         assertThatThrownBy(() -> stepService.saveChecks(user.getUserId(), preGuideId, 2, request(
                 new CheckDto(step2ItemIds.get(0), true),
-                new CheckDto(step3ItemId, true)
+                new CheckDto(step5ItemId, true)
         )))
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
