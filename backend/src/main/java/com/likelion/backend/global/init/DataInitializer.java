@@ -2,8 +2,6 @@ package com.likelion.backend.global.init;
 
 import com.likelion.backend.domain.concern.entity.Concern;
 import com.likelion.backend.domain.concern.repository.ConcernRepository;
-import com.likelion.backend.domain.preadoptionguide.entity.PreAdoptionGuide;
-import com.likelion.backend.domain.preadoptionguide.repository.PreAdoptionGuideRepository;
 import com.likelion.backend.domain.species.entity.Species;
 import com.likelion.backend.domain.species.entity.SpeciesEnvironmentStandard;
 import com.likelion.backend.domain.species.repository.SpeciesEnvironmentStandardRepository;
@@ -25,6 +23,7 @@ import java.util.List;
  * 빈 DB 기준 ID
  *  - species : 1 비어디드 드래곤 / 2 크레스티드 게코 / 3 레오파드 게코
  *  - concerns: 1 온도 관리 ~ 8 사육 환경 (CONCERNS 순서)
+ *  - pre_adoption_guides: 1 크레스티드 게코 (단계별 콘텐츠는 PreAdoptionGuideSeedData)
  */
 @Slf4j
 @Component
@@ -34,7 +33,7 @@ public class DataInitializer implements ApplicationRunner {
     private final SpeciesRepository speciesRepository;
     private final SpeciesEnvironmentStandardRepository standardRepository;
     private final ConcernRepository concernRepository;
-    private final PreAdoptionGuideRepository preAdoptionGuideRepository;
+    private final PreAdoptionGuideSeeder preAdoptionGuideSeeder;
 
     private static final List<String> CONCERNS = List.of(
             "온도 관리",
@@ -120,20 +119,7 @@ public class DataInitializer implements ApplicationRunner {
     }
 
     private void seedPreAdoptionGuides() {
-        for (SpeciesSeed seed : SPECIES) {
-            speciesRepository.findByName(seed.name()).ifPresent(species -> {
-                if (preAdoptionGuideRepository.findBySpecies_SpeciesId(species.getSpeciesId()).isEmpty()) {
-                    log.info("[DataInitializer] 사전 입양 가이드 추가: {}", seed.name());
-                    preAdoptionGuideRepository.save(
-                            PreAdoptionGuide.builder()
-                                    .species(species)
-                                    .title(seed.name() + " 입양 준비")
-                                    .description("입양 전 사육 환경을 준비해요.")
-                                    .build()
-                    );
-                }
-            });
-        }
+        preAdoptionGuideSeeder.seed();
     }
 
     private void seedConcerns() {

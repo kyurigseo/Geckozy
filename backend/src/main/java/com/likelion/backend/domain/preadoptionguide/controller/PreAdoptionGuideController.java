@@ -2,8 +2,12 @@ package com.likelion.backend.domain.preadoptionguide.controller;
 
 import com.likelion.backend.domain.preadoptionguide.dto.response.PreAdoptionGuideProgressResponse;
 import com.likelion.backend.domain.preadoptionguide.dto.response.PreAdoptionGuideResponse;
+import com.likelion.backend.domain.preadoptionguide.dto.response.PreAdoptionGuideStepResponse;
 import com.likelion.backend.domain.preadoptionguide.service.PreAdoptionGuideService;
+import com.likelion.backend.domain.preadoptionguide.service.PreAdoptionGuideStepService;
 import com.likelion.backend.global.response.ApiResponse;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class PreAdoptionGuideController {
 
     private final PreAdoptionGuideService preAdoptionGuideService;
+    private final PreAdoptionGuideStepService preAdoptionGuideStepService;
 
     // 해당 종 사전 입양 가이드 조회
     @GetMapping("/species/{speciesId}/pre-adoption-guide")
@@ -34,6 +39,17 @@ public class PreAdoptionGuideController {
             @PathVariable("preGuideId") @Positive Long preGuideId
     ) {
         PreAdoptionGuideProgressResponse response = preAdoptionGuideService.getProgress(userId, preGuideId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    // 단계별 사전 입양 가이드 조회
+    @GetMapping("/pre-adoption-guides/{preGuideId}/steps/{stepNumber}")
+    public ResponseEntity<ApiResponse<PreAdoptionGuideStepResponse>> getStep(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable("preGuideId") @Positive Long preGuideId,
+            @PathVariable("stepNumber") @Min(1) @Max(5) Integer stepNumber
+    ) {
+        PreAdoptionGuideStepResponse response = preAdoptionGuideStepService.getStep(userId, preGuideId, stepNumber);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 }
