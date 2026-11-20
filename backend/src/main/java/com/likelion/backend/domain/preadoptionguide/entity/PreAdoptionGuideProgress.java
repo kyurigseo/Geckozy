@@ -56,6 +56,10 @@ public class PreAdoptionGuideProgress {
     @Column(name = "completed", nullable = false)
     private boolean completed;
 
+    // 가이드 전체 완료 시각 (완료 전이면 null)
+    @Column(name = "completed_at")
+    private LocalDateTime completedAt;
+
     // 7일 환경 점검 시작 시각 (시작 전이면 null)
     @Column(name = "environment_check_started_at")
     private LocalDateTime environmentCheckStartedAt;
@@ -90,6 +94,14 @@ public class PreAdoptionGuideProgress {
     public void completeStep(int stepNumber) {
         this.completedStep = stepNumber;
         this.currentStep = Math.min(stepNumber + 1, LAST_STEP);
+    }
+
+    // 가이드 전체 완료: 4단계를 따로 완료하지 않았어도 4·5단계를 함께 완료 처리
+    public void completeGuide(LocalDateTime now) {
+        this.completedStep = LAST_STEP;
+        this.currentStep = LAST_STEP;
+        this.completed = true;
+        this.completedAt = now;
     }
 
     public boolean canStartEnvironmentCheck() {

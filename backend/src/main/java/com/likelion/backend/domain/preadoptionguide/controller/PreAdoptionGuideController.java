@@ -8,6 +8,7 @@ import com.likelion.backend.domain.preadoptionguide.dto.response.EnvironmentChec
 import com.likelion.backend.domain.preadoptionguide.dto.response.EnvironmentSummaryResponse;
 import com.likelion.backend.domain.preadoptionguide.service.PreAdoptionEnvironmentCheckService;
 import com.likelion.backend.domain.preadoptionguide.dto.response.PreAdoptionGuideCheckSaveResponse;
+import com.likelion.backend.domain.preadoptionguide.dto.response.PreAdoptionGuideCompleteResponse;
 import com.likelion.backend.domain.preadoptionguide.dto.response.PreAdoptionGuideProgressResponse;
 import com.likelion.backend.domain.preadoptionguide.dto.response.PreAdoptionGuideResponse;
 import com.likelion.backend.domain.preadoptionguide.dto.response.PreAdoptionGuideStepResponse;
@@ -97,6 +98,16 @@ public class PreAdoptionGuideController {
             @PathVariable("preGuideId") @Positive Long preGuideId
     ) {
         EnvironmentSummaryResponse response = preAdoptionEnvironmentCheckService.getSummary(userId, preGuideId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    // 입양 전 가이드 완료
+    @PostMapping("/pre-adoption-guides/{preGuideId}/complete")
+    public ResponseEntity<ApiResponse<PreAdoptionGuideCompleteResponse>> completeGuide(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable("preGuideId") @Positive Long preGuideId
+    ) {
+        PreAdoptionGuideCompleteResponse response = preAdoptionGuideService.completeGuide(userId, preGuideId);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

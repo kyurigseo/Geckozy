@@ -244,11 +244,11 @@ class PreAdoptionGuideStepCompleteTest {
     }
 
     @Test
-    @DisplayName("10. 4단계: 7일 환경 점검이 완료되지 않으면 ENVIRONMENT_CHECK_INCOMPLETE")
+    @DisplayName("10. 4단계: 7일 환경 점검이 완료되지 않으면 ENVIRONMENT_CHECK_NOT_COMPLETED")
     void step4_EnvironmentCheckIncomplete() {
         completeThroughStep3();
 
-        assertFails(4, ErrorCode.ENVIRONMENT_CHECK_INCOMPLETE);
+        assertFails(4, ErrorCode.ENVIRONMENT_CHECK_NOT_COMPLETED);
     }
 
     @Test

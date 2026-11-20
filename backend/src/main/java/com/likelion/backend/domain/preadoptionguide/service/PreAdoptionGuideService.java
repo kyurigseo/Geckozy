@@ -1,6 +1,7 @@
 package com.likelion.backend.domain.preadoptionguide.service;
 
 import com.likelion.backend.domain.preadoptionguide.dto.response.EnvironmentCheckStartResponse;
+import com.likelion.backend.domain.preadoptionguide.dto.response.PreAdoptionGuideCompleteResponse;
 import com.likelion.backend.domain.preadoptionguide.dto.response.PreAdoptionGuideProgressResponse;
 import com.likelion.backend.domain.preadoptionguide.dto.response.PreAdoptionGuideResponse;
 import com.likelion.backend.domain.preadoptionguide.dto.response.PreAdoptionGuideStepCompleteResponse;
@@ -162,15 +163,7 @@ public class PreAdoptionGuideService {
             int stepNumber
     ) {
 
-        List<Long> requiredItemIds = checkItemRepository
-                .findAllByStep_PreAdoptionGuide_PreGuideIdAndStep_StepNumberAndRequiredTrue(preGuideId, stepNumber)
-                .stream()
-                .map(PreAdoptionGuideCheckItem::getCheckItemId)
-                .toList();
-
-        if (!requiredItemIds.isEmpty()
-                && userCheckRepository.countByUser_UserIdAndCheckItem_CheckItemIdInAndCheckedTrue(userId, requiredItemIds)
-                < requiredItemIds.size()) {
+        if (!hasCheckedAllRequiredItems(userId, preGuideId, stepNumber)) {
             throw new BusinessException(ErrorCode.REQUIRED_CHECKS_INCOMPLETE);
         }
 
@@ -180,8 +173,60 @@ public class PreAdoptionGuideService {
         }
 
         if (stepNumber == ENVIRONMENT_CHECK_STEP && !progress.isEnvironmentCheckCompleted(KstTime.now())) {
-            throw new BusinessException(ErrorCode.ENVIRONMENT_CHECK_INCOMPLETE);
+            throw new BusinessException(ErrorCode.ENVIRONMENT_CHECK_NOT_COMPLETED);
         }
+    }
+
+    private boolean hasCheckedAllRequiredItems(Long userId, Long preGuideId, int stepNumber) {
+        List<Long> requiredItemIds = checkItemRepository
+                .findAllByStep_PreAdoptionGuide_PreGuideIdAndStep_StepNumberAndRequiredTrue(preGuideId, stepNumber)
+                .stream()
+                .map(PreAdoptionGuideCheckItem::getCheckItemId)
+                .toList();
+
+        return requiredItemIds.isEmpty()
+                || userCheckRepository.countByUser_UserIdAndCheckItem_CheckItemIdInAndCheckedTrue(userId, requiredItemIds)
+                >= requiredItemIds.size();
+    }
+
+    /*
+     * 입양 전 가이드 완료
+     * - 7일 환경 점검이 끝났고(시작 후 만 7일), 5단계 필수 체크 항목을 모두 체크해야 완료할 수 있다.
+     * - 4단계를 따로 완료하지 않았어도 조건(7일 점검 완료)을 이미 만족하므로 4·5단계를 함께 완료 처리한다.
+     * - 이미 완료한 가이드면 변경 없이 처음 완료 시각을 그대로 반환한다 (완료 버튼 연타 등).
+     */
+    @Transactional
+    public PreAdoptionGuideCompleteResponse completeGuide(Long userId, Long preGuideId) {
+
+        if (!userRepository.existsById(userId)) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+
+        if (!preAdoptionGuideRepository.existsById(preGuideId)) {
+            throw new BusinessException(ErrorCode.PRE_ADOPTION_GUIDE_NOT_FOUND);
+        }
+
+        // 진행 상태가 없으면 7일 점검도 시작하지 않은 것
+        PreAdoptionGuideProgress progress = preAdoptionGuideProgressRepository.findForUpdate(userId, preGuideId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENVIRONMENT_CHECK_NOT_COMPLETED));
+
+        if (progress.isCompleted()) {
+            return PreAdoptionGuideCompleteResponse.of(progress);
+        }
+
+        LocalDateTime now = KstTime.now();
+
+        if (!progress.isEnvironmentCheckCompleted(now)) {
+            throw new BusinessException(ErrorCode.ENVIRONMENT_CHECK_NOT_COMPLETED);
+        }
+
+        if (!hasCheckedAllRequiredItems(userId, preGuideId, PreAdoptionGuideProgress.LAST_STEP)) {
+            throw new BusinessException(ErrorCode.PRE_ADOPTION_REQUIRED_ITEMS_INCOMPLETE);
+        }
+
+        progress.completeGuide(now);
+
+        return PreAdoptionGuideCompleteResponse.of(progress);
     }
 
     // 진행 상태를 잠금 조회. 아직 없으면 (첫 조회 없이 바로 완료 요청한 경우) 생성 후 다시 잠금 조회
