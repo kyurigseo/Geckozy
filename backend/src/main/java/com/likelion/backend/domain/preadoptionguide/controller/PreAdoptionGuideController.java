@@ -3,6 +3,7 @@ package com.likelion.backend.domain.preadoptionguide.controller;
 import com.likelion.backend.domain.preadoptionguide.dto.request.PreAdoptionGuideCheckSaveRequest;
 import com.likelion.backend.domain.preadoptionguide.dto.request.PreAdoptionGuideStepCompleteRequest;
 import com.likelion.backend.domain.preadoptionguide.dto.response.PreAdoptionGuideStepCompleteResponse;
+import com.likelion.backend.domain.preadoptionguide.dto.response.EnvironmentCheckStartResponse;
 import com.likelion.backend.domain.preadoptionguide.dto.response.PreAdoptionGuideCheckSaveResponse;
 import com.likelion.backend.domain.preadoptionguide.dto.response.PreAdoptionGuideProgressResponse;
 import com.likelion.backend.domain.preadoptionguide.dto.response.PreAdoptionGuideResponse;
@@ -15,11 +16,13 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -60,6 +63,17 @@ public class PreAdoptionGuideController {
         PreAdoptionGuideStepCompleteResponse response =
                 preAdoptionGuideService.completeStep(userId, preGuideId, request.completedStep());
         return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    // 7일 환경 점검 시작
+    @PostMapping("/pre-adoption-guides/{preGuideId}/environment-check")
+    public ResponseEntity<ApiResponse<EnvironmentCheckStartResponse>> startEnvironmentCheck(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable("preGuideId") @Positive Long preGuideId
+    ) {
+        EnvironmentCheckStartResponse response = preAdoptionGuideService.startEnvironmentCheck(userId, preGuideId);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.created(response));
     }
 
     // 단계별 사전 입양 가이드 조회

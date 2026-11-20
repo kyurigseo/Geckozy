@@ -1,5 +1,6 @@
 package com.likelion.backend.domain.preadoptionguide.service;
 
+import com.likelion.backend.domain.preadoptionguide.dto.response.EnvironmentCheckStartResponse;
 import com.likelion.backend.domain.preadoptionguide.dto.response.PreAdoptionGuideProgressResponse;
 import com.likelion.backend.domain.preadoptionguide.dto.response.PreAdoptionGuideResponse;
 import com.likelion.backend.domain.preadoptionguide.dto.response.PreAdoptionGuideStepCompleteResponse;
@@ -14,12 +15,14 @@ import com.likelion.backend.domain.species.repository.SpeciesRepository;
 import com.likelion.backend.domain.user.repository.UserRepository;
 import com.likelion.backend.global.exception.BusinessException;
 import com.likelion.backend.global.exception.ErrorCode;
+import com.likelion.backend.global.util.KstTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -113,14 +116,51 @@ public class PreAdoptionGuideService {
             throw new BusinessException(ErrorCode.INVALID_REQUEST);
         }
 
-        validateStepCompletable(userId, preGuideId, stepNumber);
+        validateStepCompletable(progress, userId, preGuideId, stepNumber);
 
         progress.completeStep(stepNumber);
 
         return PreAdoptionGuideStepCompleteResponse.of(progress);
     }
 
-    private void validateStepCompletable(Long userId, Long preGuideId, int stepNumber) {
+    /*
+     * 7일 환경 점검 시작
+     * - 3단계(센서 설치)를 완료해야 시작할 수 있다.
+     * - 한 번 시작하면 다시 시작할 수 없다 (진행 중이든 완료됐든 ENVIRONMENT_CHECK_ALREADY_STARTED).
+     * - 진행 상태 행을 잠근 채 처리하므로 시작 요청이 동시에 와도 하나만 시작된다.
+     */
+    @Transactional
+    public EnvironmentCheckStartResponse startEnvironmentCheck(Long userId, Long preGuideId) {
+
+        if (!userRepository.existsById(userId)) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+
+        if (!preAdoptionGuideRepository.existsById(preGuideId)) {
+            throw new BusinessException(ErrorCode.PRE_ADOPTION_GUIDE_NOT_FOUND);
+        }
+
+        // 진행 상태가 없으면 아직 아무 단계도 완료하지 않은 것
+        PreAdoptionGuideProgress progress = preAdoptionGuideProgressRepository.findForUpdate(userId, preGuideId)
+                .filter(PreAdoptionGuideProgress::canStartEnvironmentCheck)
+                .orElseThrow(() -> new BusinessException(ErrorCode.PRE_ADOPTION_STEP_NOT_COMPLETED));
+
+        if (progress.isEnvironmentCheckStarted()) {
+            throw new BusinessException(ErrorCode.ENVIRONMENT_CHECK_ALREADY_STARTED);
+        }
+
+        LocalDateTime now = KstTime.now();
+        progress.startEnvironmentCheck(now);
+
+        return EnvironmentCheckStartResponse.of(progress, now);
+    }
+
+    private void validateStepCompletable(
+            PreAdoptionGuideProgress progress,
+            Long userId,
+            Long preGuideId,
+            int stepNumber
+    ) {
 
         List<Long> requiredItemIds = checkItemRepository
                 .findAllByStep_PreAdoptionGuide_PreGuideIdAndStep_StepNumberAndRequiredTrue(preGuideId, stepNumber)
@@ -139,15 +179,9 @@ public class PreAdoptionGuideService {
             throw new BusinessException(ErrorCode.ENCLOSURE_NOT_REGISTERED);
         }
 
-        if (stepNumber == ENVIRONMENT_CHECK_STEP && !isEnvironmentCheckCompleted(userId, preGuideId)) {
+        if (stepNumber == ENVIRONMENT_CHECK_STEP && !progress.isEnvironmentCheckCompleted(KstTime.now())) {
             throw new BusinessException(ErrorCode.ENVIRONMENT_CHECK_INCOMPLETE);
         }
-    }
-
-    // TODO: 7일 환경 점검 API(점검 시작 / 진행 상태 / 중간 요약) 구현 시 실제 점검 완료 여부로 교체.
-    //       그 전까지는 점검을 시작할 방법이 없으므로 4단계는 완료할 수 없다.
-    private boolean isEnvironmentCheckCompleted(Long userId, Long preGuideId) {
-        return false;
     }
 
     // 진행 상태를 잠금 조회. 아직 없으면 (첫 조회 없이 바로 완료 요청한 경우) 생성 후 다시 잠금 조회

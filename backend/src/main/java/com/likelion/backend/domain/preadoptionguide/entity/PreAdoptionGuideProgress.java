@@ -9,6 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 @Entity
 @Table(
@@ -25,6 +26,10 @@ public class PreAdoptionGuideProgress {
     public static final int FIRST_STEP = 1;
     public static final int LAST_STEP = 5;
     public static final int NOT_COMPLETED = 0;
+
+    // 7일 환경 점검은 3단계(센서 설치) 완료 후 시작할 수 있고, 시작 후 만 7일(168시간)이 지나면 완료
+    public static final int ENVIRONMENT_CHECK_REQUIRED_STEP = 3;
+    public static final int ENVIRONMENT_CHECK_DAYS = 7;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -50,6 +55,10 @@ public class PreAdoptionGuideProgress {
     // 가이드 전체 완료 여부 (입양 전 가이드 완료 API에서 true로 변경)
     @Column(name = "completed", nullable = false)
     private boolean completed;
+
+    // 7일 환경 점검 시작 시각 (시작 전이면 null)
+    @Column(name = "environment_check_started_at")
+    private LocalDateTime environmentCheckStartedAt;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -81,5 +90,29 @@ public class PreAdoptionGuideProgress {
     public void completeStep(int stepNumber) {
         this.completedStep = stepNumber;
         this.currentStep = Math.min(stepNumber + 1, LAST_STEP);
+    }
+
+    public boolean canStartEnvironmentCheck() {
+        return completedStep >= ENVIRONMENT_CHECK_REQUIRED_STEP;
+    }
+
+    public boolean isEnvironmentCheckStarted() {
+        return environmentCheckStartedAt != null;
+    }
+
+    public void startEnvironmentCheck(LocalDateTime now) {
+        this.environmentCheckStartedAt = now;
+    }
+
+    // 시작 후 만 7일(168시간)이 지났는지
+    public boolean isEnvironmentCheckCompleted(LocalDateTime now) {
+        return isEnvironmentCheckStarted()
+                && !now.isBefore(environmentCheckStartedAt.plusDays(ENVIRONMENT_CHECK_DAYS));
+    }
+
+    // 진행 일수: 시작한 날이 1일차, 최대 7
+    public int environmentCheckElapsedDays(LocalDateTime now) {
+        long days = ChronoUnit.DAYS.between(environmentCheckStartedAt.toLocalDate(), now.toLocalDate()) + 1;
+        return (int) Math.max(1, Math.min(days, ENVIRONMENT_CHECK_DAYS));
     }
 }
