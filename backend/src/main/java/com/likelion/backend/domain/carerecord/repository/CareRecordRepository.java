@@ -19,9 +19,10 @@ public interface CareRecordRepository extends JpaRepository<CareRecord, Long> {
     // 특정 도마뱀의 기록을 날짜순으로 조회
     List<CareRecord> findAllByLizard_LizardIdOrderByRecordedAtDesc(Long lizardId);
 
-    // 기록 ID와 사용자 ID를 기준으로 본인 소유 기록인지 확인
-    Optional<CareRecord> findByRecordIdAndLizard_User_UserId(
+    // 기록 ID, 도마뱀 ID, 사용자 ID를 기준으로 본인 소유 기록인지 확인
+    Optional<CareRecord> findByRecordIdAndLizard_LizardIdAndLizard_User_UserIdAndLizard_DeletedAtIsNull(
             Long recordId,
+            Long lizardId,
             Long userId
     );
 
