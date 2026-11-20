@@ -1,6 +1,7 @@
 package com.likelion.backend.domain.preadoptionguide;
 
 import com.likelion.backend.domain.preadoptionguide.controller.PreAdoptionGuideController;
+import com.likelion.backend.domain.preadoptionguide.dto.response.PreAdoptionGuideProgressResponse;
 import com.likelion.backend.domain.preadoptionguide.dto.response.PreAdoptionGuideResponse;
 import com.likelion.backend.domain.preadoptionguide.service.PreAdoptionGuideService;
 import com.likelion.backend.global.response.ApiResponse;
@@ -44,5 +45,28 @@ class PreAdoptionGuideControllerTest {
         assertThat(response.getBody().getData().getTitle()).isEqualTo("크레스티드 게코 입양 준비");
 
         verify(preAdoptionGuideService).getGuideBySpecies(1L);
+    }
+
+    @Test
+    @DisplayName("2. 사전 입양 가이드 진행 상태 조회 응답 포맷 검증")
+    void getProgress_ReturnsSuccessResponse() {
+        PreAdoptionGuideProgressResponse mockResponse =
+                new PreAdoptionGuideProgressResponse(1L, 1L, 1, 0);
+
+        when(preAdoptionGuideService.getProgress(10L, 1L)).thenReturn(mockResponse);
+
+        ResponseEntity<ApiResponse<PreAdoptionGuideProgressResponse>> response =
+                preAdoptionGuideController.getProgress(10L, 1L);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getCode()).isEqualTo(200);
+        assertThat(response.getBody().getMessage()).isEqualTo("SUCCESS");
+        assertThat(response.getBody().getData().getProgressId()).isEqualTo(1L);
+        assertThat(response.getBody().getData().getPreGuideId()).isEqualTo(1L);
+        assertThat(response.getBody().getData().getCurrentStep()).isEqualTo(1);
+        assertThat(response.getBody().getData().getCompletedStep()).isEqualTo(0);
+
+        verify(preAdoptionGuideService).getProgress(10L, 1L);
     }
 }
