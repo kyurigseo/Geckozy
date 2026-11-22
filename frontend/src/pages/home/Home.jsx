@@ -6,7 +6,7 @@ import "./Home.scss";
 import TankPreview from "../../components/tank/TankPreview"
 
 
-import { getMyProfile, getMyTank } from "../../api/my";
+import { fetchHome } from "../../api/home";
 
 import sproutIcon from "../../assets/onboarding/icon-leaf.png";
 import leoImg from "../../assets/onboarding/gecko-yellow.png";
@@ -29,16 +29,10 @@ import buttonSrc from '../../assets/sounds/button.mp3';
 
 
 
-const TERRARIUMS = [{ id: 1, pet: "레오", name: "1번 사육장", alerts: 2 }];
-
-const ALERTS = [
-  { id: "humidity", x: 76, y: 20, bubbleSide: "left", text: "습도가 오래 유지되고 있어요!", link: "/humidity" },
-  { id: "sensor", x: 33, y: 55, bubbleSide: "right", text: "센서 연결을 확인해주세요.", link: "/my/sensor" },
-];
-
-const METRICS = [
-  { id: "temperature", label: "온도", icon: temperatureIcon, value: "24.2", unit: "°C", status: "안정", statusIcon: stateok, tone: "ok", path: "/temperature" },
-  { id: "humidity", label: "습도", icon: humidityIcon, value: "78", unit: "%", status: "확인 필요", statusIcon: statewarning, tone: "warn", path: "/humidity" },
+// 지표 카드의 아이콘·이동 경로 (값과 상태는 서버에서 받아요)
+const METRIC_META = [
+  { id: "temperature", label: "온도", icon: temperatureIcon, path: "/temperature", key: "temperature" },
+  { id: "humidity", label: "습도", icon: humidityIcon, path: "/humidity", key: "humidity" },
 ];
 
 export default function Home() {
@@ -47,25 +41,28 @@ export default function Home() {
   const [showGuide, setShowGuide] = useState(false);
   const { isSoundOn, toggleSound, playSfx } = useSound();
 
-  // 마이페이지에서 고른 프로필/사육장
-  const [profile, setProfile] = useState(null);
-  const [tank, setTank] = useState(null);
+  // 서버에서 받은 홈 데이터 (도마뱀, 사육장, 알림, 온습도, 요약, 코치)
+  const [home, setHome] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([getMyProfile(), getMyTank()]).then(([p, t]) => {
-      if (cancelled) return;
-      setProfile(p);
-      setTank(t);
-    });
+    fetchHome()
+      .then((h) => {
+        if (!cancelled) setHome(h);
+      })
+      .catch((error) => {
+        // 로그인이 풀렸으면 처음 화면으로
+        if (!cancelled && error.status === 401) navigate("/onboarding", { replace: true });
+      });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [navigate]);
 
-  const current = TERRARIUMS[0];
-  const petName = profile?.name ?? current.pet;
-  const tankName = profile?.tankName ?? current.name;
+  const petName = home?.petName ?? "";
+  const tankName = "1번 사육장"; // TODO: 서버에 사육장 이름이 없음
+  const tank = home?.tank ?? null;
+  const alerts = home?.alerts ?? [];
   const today = new Date();
   const dateStr = today.toLocaleDateString("ko-KR", {
     year: "numeric",
@@ -115,7 +112,7 @@ export default function Home() {
         <button type="button" className="selector">
           <img src={sproutIcon} alt="" />
           <span>
-            {petName} • {tankName} • <em>새 알림 {ALERTS.length}개</em>
+            {petName} • {tankName} • <em>새 알림 {alerts.length}개</em>
           </span>
           <span className="selector__arrow" aria-hidden="true"><img src={dropdownIcon} className="selector__dropdown-icon" /></span>
         </button>
@@ -139,7 +136,7 @@ export default function Home() {
                   </span>
                 </button>
 
-          {ALERTS.map((a) => {
+          {alerts.map((a) => {
               const isOpen = activePinId === a.id;
               return (
                 <div key={a.id} className="pin" style={{ left: `${a.x}%`, top: `${a.y}%` }}>
@@ -179,12 +176,22 @@ export default function Home() {
               <h3>
                 <img src={calendarIcon} alt="" /> 오늘의 사육환경
               </h3>
-              <p>온도는 비교적 일정했고, <br/>습도는 오후부터 높게 유지되고 있어요.</p>
+              <p>{home?.summary ?? "아직 오늘의 데이터가 충분하지 않아요."}</p>
             </div>
           </div>
 
           <div className="metrics">
-            {METRICS.map((m) => (
+            {METRIC_META.map((meta) => {
+              const v = home?.[meta.key];
+              const m = {
+                ...meta,
+                value: v?.value ?? "-",
+                unit: v?.unit ?? "",
+                tone: v?.tone ?? "warn",
+                status: v?.label ?? "확인 중",
+                statusIcon: v?.tone === "ok" ? stateok : statewarning,
+              };
+              return (
               <button
                 key={m.id}
                 type="button"
@@ -210,16 +217,15 @@ export default function Home() {
                   <img src={m.statusIcon} alt="" className="badge__icon" />
                   {m.status}</span>
               </button>
-            ))}
+              );
+            })}
           </div>
 
           <div className="card coach">
             <h3>
               <img src={sproutIcon} alt="" /> {petName}의 환경 코치
             </h3>
-            <p>
-              분무 이후 습도가 평소보다 오래 유지되고 있어요. 환기가 원활한지 확인해보는 것을 추천드려요!
-            </p>
+            <p>{home?.coach?.text ?? "지금은 특별히 안내할 내용이 없어요."}</p>
             <button type="button" className="coach__btn" 
       
             onClick={() => {

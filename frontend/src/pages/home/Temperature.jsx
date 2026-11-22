@@ -10,30 +10,10 @@ import docIcon from "../../assets/home/doc_icon.png";
 import stateOk from "../../assets/home/stable_icon.png";
 import closeBtn from "../../assets/home/close_btn.png";
 
-// ─────────── 임시 데이터 (연동 전) ───────────
-// TODO: 백엔드 API가 나오면 이 함수만 실제 요청으로 교체 
-// 응답 모양: { current: 현재 온도(℃), measuredAt: 마지막 측정 시각(ISO 문자열), hourly: [{ h: 시각(0~24), min, max }] }
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+import { fetchTemperature } from "../../api/climate";
 
-const fetchTemperature = async () => {
-  await delay(300);
-  return {
-    current: 24.2,
-    measuredAt: "2026-11-01T14:32:00",
-    hourly: [
-      { h: 0.75, min: 18, max: 21 },
-      { h: 2.25, min: 19, max: 22 },
-      { h: 3.75, min: 19, max: 22 },
-      { h: 5.25, min: 19, max: 22 },
-      { h: 6.75, min: 21, max: 24 },
-      { h: 8.25, min: 22, max: 25 },
-      { h: 9.75, min: 22, max: 26 },
-      { h: 11.25, min: 23, max: 26 },
-      { h: 12.75, min: 23, max: 27 },
-      { h: 14.25, min: 24, max: 27 },
-    ],
-  };
-};
+// 서버 요청이 실패하거나 센서 데이터가 없을 때 보여줄 빈 값
+const EMPTY = { current: null, measuredAt: null, hourly: [] };
 
 const OK_MIN = 22; 
 const OK_MAX = 29;
@@ -255,15 +235,41 @@ export default function Temperature() {
 
   useEffect(() => {
     let cancelled = false;
-    fetchTemperature().then((res) => {
-      if (!cancelled) setData(res);
-    });
+    fetchTemperature()
+      .then((res) => {
+        if (!cancelled) setData(res);
+      })
+      .catch(() => {
+        if (!cancelled) setData(EMPTY);
+      });
     return () => {
       cancelled = true;
     };
   }, []);
 
   if (!data) return <div className="temperature-page" />;
+
+  // 센서가 없거나 아직 측정값이 없을 때
+  if (data.current == null) {
+    return (
+      <div className="temperature-page">
+        <div className="temperature-page__scroll">
+          <header className="header">
+            <button type="button" className="header__back" onClick={() => navigate(-1)}>
+              <img src={backBtn} alt="뒤로가기" />
+            </button>
+            <h1 className="header__title">온도</h1>
+          </header>
+          <p style={{ textAlign: "center", marginTop: 80, lineHeight: 1.6 }}>
+            아직 측정된 온도가 없어요.<br />센서 연결을 확인해주세요.
+          </p>
+          <button type="button" style={{ display: "block", margin: "16px auto" }} onClick={() => navigate("/my/sensor")}>
+            센서 확인하기
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const status = getStatus(data.current);
   const guide = GUIDES[status.key];

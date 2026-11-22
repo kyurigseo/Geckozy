@@ -10,37 +10,10 @@ import closeBtn from "../../assets/home/close_btn.png";
 import humidityIcon from "../../assets/home/humid_icon.png";
 import warnIcon from "../../assets/home/warning_icon.png";
 
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+import { fetchHumidity } from "../../api/climate";
 
-const fetchHumidity = async () => {
-  await delay(300);
-  return {
-    current: 78,
-    measuredAt: "2026-11-01T14:32:00",
-    measured: [
-      { h: 0.5, v: 48 },
-      { h: 1.5, v: 41 },
-      { h: 2.5, v: 39 },
-      { h: 3.5, v: 36 },
-      { h: 4.5, v: 36 },
-      { h: 7.5, v: 63 },
-      { h: 8.7, v: 81 },
-      { h: 9.9, v: 80 },
-      { h: 11, v: 79 },
-      { h: 12.2, v: 78 },
-      { h: 13.3, v: 78 },
-      { h: 14.4, v: 78 },
-    ],
-    ideal: [
-      { h: 0, v: 55 }, { h: 2, v: 40 }, { h: 4.5, v: 33 }, { h: 6, v: 34 },
-      { h: 7.2, v: 62 }, { h: 8.3, v: 82 }, { h: 9.2, v: 80 }, { h: 11, v: 62 },
-      { h: 13, v: 45 }, { h: 15, v: 36 }, { h: 16.5, v: 35 }, { h: 17.3, v: 50 },
-      { h: 18.3, v: 78 }, { h: 19, v: 84 }, { h: 20, v: 80 }, { h: 22, v: 58 },
-      { h: 24, v: 46 },
-    ],
-    sprayZones: [[6, 9], [17, 20]],
-  };
-};
+// 서버 요청이 실패하거나 센서 데이터가 없을 때 보여줄 빈 값
+const EMPTY = { current: null, measuredAt: null, measured: [], ideal: [], sprayZones: [] };
 
 const HIGH = 70; 
 const LOW = 40; 
@@ -215,9 +188,13 @@ export default function Humidity() {
 
   useEffect(() => {
     let cancelled = false;
-    fetchHumidity().then((res) => {
-      if (!cancelled) setData(res);
-    });
+    fetchHumidity()
+      .then((res) => {
+        if (!cancelled) setData(res);
+      })
+      .catch(() => {
+        if (!cancelled) setData(EMPTY);
+      });
     return () => {
       cancelled = true;
     };
@@ -236,6 +213,28 @@ export default function Humidity() {
   }, [showWhyModal]);
 
   if (!data) return <div className="humidity-page" />;
+
+  // 센서가 없거나 아직 측정값이 없을 때
+  if (data.current == null) {
+    return (
+      <div className="humidity-page">
+        <div className="humidity-page__scroll">
+          <header className="header">
+            <button type="button" className="header__back" onClick={() => navigate(-1)}>
+              <img src={backBtn} alt="뒤로가기" />
+            </button>
+            <h1 className="header__title">습도</h1>
+          </header>
+          <p style={{ textAlign: "center", marginTop: 80, lineHeight: 1.6 }}>
+            아직 측정된 습도가 없어요.<br />센서 연결을 확인해주세요.
+          </p>
+          <button type="button" style={{ display: "block", margin: "16px auto" }} onClick={() => navigate("/my/sensor")}>
+            센서 확인하기
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const status = getStatus(data.current, data.measured);
   const guide = GUIDES[status.key];
