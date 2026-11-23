@@ -185,4 +185,22 @@ public class CareRecordController {
                 )
         );
     }
+
+    // REC-20. 사육 기록 삭제
+    @DeleteMapping("/{recordId}")
+    public ResponseEntity<ApiResponse<Void>> deleteRecord(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable Long lizardId,
+            @PathVariable Long recordId
+    ) {
+        careRecordService.deleteRecord(
+                userId,
+                lizardId,
+                recordId
+        );
+
+        return ResponseEntity.ok(
+                ApiResponse.success(null)
+        );
+    }
 }
