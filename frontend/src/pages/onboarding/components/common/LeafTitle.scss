@@ -1,0 +1,16 @@
+@use '../../variables' as *;
+@use '../../mixins' as *;
+
+.leaf-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  @include text-pixel-xl;
+  color: $color-main-outline;
+
+  img {
+    width: 29px;
+    height: 20px;
+  }
+}

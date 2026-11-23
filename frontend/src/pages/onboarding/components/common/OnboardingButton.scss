@@ -1,0 +1,109 @@
+@use '../../variables' as *;
+@use '../../mixins' as *;
+
+.onboarding-button {
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+// 픽셀 버튼 (피그마 Button 320x62)
+// 레이어: 바깥 테두리(버튼) → 브라운3 띠(::before) → 브라운2 테두리(::after) → 베이지3 면(label)
+.onboarding-button-primary {
+  position: relative;
+  width: 100%;
+  height: 62px;
+  background-color: $color-main-outline;
+  @include pixel-corners((13.67px 8.2px 5.47px 2.74px 0px), (0px 2.39px 4.77px 7.15px 9.54px));
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+  }
+
+  &::before {
+    inset: 2.39px 2.74px;
+    background-color: $color-main-brown-3;
+    @include pixel-corners((10.93px 5.47px 2.74px 0px), (0px 2.38px 4.76px 7.15px));
+  }
+
+  &::after {
+    top: 5.29px;
+    right: 7.81px;
+    bottom: 5.65px;
+    left: 7.31px;
+    background-color: $color-main-brown-2;
+    @include pixel-corners((13.03px 7.81px 5.21px 2.61px 0px), (0px 1.97px 3.92px 5.89px 7.86px));
+  }
+
+  .onboarding-button-label {
+    position: absolute;
+    top: 7.26px;
+    right: 10.42px;
+    bottom: 7.61px;
+    left: 9.92px;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: $color-main-beige-3;
+    box-shadow: inset -10px -10px 0 $color-button-shadow;
+    @include pixel-corners((10.42px 5.2px 2.6px 0px), (0px 1.95px 3.92px 5.89px));
+
+    @include text-pixel-xl;
+    color: $color-main-outline;
+  }
+}
+
+// 작은 픽셀 버튼 (피그마 131x39). 계단 모서리를 가로 0.411배, 세로 0.632배로 줄인 값
+.onboarding-button-primary.onboarding-button-s {
+  height: 39px;
+  @include pixel-corners((5.62px 3.37px 2.25px 1.13px 0px), (0px 1.51px 3.01px 4.52px 6.03px));
+
+  &::before {
+    inset: 1.51px 1.12px;
+    @include pixel-corners((4.49px 2.25px 1.13px 0px), (0px 1.5px 3.01px 4.52px));
+  }
+
+  &::after {
+    top: 3.34px;
+    right: 3.21px;
+    bottom: 3.57px;
+    left: 3px;
+    @include pixel-corners((5.36px 3.21px 2.14px 1.07px 0px), (0px 1.25px 2.48px 3.72px 4.97px));
+  }
+
+  .onboarding-button-label {
+    top: 4.59px;
+    right: 4.28px;
+    bottom: 4.81px;
+    left: 4.08px;
+    box-shadow: inset -6px -6px 0 $color-button-shadow;
+    @include pixel-corners((4.28px 2.14px 1.07px 0px), (0px 1.23px 2.48px 3.72px));
+    @include text-pixel-l;
+  }
+}
+
+// 작은 채움 버튼 (회원가입 '중복확인')
+.onboarding-button-filled {
+  flex-shrink: 0;
+  height: 51px;
+  padding: 0 28px;
+  border-radius: 10px;
+  background-color: $color-sub-beige-2;
+  @include text-body-m-medium-bold;
+  color: $color-white;
+  white-space: nowrap;
+}
+
+// 텍스트 링크형 버튼 (진입화면 '이메일 찾기 | 비밀번호 찾기 | 회원가입')
+.onboarding-button-text {
+  @include text-link;
+  color: $color-gray-800;
+}

@@ -1,0 +1,520 @@
+$bg-cream: #FFFDF8;
+$text-brown: #5B3524; //
+$accent-green: #5B911C; //
+$light-green: #E8F3DF;
+$orange-border: #FFD2A6;
+$orange-bg: #FFF8F0;
+
+$font-pixel: "yoon-px-pixman", sans-serif;
+$font-katuri: "andong-katuri", sans-serif;
+$font-mamablock: "mamablock-210", sans-serif;
+
+
+.record-form-page {
+  position: relative;
+  width: 100%;
+  max-width: 430px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background-color: $bg-cream;
+  color: $text-brown;
+  padding-bottom: 60px;
+  box-sizing: border-box;
+
+  background-image: url('../../assets/record/bg_pattern.png');
+  background-size: cover;
+  background-position: top center;
+  background-repeat: no-repeat;
+
+  .bg-decoration {
+    display: none;
+  }
+
+  .record-form-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 16px;
+
+    .back-btn {
+      position: absolute;
+      left: 16px;
+      width: 32px;
+      height: 32px;
+      border-radius: 16px;
+      background: #FFECCB;
+      border: 2px solid #FFDCB9;
+      font-size: 20px;
+      color: #B47952;
+      font-size: 30px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-bottom: 2px;
+    }
+
+    .title {
+      font-size: 20px;
+      font-weight: 600;
+    }
+  }
+
+  .record-form-body {
+    padding: 0 20px;
+  }
+}
+
+.form-section {
+  margin-bottom: 24px;
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 20px;
+    font-weight: 400;
+    margin-bottom: 14px;
+    font-family: $font-pixel;
+    letter-spacing: -0.02em;
+    line-height: 1.5;
+
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 27px;
+      height: 27px;
+      background: $light-green;
+      border: 1.5px solid $accent-green;
+      border-radius: 6px;
+      font-size: 12px;
+      color: $text-brown;
+      margin-left: 22px;
+    }
+  }
+}
+
+.options-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  margin-left: 29px;
+  margin-bottom: 30px;
+
+  &.grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .option-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+
+    input { display: none; }
+
+    .radio-circle {
+      width: 18px;
+      height: 18px;
+      border: 2px solid $accent-green;
+      border-radius: 50%;
+      background: #fff;
+      position: relative;
+      box-sizing: border-box;
+    }
+
+    &.is-checked .radio-circle::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 8px;
+      height: 8px;
+      background: $accent-green;
+      border-radius: 50%;
+    }
+  }
+}
+
+.input-custom-orange {
+  margin-top: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  background: $orange-bg;
+  border: 1px solid $orange-border;
+  border-radius: 10px;
+  font-size: 13px;
+  outline: none;
+  color: $text-brown;
+  box-sizing: border-box;
+
+  &::placeholder { color: #FFC58D; }
+}
+
+.weight-input-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: $orange-bg;
+  border: 1px solid $orange-border;
+  padding: 8px 16px;
+  border-radius: 10px;
+
+  input {
+    width: 50px;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    text-align: center;
+    outline: none;
+    color: #FFB380;
+  }
+
+  .unit {
+    font-size: 13px;
+    color: #FFB380;
+  }
+}
+
+.time-select-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: $orange-bg;
+  border: 1px solid $orange-border;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #FFB380;
+}
+
+.memo-section {
+  .memo-label {
+    display: block;
+    font-size: 15px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    color: #5B3524;
+    margin-left: 37px;
+  }
+
+  .textarea-wrapper {
+    position: relative;
+    border: 1px solid #FFDCB9;
+    border-radius: 12px;
+    padding: 12px;
+    background: #FFFFFF;
+    width: 350px;
+    height: 137px;
+    margin-left: 22px;
+
+
+    textarea {
+      width: 100%;
+      height: 90px;
+      border: none;
+      resize: none;
+      outline: none;
+      font-size: 13px;
+      color: $text-brown;
+
+      &::placeholder { 
+        color: #D9D2D4;
+        font-weight: 400;
+        font-size: 14px;
+        font-family: Pretendard;
+     }
+    }
+
+    .char-count {
+      position: absolute;
+      bottom: 10px;
+      right: 12px;
+      font-size: 12px;
+      color: #FFC093;
+    }
+  }
+}
+
+.photo-section {
+    .photo-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #5B3524;   
+    line-height: 1.3;
+    margin: 0 0 0 22px !important;
+  }
+
+  .photo-sub {
+    font-size: 14px;
+    font-weight: 500;
+    color: #A89EA1;     
+    line-height: 1.4;
+    margin: 0 0 10px 22px !important; 
+  }
+
+
+  .photo-grid {
+    display: flex;
+    gap: 19px;
+    margin-left: 22px;
+    margin-bottom: 35px;
+
+    .photo-btn-img {
+      background: #E8F6CA;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      width: 104px;
+      height: 104px;
+      border: 1.5px dashed #5B911C;
+      border-radius: 12px;
+      box-sizing: border-box;
+      padding: 0;
+
+      .icon-cam, img { 
+        width: 46px; 
+        height: 37px; 
+        object-fit: contain;
+      }
+    }
+    .photo-placeholder-img {
+      background: #F0EDEE;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 104px;
+      height: 104px;
+      border: 1px dashed #D9D2D4;
+      border-radius: 12px;
+      box-sizing: border-box;
+
+      img {
+        width: 30px;
+        height: 25px;
+        object-fit: contain;
+        opacity: 0.4; /* 아이콘 연하게 */
+      }
+    }
+  }
+}
+.submit-area {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+
+  .submit-btn-img {
+    position: relative;        
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    width: 130px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      z-index: 0;
+    }
+
+    .btn-text {
+      position: relative;
+      z-index: 1;                
+      font-size: 15px;
+      font-weight: 400;
+      color: #492515;            
+      pointer-events: none;
+      font-family: $font-pixel;
+    }
+  }
+}
+.picker-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: flex-end;
+  z-index: 1000;
+
+  .picker-modal {
+    width: 100%;
+    background: #FDF7EE;
+    border-radius: 40px 40px 0 0;
+    padding: 20px 20px 32px;
+    box-sizing: border-box;
+    border-style: solid;
+    border-color: #5B3524;
+    border-width: 3px 0px 0px 0px; 
+    position: relative; /* absolute 대신 relative 적용으로 내부 스크롤 안전성 확보 */
+
+    .picker-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+
+      h3 { 
+        font-size: 20px; 
+        font-weight: 400;
+        font-family: $font-pixel;
+        color: #5B3524;
+      }
+      .close-btn {
+        background: #FFECCB;
+        border: 2px solid #FFDCB9;
+        width: 32px;
+        height: 32px;
+        border-radius: 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        img {
+          width: 10px;
+          height: 10px;
+        }
+      }
+    }
+
+    /* 휠 피커 전체 컨테이너 */
+    .picker-wheels {
+      position: relative !important;
+      display: flex !important;
+      justify-content: space-around !important;
+      height: 220px !important; /* 44px * 5개 항목 높이 */
+      margin: 16px 0 24px !important;
+      overflow: hidden !important;
+
+      /* 중앙 구분선 2줄 */
+      .picker-selection-highlight {
+        position: absolute !important;
+        top: 50% !important;
+        left: 10px !important;
+        right: 10px !important;
+        height: 44px !important;
+        transform: translateY(-50%) !important;
+        border-top: 1px solid #E0D7C6 !important;
+        border-bottom: 1px solid #E0D7C6 !important;
+        pointer-events: none !important;
+        z-index: 1 !important;
+      }
+
+      .wheel-column {
+        flex: 1 !important;
+        height: 100% !important;
+        position: relative !important;
+        z-index: 2 !important;
+      }
+
+      .picker-wheel {
+        height: 100% !important;
+        overflow-y: scroll !important;
+        scroll-snap-type: y mandatory !important;
+        scrollbar-width: none !important;
+
+        &::-webkit-scrollbar {
+          display: none !important;
+        }
+
+        /* 휠 중앙 조절용 상하 공간 */
+        .picker-padding {
+          height: 88px !important; /* 44px * 2 */
+          flex-shrink: 0;
+        }
+
+        /* 휠 아이템 텍스트 상세 설정 */
+        .wheel-item {
+          height: 44px !important;
+          line-height: 44px !important;
+          text-align: center !important;
+          box-sizing: border-box !important;
+          font-family: sans-serif;
+          transition: color 0.15s ease, opacity 0.15s ease;
+
+          /* 중앙 활성화 텍스트 (진한 검정) */
+          &.active {
+            color: #000000 !important;
+            font-size: 22px !important;
+            font-weight: 700 !important;
+            opacity: 1 !important;
+          }
+
+          /* 바로 위/아래 1단계 텍스트 */
+          &.dim1 {
+            color: #9C9081 !important;
+            font-size: 20px !important;
+            font-weight: 400 !important;
+            opacity: 0.85 !important;
+          }
+
+          /* 2단계 위/아래 텍스트 */
+          &.dim2 {
+            color: #CFC8BC !important;
+            font-size: 19px !important;
+            font-weight: 300 !important;
+            opacity: 0.6 !important;
+          }
+
+          /* 기타 영역 */
+          &.hidden {
+            opacity: 0.2 !important;
+            color: #E2DDD5 !important;
+          }
+        }
+      }
+    }
+
+    .picker-confirm-btn-img {
+      position: relative;
+      width: 162px;
+      height: 54px;
+      background: transparent;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto; /* 중앙 정렬 */
+
+      img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        z-index: 1;
+      }
+
+      .btn-text,
+      span {
+        position: relative;
+        z-index: 2;
+        font-size: 20px;
+        font-weight: 400;
+        color: #5B3524;     
+        line-height: 1;
+        pointer-events: none;
+        font-family: $font-pixel;
+      }
+    }
+  }
+}

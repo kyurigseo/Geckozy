@@ -1,0 +1,80 @@
+import { Routes, Route } from "react-router-dom";
+
+import Layout from "./components/layout/Layout";
+import Onboarding from "./pages/onboarding/Onboarding";
+import MyPage from "./pages/my/MyPage";
+import MyGeckoCustom from "./pages/my/components/screens/GeckoCustom";
+import MyTankCustom from "./pages/my/components/screens/TankCustom";
+import LizardManage from './pages/my/components/screens/LizardManage'
+import Scrap from './pages/my/components/screens/Scrap'
+import SensorManage from './pages/my/components/screens/SensorManage'
+
+
+
+import Guide from "./pages/Guide/Guide";
+import LizardInfo from "./pages/Guide/LizardInfo";
+import Loading from "./pages/Guide/Loading";
+import Step1 from "./pages/Guide/Step1";
+import EnclosureCheck from "./pages/Guide/EnclosureCheck";
+import Step2 from "./pages/Guide/Step2";
+import Step3 from "./pages/Guide/Step3";
+import Step4 from "./pages/Guide/Step4";
+import Step5 from "./pages/Guide/Step5";
+import LoadingFin from "./pages/Guide/Loading_fin";
+
+import Home from "./pages/home/Home";
+import Temperature from "./pages/home/Temperature";
+import Humidity from "./pages/home/Humidity";
+
+import Record from "./pages/record/Record";
+import RecordForm from "./pages/record/RecordForm"; 
+import RecordSaved from './pages/record/RecordSaved';
+import RecordList from './pages/record/RecordList';
+
+
+
+
+function App() {
+  return (
+    <div className="app">
+      <Routes>
+        <Route path="/onboarding" element={<Onboarding />} />
+        <Route path="/my/gecko-custom" element={<MyGeckoCustom />} />
+        <Route path="/my/tank-custom" element={<MyTankCustom />} />
+        <Route path="/my/lizard-manage" element={<LizardManage />} />
+        <Route path="/my/scrap" element={<Scrap />} />
+        <Route path="/my/sensor" element={<SensorManage />} />
+
+        <Route path="/lizard-info" element={<LizardInfo />} />
+        <Route path="/loading" element={<Loading />} />
+        <Route path="/guide/enclosure-check" element={<EnclosureCheck />} />
+        <Route path="/loading-fin" element={<LoadingFin />} />
+
+        <Route path="/record/new/:type" element={<RecordForm />} />
+
+        <Route element={<Layout />}>
+          <Route path="/my" element={<MyPage />} />
+          <Route path="/guide" element={<Guide />} />
+          <Route path="/guide/step1" element={<Step1 />} />
+          <Route path="/guide/step2" element={<Step2 />} />
+          <Route path="/guide/step3" element={<Step3 />} />
+          <Route path="/guide/step4" element={<Step4 />} />
+          <Route path="/guide/step5" element={<Step5 />} />
+
+          <Route path="/" element={<Home />} />
+          <Route path="/temperature" element={<Temperature />} />
+          <Route path="/humidity" element={<Humidity />} />
+
+          <Route path="/record" element={<Record />} />
+          <Route path="/record/saved" element={<RecordSaved />} />
+          <Route path="/record/list" element={<RecordList />} />
+
+
+          <Route path="*" element={null} />
+        </Route>
+      </Routes>
+    </div>
+  );
+}
+
+export default App;

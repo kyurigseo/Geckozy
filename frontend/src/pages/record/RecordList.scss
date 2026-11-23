@@ -1,0 +1,284 @@
+$font-pixel: "yoon-px-pixman", sans-serif;
+$font-katuri: "andong-katuri", sans-serif;
+$font-mamablock: "mamablock-210", sans-serif;
+
+.record-list-page {
+  width: 100%;
+  height: 100vh; /* 🎯 height: auto 대신 100vh로 고정 */
+  overflow-y: auto; /* 🎯 scroll 대신 auto 권장 */
+  -webkit-overflow-scrolling: touch; 
+  background-color: #FDF7EE;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 40px;
+  -ms-overflow-style: none; /* IE, Edge */
+  scrollbar-width: none; /* Firefox */
+
+  &::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+
+  &.is-editing-mode {
+    padding-bottom: 90px; 
+  }
+
+
+
+  .list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+
+    .header-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #492515;
+      letter-spacing: -0.02em;
+    }
+
+    .header-btn {
+      width: 32px;
+      height: 32px;
+      background: none;
+      border: 2px solid #FFDCB9;
+      border-radius: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #FFECCB;
+
+      img {
+        width: 10px;
+        height: 10px;
+        object-fit: contain;
+      }
+    }
+  }
+
+  /* 메인 타임라인 영역 */
+  .list-content {
+    flex: 1;
+    padding: 10px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: relative;
+  }
+
+  .timeline-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+
+    /* 타임라인 점선 연결 (마지막 요소 제외) */
+    &:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 20px; /* 뱃지 중앙 좌표 */
+      top: 44px;
+      bottom: -20px;
+      width: 2px;
+      border-left: 2px dotted #C7BBA5;
+      z-index: 0;
+    }
+
+    .date-badge {
+  position: relative;
+  z-index: 1;
+  width: 40px;  
+  height: 51px; 
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .badge-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    z-index: 1;
+  }
+
+  .badge-text {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-weight: 400;
+    font-family: $font-pixel;
+    font-size: 20;
+
+    .date-num {
+      line-height: 1.1;
+      letter-spacing: 0.15em;
+    }
+
+    .date-day {
+      line-height: 1.1;
+      letter-spacing: 0.15em;
+    }
+  
+  }
+  &.green {
+        .badge-text {
+          color: #5B911C; 
+        }
+      }
+
+      &.orange {
+        .badge-text {
+          color: #B47952; 
+        }
+      }
+}
+
+    /* 우측 기록 정보 카드 */
+    .record-card {
+      position: relative;
+      flex: 1;
+      border-radius: 10px;
+      padding: 12px 14px;
+      width: 294px;
+      height: 88px;
+      border: 1px solid #FFDCB9;
+
+      .card-delete-btn {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        width: 26px;
+        height: 26px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        z-index: 2;
+
+        img {
+          width: 24px;
+          height: 24px;
+          object-fit: contain;
+        }
+      }
+
+      .card-main {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .card-info {
+        flex: 1;
+        overflow: hidden;
+
+        .type-row {
+  display: flex;
+  align-items: center; /* 아이콘과 텍스트 영역 세로 중앙 정렬 */
+  gap: 10px; /* 아이콘과 텍스트 사이 간격 */
+
+  .type-icon {
+    width: 36px;  /* 디자인에 맞게 아이콘 크기 조절 */
+    height: 36px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+
+      .type-text-wrap {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+
+        .type-name {
+          font-size: 15px;
+          font-weight: 400;
+          color: #5B3524;
+          letter-spacing: -0.02em;
+          font-family: $font-pixel;
+          line-height: 1.5;
+        }
+
+        .time-text {
+          font-size: 10px;
+          color: #7B7578;
+          letter-spacing: -0.02em;
+          line-height: 1.5;
+        }
+      }
+    }
+
+        .record-text {
+          font-size: 12px;
+          color: #5B3524;
+          font-weight: 500;
+          letter-spacing: -0.02em;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+
+      .record-img {
+        width: 60px;
+        height: 60px;
+        border-radius: 10px;
+        object-fit: cover;
+      }
+    }
+  }
+
+  .finish-btn-wrapper {
+  position: relative;
+  margin: 32px auto 0; 
+  width: 162px; 
+  height: 55px; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .finish-btn-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 162px; 
+    height: 55px;
+    object-fit: contain;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .finish-btn {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    
+    padding: 0;
+    margin: 0;
+    line-height: 1;
+    
+    font-family: $font-pixel;
+    font-size: 20px;
+    font-weight: 400;
+    color: #5B3524;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 15px;
+    
+
+  }
+}
+}

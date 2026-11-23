@@ -1,0 +1,68 @@
+@use '../../variables' as *;
+@use '../../mixins' as *;
+
+.bottom-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+}
+
+.bottom-sheet-dim {
+  position: absolute;
+  inset: 0;
+  background-color: $color-dim;
+}
+
+// 피그마 바텀시트 (393 폭, 위쪽 모서리 40, 테두리 3)
+.bottom-sheet-panel {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: min(#{$frame-width}, 100%);
+  padding-bottom: 38px;
+  border: 3px solid $color-main-outline;
+  border-bottom: none;
+  border-radius: 40px 40px 0 0;
+  background-color: $color-main-beige-4;
+  box-shadow: 0 -5px 0 $color-panel-shadow;
+  transform: translateX(-50%);
+}
+
+.bottom-sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 20px 18px 0 19px; // 테두리 3 제외하고 top 23, left 22
+}
+
+.bottom-sheet-title {
+  margin: 0;
+  @include text-pixel-xl;
+  color: $color-main-outline;
+}
+
+.bottom-sheet-close {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+
+  img {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+// 확인 버튼 162x54
+.bottom-sheet-confirm {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+
+  .onboarding-button-primary {
+    width: 162px;
+    height: 54px;
+  }
+}

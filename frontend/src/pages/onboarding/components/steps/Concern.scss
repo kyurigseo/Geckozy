@@ -1,0 +1,82 @@
+@use '../../variables' as *;
+@use '../../mixins' as *;
+
+// 피그마 '고민'. 공통 틀은 common/QuestionLayout (내용 시작 top 236)
+.concern .question-layout-body {
+  margin-top: 54px;
+}
+
+// 칩 (간격 가로 5, 세로 11)
+.concern-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 11px 5px;
+}
+
+.concern-chip {
+  padding: 5px 12px;
+  border: 1px solid $color-main-beige;
+  border-radius: 100px;
+  background-color: $color-white;
+  cursor: pointer;
+  @include text-body-m-medium;
+  color: $color-main-brown;
+
+  &.selected {
+    padding: 4.5px 11.5px; // 테두리 1.5px이 돼도 크기 유지
+    border: 1.5px solid $color-sub-beige;
+    background-color: $color-main-beige-2;
+    @include text-body-m-medium-bold;
+  }
+}
+
+// 자유 입력 (안내 문구 top 344 left 36, 칸 top 371 left 20, 350x137)
+.concern-memo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 26px;
+}
+
+.concern-memo-label {
+  margin-left: 14px;
+  @include text-body-m-medium;
+  color: $color-main-outline;
+}
+
+.concern-memo-box {
+  position: relative;
+  display: block;
+  width: 350px;
+  max-width: calc(100% + 2px);
+  height: 137px;
+  margin-left: -2px;
+  padding: 13px 8px 10px 14px;
+  border: 1px solid $color-main-beige-3;
+  border-radius: 10px;
+  background-color: $color-white;
+}
+
+.concern-memo-field {
+  width: 100%;
+  height: 90px;
+  padding: 0;
+  border: none;
+  outline: none;
+  background: none;
+  resize: none;
+  @include text-body-s;
+  color: $color-main-outline;
+
+  &::placeholder {
+    color: $color-gray-200;
+  }
+}
+
+.concern-memo-count {
+  position: absolute;
+  right: 13px;
+  bottom: 10px;
+  @include text-body-s;
+  color: $color-sub-beige;
+}
