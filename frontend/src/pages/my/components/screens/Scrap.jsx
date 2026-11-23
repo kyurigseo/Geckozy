@@ -1,3 +1,5 @@
+import GuidePopup from '../../../home/GuidePopup'
+import { VENTILATION_GUIDEBOOK_ID } from '../../../../api/myManage'
 import {
   useCallback,
   useEffect,
@@ -162,12 +164,20 @@ const Scrap = () => {
       </main>
 
       {openPopup && (
-        <ScrapGuidePopup
-          key={openPopup.guidebookId}
-          guidebook={openPopup}
-          onClose={closePopup}
-          onScrapChange={handleScrapChange}
-        />
+        openPopup.guidebookId === VENTILATION_GUIDEBOOK_ID ? (
+          <GuidePopup
+            initialScrapped
+            onClose={closePopup}
+            onScrapChange={handleScrapChange}
+          />
+        ) : (
+          <ScrapGuidePopup
+            key={openPopup.guidebookId}
+            guidebook={openPopup}
+            onClose={closePopup}
+            onScrapChange={handleScrapChange}
+          />
+        )
       )}
     </div>
   )

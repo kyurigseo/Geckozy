@@ -42,7 +42,12 @@ const SensorManage = () => {
       .then((items) => {
         if (controller.signal.aborted) return
 
-        setSensors(items)
+        setSensors((current) => [
+          ...items.filter((item) => !current.some(
+            (sensor) => String(sensor.enclosureId) === String(item.enclosureId),
+          )),
+          ...current,
+        ])
         setError('')
       })
       .catch((error) => {

@@ -1,7 +1,6 @@
 import { getSpecies, getSpeciesGuide, getGuideProgress, getGuideStep, loadGuideAccountContext, saveGuideContext } from '../../api/guide'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { toSpeciesId } from '../../api/species'
 
 import board from '../../assets/guide/나무판자.svg'
 import leaf from '../../assets/guide/나뭇잎.svg'
@@ -16,6 +15,12 @@ import complete from '../../assets/guide/완료버튼.svg'
 import './LizardInfo.scss'
 import { useSound } from '../../sound/SoundProvider'
 
+const GUIDE_SPECIES_NAMES = [
+  '크레스티드 게코',
+  '레오파드 게코',
+  '비어디드 드래곤',
+]
+
 const LizardInfo = ({ step, onClose }) => {
   const navigate = useNavigate()
   const { playSfx } = useSound()
@@ -24,17 +29,7 @@ const LizardInfo = ({ step, onClose }) => {
   const [sizeUnknown, setSizeUnknown] = useState(false)
   const [adoptionDateValue, setAdoptionDateValue] = useState('')
 
-  const [species, setSpecies] = useState(
-    [
-      '크레스티드 게코',
-      '레오파드 게코',
-      '비어디드 드래곤',
-    ].map((name) => ({
-      name,
-      speciesId: toSpeciesId(name),
-    })),
-  )
-
+  const [species, setSpecies] = useState([])
   const [speciesId, setSpeciesId] = useState('')
   const [sizeCm, setSizeCm] = useState('')
   const [weightG, setWeightG] = useState('')
@@ -42,6 +37,18 @@ const LizardInfo = ({ step, onClose }) => {
 
   useEffect(() => {
     const controller = new AbortController()
+
+    getSpecies(controller.signal)
+      .then((items) => {
+        if (controller.signal.aborted) return
+
+        setSpecies(
+          GUIDE_SPECIES_NAMES.map((name) =>
+            items.find((item) => item.name === name),
+          ).filter(Boolean),
+        )
+      })
+      .catch(() => {})
 
     loadGuideAccountContext(controller.signal)
       .then(({ lizard }) => {

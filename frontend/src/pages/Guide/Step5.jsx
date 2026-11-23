@@ -22,7 +22,7 @@ const Step5 = () => {
     checked,
     handleCheck,
     isAllChecked,
-    finish,
+    run,
   } = useGuideStep(5, 8)
 
   const handleBack = () => {
@@ -38,7 +38,7 @@ const Step5 = () => {
   const handleComplete = () => {
     playSfx('button')
 
-    finish(async () => {
+    run(async () => {
       const result = await completeGuide()
 
       if (!result.completed) {

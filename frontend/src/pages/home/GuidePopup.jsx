@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { VENTILATION_GUIDEBOOK_ID, changeScrap, getMyScraps } from "../../api/myManage";
 import "./GuidePopup.scss";
 
 import closeImg from "../../assets/home/close.png";
@@ -57,6 +58,11 @@ const PAGES = [
 ];
 
 const LAST = PAGES.length - 1;
+
+async function getVentilationScrapStatus(signal) {
+  const scraps = await getMyScraps(signal);
+  return scraps.some(({ guidebookId }) => guidebookId === VENTILATION_GUIDEBOOK_ID);
+}
 
 function PageBody({ page, scrapped, onScrap }) {
   const heading = (
@@ -128,10 +134,46 @@ function PageBody({ page, scrapped, onScrap }) {
 }
 
 
-export default function GuidePopup({ onClose, initialScrapped = false }) {
+export default function GuidePopup({ onClose, initialScrapped = false, onScrapChange }) {
   const [page, setPage] = useState(0);
-  const [scrapped, setScrapped] = useState(initialScrapped); // TODO: 서버/로컬 저장소와 연결
+  const [scrapped, setScrapped] = useState(initialScrapped);
   const panelRef = useRef(null);
+  const scrapStatus = useRef(null);
+  const savingScrap = useRef(false);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const status = getVentilationScrapStatus(controller.signal);
+    scrapStatus.current = status;
+    status.then((value) => {
+      if (!controller.signal.aborted) setScrapped(value);
+    }).catch(() => {
+      if (!controller.signal.aborted) scrapStatus.current = null;
+    });
+
+    return () => controller.abort();
+  }, []);
+
+  const toggleScrap = async () => {
+    if (savingScrap.current) return;
+    savingScrap.current = true;
+
+    try {
+      const current = await (scrapStatus.current ?? getVentilationScrapStatus());
+      const result = await changeScrap(VENTILATION_GUIDEBOOK_ID, !current);
+      if (typeof result?.scrapped === "boolean") {
+        scrapStatus.current = Promise.resolve(result.scrapped);
+        setScrapped(result.scrapped);
+        onScrapChange?.(result);
+      } else {
+        scrapStatus.current = null;
+      }
+    } catch {
+      scrapStatus.current = null;
+    } finally {
+      savingScrap.current = false;
+    }
+  };
 
   const prev = () => setPage((p) => Math.max(0, p - 1));
   const next = () => setPage((p) => Math.min(LAST, p + 1));
@@ -186,7 +228,7 @@ export default function GuidePopup({ onClose, initialScrapped = false }) {
         </h2>
 
         <div className="guide-popup__page" key={page}>
-          <PageBody page={PAGES[page]} scrapped={scrapped} onScrap={() => setScrapped((v) => !v)} />
+          <PageBody page={PAGES[page]} scrapped={scrapped} onScrap={toggleScrap} />
         </div>
 
         <footer className="guide-popup__pager">

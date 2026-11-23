@@ -225,6 +225,8 @@ export async function getManagedProfile(signal) {
 }
 
 // 스크랩
+export const VENTILATION_GUIDEBOOK_ID = 1
+
 export async function getMyScraps(signal) {
   const data = await myRequest(
     '/guidebooks/scraps',
@@ -253,28 +255,31 @@ export const changeScrap = (id, value) =>
   )
 
 // 센서
-export function getMyEnclosures() {
-  const context = getGuideContext()
+async function getMyEnclosure(lizard, index, signal) {
+  try {
+    const { enclosureId } = await myRequest(
+      `/enclosures?lizardId=${encodeURIComponent(lizard.lizardId)}`,
+      { signal },
+    )
 
-  if (
-    Array.isArray(context.enclosures) &&
-    context.enclosures.length
-  ) {
-    return context.enclosures
+    return {
+      enclosureId,
+      name: `${index + 1}번 사육장`,
+    }
+  } catch (error) {
+    if (error.code === 'ENCLOSURE_NOT_FOUND') {
+      return null
+    }
+
+    throw error
   }
-
-  return context.enclosureId
-    ? [
-        {
-          enclosureId: context.enclosureId,
-          name: context.tankName || '선택한 사육장',
-        },
-      ]
-    : []
 }
 
 export async function getMySensors(signal) {
-  const enclosures = getMyEnclosures()
+  const lizards = await getGuideLizards(signal)
+  const enclosures = (await Promise.all(
+    lizards.map((lizard, index) => getMyEnclosure(lizard, index, signal)),
+  )).filter(Boolean)
 
   if (!enclosures.length) {
     throw new Error(
@@ -319,14 +324,17 @@ export async function getMySensors(signal) {
 export async function connectMySensor(
   deviceIdentifier,
 ) {
-  const { enclosureId } = getGuideContext()
+  const lizards = await getGuideLizards()
+  const selected = getSelectedLizard(lizards)
+  const tank = selected && await getMyEnclosure(selected, lizards.indexOf(selected))
 
-  if (!enclosureId) {
+  if (!tank) {
     throw new Error(
       '연결할 사육장을 먼저 선택해주세요.',
     )
   }
 
+  const { enclosureId } = tank
   const data = await myRequest(
     `/enclosures/${encodeURIComponent(enclosureId)}/sensor`,
     {
@@ -343,16 +351,10 @@ export async function connectMySensor(
     )
   }
 
-  const tank = getMyEnclosures().find(
-    (item) =>
-      String(item.enclosureId) ===
-      String(enclosureId),
-  )
-
   return {
     ...data,
     enclosureId,
-    tank: tank?.name || '선택한 사육장',
+    tank: tank.name,
   }
 }
 

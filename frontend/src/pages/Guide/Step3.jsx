@@ -28,7 +28,7 @@ const Step3 = () => {
     handleCheck,
     finish,
     busy,
-  } = useGuideStep(3, 4)
+  } = useGuideStep(3, 4, { localChecklist: true })
 
   const [sensor, setSensor] = useState(null)
   const isSensorConnected = sensor?.status === 'CONNECTED'

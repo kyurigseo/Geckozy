@@ -7,43 +7,43 @@ import {
   saveGuideContext,
 } from '../../api/guide'
 
-export default function useGuideStep(step, count = 0) {
+export default function useGuideStep(
+  step,
+  count = 0,
+  { localChecklist = false } = {},
+) {
   const [data, setData] = useState(null)
   const [busy, setBusy] = useState(false)
   const lock = useRef(false)
 
   const localMode =
     getGuideContext().guideMode === 'static'
+  const storeChecksLocally = localMode || localChecklist
 
   useEffect(() => {
     const controller = new AbortController()
 
     Promise.resolve()
-      .then(() => {
-        // API 없이 이용하는 기본 가이드
-        if (localMode) {
-          const saved =
-            getGuideContext().localChecks?.[step] || []
-
-          return {
-            checkItems: Array.from(
-              { length: count },
-              (_, index) => ({
-                itemOrder: index + 1,
-                checked: Boolean(saved[index]),
-              }),
-            ),
-          }
-        }
-
-        return getGuideStep(step, controller.signal)
-      })
+      .then(() =>
+        localMode ? null : getGuideStep(step, controller.signal),
+      )
       .then((result) => {
         if (controller.signal.aborted) return
 
-        const checkItems = [...result.checkItems].sort(
-          (a, b) => a.itemOrder - b.itemOrder,
-        )
+        let checkItems
+        if (storeChecksLocally) {
+          const saved =
+            getGuideContext().localChecks?.[step] || []
+
+          checkItems = Array.from({ length: count }, (_, index) => ({
+            itemOrder: index + 1,
+            checked: Boolean(saved[index]),
+          }))
+        } else {
+          checkItems = [...result.checkItems].sort(
+            (a, b) => a.itemOrder - b.itemOrder,
+          )
+        }
 
         if (checkItems.length !== count) {
           throw new Error(
@@ -63,7 +63,7 @@ export default function useGuideStep(step, count = 0) {
       })
 
     return () => controller.abort()
-  }, [step, count, localMode])
+  }, [step, count, localMode, storeChecksLocally])
 
   const checked =
     data?.checkItems.map((item) => item.checked) ||
@@ -100,7 +100,7 @@ export default function useGuideStep(step, count = 0) {
           : item,
       )
 
-      if (localMode) {
+      if (storeChecksLocally) {
         const context = getGuideContext()
 
         saveGuideContext({
