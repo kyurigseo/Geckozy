@@ -1,5 +1,6 @@
 package com.likelion.backend.domain.carerecord.service;
 
+import lombok.extern.slf4j.Slf4j;
 import tools.jackson.databind.JsonNode;
 import com.likelion.backend.domain.carerecord.dto.request.CareRecordCreateRequest;
 import com.likelion.backend.domain.carerecord.dto.response.*;
@@ -21,6 +22,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -30,6 +33,7 @@ import java.nio.file.Paths;
 import java.time.*;
 import java.util.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -326,10 +330,109 @@ public class CareRecordService {
         }
 
         try {
-            Files.deleteIfExists(path);
-        } catch (IOException e) {
-            // 파일 삭제 실패는 별도 로그로 남기는 것을 권장
+            Path directory = Paths.get(uploadDir)
+                    .toAbsolutePath()
+                    .normalize();
+
+            Path target = path.toAbsolutePath().normalize();
+
+            // 업로드 디렉터리 외부 파일 삭제 방지
+            if (!target.startsWith(directory)
+                    || target.equals(directory)) {
+                log.error("허용되지 않은 사진 삭제 경로: {}", target);
+                return;
+            }
+
+            boolean deleted = Files.deleteIfExists(target);
+
+            if (deleted) {
+                log.info("사육 기록 사진 파일 삭제 성공: {}", target);
+            } else {
+                log.info("사육 기록 사진 파일이 이미 존재하지 않음: {}", target);
+            }
+
+        } catch (IOException | SecurityException e) {
+            log.error(
+                    "사육 기록 사진 파일 삭제 실패. 수동 정리 필요. path={}",
+                    path,
+                    e
+            );
         }
+    }
+
+    private <T> void deleteByIdIfExists(
+            org.springframework.data.jpa.repository.JpaRepository<T, Long> repository,
+            Long recordId
+    ) {
+        repository.findById(recordId)
+                .ifPresent(repository::delete);
+    }
+
+    // REC-19. 사육 기록 삭제
+    @Transactional
+    public void deleteRecord(
+            Long userId,
+            Long lizardId,
+            Long recordId
+    ) {
+        // 1. 기록 소유권 검증
+        CareRecord record = validateRecordOwner(
+                userId, lizardId, recordId
+        );
+
+        // 2. 삭제 전 사진 경로 확보
+        List<Path> photoPaths = careRecordPhotoRepository
+                .findAllByCareRecord_RecordIdOrderByPhotoOrderAsc(recordId)
+                .stream()
+                .map(photo -> {
+                    String imageUrl = photo.getImageUrl();
+                    String filename = imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
+
+                    return Paths.get(uploadDir)
+                            .toAbsolutePath()
+                            .normalize()
+                            .resolve(filename)
+                            .normalize();
+                })
+                .toList();
+
+        // 3. 유형별 상세 데이터 삭제
+        deleteByIdIfExists(feedingRepository, recordId);
+        deleteByIdIfExists(weightRepository, recordId);
+        deleteByIdIfExists(sheddingRepository, recordId);
+        deleteByIdIfExists(stoolRepository, recordId);
+        deleteByIdIfExists(cleaningRepository, recordId);
+        deleteByIdIfExists(abnormalBehaviorRepository, recordId);
+        deleteByIdIfExists(extraRepository, recordId);
+
+        // 4. 사진 DB 데이터 삭제
+        careRecordPhotoRepository.deleteAllByCareRecord_RecordId(recordId);
+
+        // 5. 원본 기록 삭제
+        careRecordRepository.delete(record);
+
+        // 6. DB 커밋 성공 후 실제 사진 파일 삭제
+        TransactionSynchronizationManager.registerSynchronization(
+                new TransactionSynchronization() {
+                    @Override
+                    public void afterCommit() {
+                        log.info(
+                                "사육 기록 삭제 완료. 사진 파일 정리 시작. recordId={}, photoCount={}",
+                                recordId,
+                                photoPaths.size()
+                        );
+
+                        for (Path path : photoPaths) {
+                            deleteFileIfExists(path);
+                        }
+
+                        log.info(
+                                "사육 기록 사진 파일 정리 시도 완료. recordId={}",
+                                recordId
+                        );
+                    }
+                }
+        );
     }
 
     private String getImageExtension(String filename) {
