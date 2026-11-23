@@ -23,17 +23,12 @@ public class EnclosureService {
     private final EnclosureRecommendationService enclosureRecommendationService;
     private final EnclosureEnvironmentService enclosureEnvironmentService;
 
-    public EnclosureCreateResponse createEnclosure(EnclosureCreateRequest request) {
-        return enclosureCommandService.createEnclosure(request);
+    public EnclosureCreateResponse createEnclosure(EnclosureCreateRequest request, Long currentUserId) {
+        return enclosureCommandService.createEnclosure(request, currentUserId);
     }
 
-    public ManagementSettingResponse updateManagementSetting(Long enclosureId, ManagementSettingRequest request) {
-        return enclosureCommandService.updateManagementSetting(enclosureId, request);
-    }
-
-    @Transactional(readOnly = true)
-    public TemperatureStatusResponse getTemperatureStatus(Long enclosureId) {
-        return enclosureEnvironmentService.getTemperatureStatus(enclosureId);
+    public ManagementSettingResponse updateManagementSetting(Long enclosureId, ManagementSettingRequest request, Long currentUserId) {
+        return enclosureCommandService.updateManagementSetting(enclosureId, request, currentUserId);
     }
 
     public EnclosureResponse getEnclosureByLizardId(Long lizardId, Long currentUserId) {
@@ -41,18 +36,18 @@ public class EnclosureService {
     }
 
     @Transactional(readOnly = true)
-    public EnclosureTemperatureSuggestionResponse getTemperatureSuggestions(Long enclosureId) {
-        return enclosureRecommendationService.getTemperatureSuggestions(enclosureId);
+    public EnclosureTemperatureSuggestionResponse getTemperatureSuggestions(Long enclosureId, Long currentUserId) {
+        return enclosureRecommendationService.getTemperatureSuggestions(enclosureId, currentUserId);
     }
 
     @Transactional(readOnly = true)
-    public EnclosureHumiditySuggestionResponse getHumiditySuggestions(Long enclosureId) {
-        return enclosureRecommendationService.getHumiditySuggestions(enclosureId);
+    public EnclosureHumiditySuggestionResponse getHumiditySuggestions(Long enclosureId, Long currentUserId) {
+        return enclosureRecommendationService.getHumiditySuggestions(enclosureId, currentUserId);
     }
 
     @Transactional(readOnly = true)
-    public EnclosureGuidebookRecommendationResponse getGuidebookRecommendations(Long enclosureId) {
-        return enclosureRecommendationService.getGuidebookRecommendations(enclosureId);
+    public EnclosureGuidebookRecommendationResponse getGuidebookRecommendations(Long enclosureId, Long currentUserId) {
+        return enclosureRecommendationService.getGuidebookRecommendations(enclosureId, currentUserId);
     }
 
     public EnclosureUpdateResponse updateEnclosure(Long enclosureId, EnclosureUpdateRequest requestDto, Long currentUserId) {
@@ -83,7 +78,7 @@ public class EnclosureService {
         return enclosureEnvironmentService.getEnvironmentSummary(enclosureId, dateStr, currentUserId);
     }
 
-    public TemperaturePatternResponse getTemperaturePattern(Long enclosureId) {
-        return enclosureEnvironmentService.getTemperaturePattern(enclosureId);
+    public TemperaturePatternResponse getTemperaturePattern(Long enclosureId, Long currentUserId) {
+        return enclosureEnvironmentService.getTemperaturePattern(enclosureId, currentUserId);
     }
 }

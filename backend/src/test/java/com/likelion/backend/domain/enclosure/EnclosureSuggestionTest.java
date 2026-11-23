@@ -4,22 +4,39 @@ import com.likelion.backend.domain.enclosure.dto.suggestion.EnclosureGuidebookRe
 import com.likelion.backend.domain.enclosure.dto.suggestion.EnclosureHumiditySuggestionResponse;
 import com.likelion.backend.domain.enclosure.dto.suggestion.EnclosureTemperatureSuggestionResponse;
 import com.likelion.backend.domain.enclosure.service.EnclosureRecommendationService;
+import com.likelion.backend.domain.enclosure.entity.Enclosure;
+import com.likelion.backend.domain.enclosure.repository.EnclosureRepository;
 import com.likelion.backend.domain.enclosure.service.EnclosureService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class EnclosureSuggestionTest {
+
+    private static final Long USER_ID = 1L;
 
     private EnclosureService enclosureService;
 
     @BeforeEach
     void setUp() {
+        // 소유자 확인을 통과하도록 사육장 → 도마뱀 → 유저 ID를 스텁
+        Enclosure enclosure = mock(Enclosure.class, RETURNS_DEEP_STUBS);
+        when(enclosure.getLizard().getUser().getUserId()).thenReturn(USER_ID);
+
+        EnclosureRepository enclosureRepository = mock(EnclosureRepository.class);
+        when(enclosureRepository.findById(anyLong())).thenReturn(Optional.of(enclosure));
+
         enclosureService = new EnclosureService(
                 null,
-                new EnclosureRecommendationService(),
+                new EnclosureRecommendationService(enclosureRepository),
                 null
         );
     }
@@ -28,7 +45,7 @@ class EnclosureSuggestionTest {
     void getTemperatureSuggestions_Success() {
         Long enclosureId = 1L;
 
-        EnclosureTemperatureSuggestionResponse response = enclosureService.getTemperatureSuggestions(enclosureId);
+        EnclosureTemperatureSuggestionResponse response = enclosureService.getTemperatureSuggestions(enclosureId, USER_ID);
 
         assertThat(response).isNotNull();
         assertThat(response.getEnclosureId()).isEqualTo(enclosureId);
@@ -43,7 +60,7 @@ class EnclosureSuggestionTest {
     void getHumiditySuggestions_Success() {
         Long enclosureId = 1L;
 
-        EnclosureHumiditySuggestionResponse response = enclosureService.getHumiditySuggestions(enclosureId);
+        EnclosureHumiditySuggestionResponse response = enclosureService.getHumiditySuggestions(enclosureId, USER_ID);
 
         assertThat(response).isNotNull();
         assertThat(response.getEnclosureId()).isEqualTo(enclosureId);
@@ -58,7 +75,7 @@ class EnclosureSuggestionTest {
     void getGuidebookRecommendations_Matched() {
         Long enclosureId = 1L;
 
-        EnclosureGuidebookRecommendationResponse response = enclosureService.getGuidebookRecommendations(enclosureId);
+        EnclosureGuidebookRecommendationResponse response = enclosureService.getGuidebookRecommendations(enclosureId, USER_ID);
 
         assertThat(response).isNotNull();
         assertThat(response.getRecommendations()).isNotEmpty();
@@ -75,7 +92,7 @@ class EnclosureSuggestionTest {
     void getGuidebookRecommendations_NoMatch_ReturnsEmptyList() {
         Long enclosureId = 999L;
 
-        EnclosureGuidebookRecommendationResponse response = enclosureService.getGuidebookRecommendations(enclosureId);
+        EnclosureGuidebookRecommendationResponse response = enclosureService.getGuidebookRecommendations(enclosureId, USER_ID);
 
         assertThat(response).isNotNull();
         assertThat(response.getRecommendations()).isNotNull();

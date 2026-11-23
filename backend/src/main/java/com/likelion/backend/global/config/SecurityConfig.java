@@ -88,6 +88,9 @@ public class SecurityConfig {
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .formLogin(form -> form.disable())
 
+                // 기본 로그아웃 방식 비활성화
+                .logout(logout -> logout.disable())
+
                 // 세션 사용하지 않음
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
@@ -109,6 +112,12 @@ public class SecurityConfig {
                                 "/auth/signup",
                                 "/auth/login",
                                 "/auth/check-username"
+                        ).permitAll()
+
+                        // IoT 센서 데이터 수집 (JWT 대신 X-Device-Id 헤더로 서비스에서 인증)
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/enclosures/*/sensor/readings"
                         ).permitAll()
 
                         // Swagger

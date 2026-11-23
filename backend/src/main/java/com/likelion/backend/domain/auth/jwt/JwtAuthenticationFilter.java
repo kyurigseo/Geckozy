@@ -1,5 +1,8 @@
 package com.likelion.backend.domain.auth.jwt;
 
+import com.likelion.backend.domain.user.entity.User;
+import com.likelion.backend.domain.user.entity.UserStatus;
+import com.likelion.backend.domain.user.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -19,6 +22,8 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
+    private final JwtTokenBlacklist jwtTokenBlacklist;
+    private final UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(
@@ -27,9 +32,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        String authorization = request.getHeader("Authorization");
+        String authorization =
+                request.getHeader("Authorization");
 
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
+        if (authorization == null
+                || !authorization.startsWith("Bearer ")) {
+
             filterChain.doFilter(request, response);
             return;
         }
@@ -37,19 +45,45 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = authorization.substring(7);
 
         try {
+
+            // 1. JWT 서명 및 만료 시간 검증
             Claims claims = jwtProvider.parseClaims(token);
 
-            Long userId = Long.valueOf(claims.getSubject());
+            // 2. 로그아웃한 토큰인지 확인
+            if (jwtTokenBlacklist.contains(token)) {
 
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(
-                            userId,
-                            null,
-                            AuthorityUtils.NO_AUTHORITIES
-                    );
+                SecurityContextHolder.clearContext();
 
-            SecurityContextHolder.getContext()
-                    .setAuthentication(authentication);
+            } else {
+
+                Long userId = Long.valueOf(
+                        claims.getSubject()
+                );
+
+                // 3. 회원 상태 확인
+                User user = userRepository
+                        .findById(userId)
+                        .orElse(null);
+
+                if (user != null
+                        && user.getStatus() == UserStatus.ACTIVE
+                        && user.getDeletedAt() == null) {
+
+                    // 4. 인증 정보 등록
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(
+                                    userId,
+                                    null,
+                                    AuthorityUtils.NO_AUTHORITIES
+                            );
+
+                    SecurityContextHolder.getContext()
+                            .setAuthentication(authentication);
+
+                } else {
+                    SecurityContextHolder.clearContext();
+                }
+            }
 
         } catch (Exception e) {
             SecurityContextHolder.clearContext();

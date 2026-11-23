@@ -67,6 +67,19 @@ public class ManagementSetting {
         MORNING, DAY, EVENING, NIGHT
     }
 
+    public void update(SprayingMethod sprayingMethod, SprayingFrequency sprayingFrequency,
+                       LocalTime lightingStartTime, LocalTime lightingEndTime, Boolean lightingEnabled,
+                       HeatingUsageMode heatingUsageMode, LocalTime heatingStartTime, LocalTime heatingEndTime) {
+        this.sprayingMethod = sprayingMethod;
+        this.sprayingFrequency = sprayingFrequency;
+        this.lightingStartTime = lightingStartTime;
+        this.lightingEndTime = lightingEndTime;
+        this.lightingEnabled = lightingEnabled != null ? lightingEnabled : true;
+        this.heatingUsageMode = heatingUsageMode;
+        this.heatingStartTime = heatingStartTime;
+        this.heatingEndTime = heatingEndTime;
+    }
+
     @Builder
     public ManagementSetting(Enclosure enclosure, SprayingMethod sprayingMethod,
                              SprayingFrequency sprayingFrequency, LocalTime lightingStartTime,

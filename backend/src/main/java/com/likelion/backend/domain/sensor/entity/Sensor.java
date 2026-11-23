@@ -38,6 +38,14 @@ public class Sensor {
         CONNECTED, DISCONNECTED
     }
 
+    public void markConnected() {
+        this.status = Status.CONNECTED;
+    }
+
+    public void markDisconnected() {
+        this.status = Status.DISCONNECTED;
+    }
+
     @Builder
     public Sensor(Enclosure enclosure, String deviceIdentifier, Status status) {
         this.enclosure = enclosure;
