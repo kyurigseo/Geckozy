@@ -1,117 +1,35 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import './RecordForm.scss';
+import RecordPhotos from './Recordphotos';
+import RecordTimeSheet from './Recordtimesheet';
 
 import bgDecoration from '../../assets/record/bg_pattern.png';
 import num1 from '../../assets/record/num_1.png';
 import num2 from '../../assets/record/num_2.png';
 import iconClock from '../../assets/record/icon_clock.png';
-import btnAddPhoto from '../../assets/record/btn_add_photo.png';
-import photoEmpty from '../../assets/record/photo_empty.png';
 import btnComplete from '../../assets/record/btn_complete.png';
-import iconClose from '../../assets/record/icon_close.png';
-import btnConfirm from '../../assets/record/btn_confirm.png';
-
-const MONTHS = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'));
-const DAYS = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, '0'));
-const TIMES = Array.from({ length: 48 }, (_, i) => {
-  const h = String(Math.floor(i / 2)).padStart(2, '0');
-  const m = i % 2 === 0 ? '00' : '30';
-  return `${h}:${m}`;
-});
-
-const ITEM_HEIGHT = 44; // 아이템 높이 (px)
-
-function WheelColumn({ items, unit, defaultValue, onChange }) {
-  const scrollRef = useRef(null);
-  const [selectedIndex, setSelectedIndex] = useState(() => {
-    const idx = items.indexOf(defaultValue);
-    return idx !== -1 ? idx : 0;
-  });
-
-  // 모달이 완전히 화면에 그려진 후 초깃값 위치로 이동
-  useEffect(() => {
-    const idx = items.indexOf(defaultValue);
-    if (idx !== -1) {
-      setSelectedIndex(idx);
-      const timer = setTimeout(() => {
-        if (scrollRef.current) {
-          scrollRef.current.scrollTop = idx * ITEM_HEIGHT;
-        }
-      }, 50);
-      return () => clearTimeout(timer);
-    }
-  }, [defaultValue, items]);
-
-  // 단순 스크롤 계산 (상태 재렌더링 최소화)
-  const handleScroll = (e) => {
-    const scrollTop = e.currentTarget.scrollTop;
-    let idx = Math.round(scrollTop / ITEM_HEIGHT);
-
-    if (idx < 0) idx = 0;
-    if (idx >= items.length) idx = items.length - 1;
-
-    if (idx !== selectedIndex) {
-      setSelectedIndex(idx);
-      onChange(items[idx]);
-    }
-  };
-
-  const handleClickItem = (idx) => {
-    setSelectedIndex(idx);
-    onChange(items[idx]);
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = idx * ITEM_HEIGHT;
-    }
-  };
-
-  return (
-    <div className="wheel-column">
-      <div 
-        className="picker-wheel" 
-        ref={scrollRef} 
-        onScroll={handleScroll}
-      >
-        <div className="picker-padding" />
-
-        {items.map((item, idx) => {
-          const diff = idx - selectedIndex;
-          let statusClass = 'hidden';
-
-          if (diff === 0) statusClass = 'active';
-          else if (Math.abs(diff) === 1) statusClass = 'dim1';
-          else if (Math.abs(diff) === 2) statusClass = 'dim2';
-
-          return (
-            <div
-              key={item}
-              className={`wheel-item ${statusClass}`}
-              onClick={() => handleClickItem(idx)}
-            >
-              {item}{unit}
-            </div>
-          );
-        })}
-
-        <div className="picker-padding" />
-      </div>
-    </div>
-  );
-}
 
 const RecordEtc = ({ onBack,onComplete  }) => {
   const [etcType, setEtcType] = useState('사육장 변화');
   const [selectedTime, setSelectedTime] = useState('');
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [memo, setMemo] = useState('');
+  const [photos, setPhotos] = useState([]);
 
-  const [tempMonth, setTempMonth] = useState('05');
-  const [tempDay, setTempDay] = useState('18');
-  const [tempTime, setTempTime] = useState('21:00');
-
-  const handleConfirmTime = () => {
-    setSelectedTime(`${tempMonth}월 ${tempDay}일 ${tempTime}`);
-    setIsPickerOpen(false);
+  const pickedAt = () => {
+    if (!selectedTime) return undefined;
+    const [hh, mm] = tempTime.split(':').map(Number);
+    const now = new Date();
+    const at = new Date(now.getFullYear(), Number(tempMonth) - 1, Number(tempDay), hh, mm);
+    if (at > now) at.setFullYear(now.getFullYear() - 1);
+    return at;
   };
+
+  const [now] = useState(() => new Date());
+  const p2 = (n) => String(n).padStart(2, '0');
+  const [tempMonth, setTempMonth] = useState(p2(now.getMonth() + 1));
+  const [tempDay, setTempDay] = useState(p2(now.getDate()));
+  const [tempTime, setTempTime] = useState(`${p2(now.getHours())}:${now.getMinutes() >= 30 ? '30' : '00'}`);
 
   return (
     <div className="record-form-page">
@@ -170,24 +88,10 @@ const RecordEtc = ({ onBack,onComplete  }) => {
           </div>
         </section>
 
-        <section className="form-section photo-section">
-          <h2 className="photo-title">사진 추가</h2>
-          <p className="photo-sub">최대 3장의 사진을 업로드할 수 있어요.</p>
-          <div className="photo-grid">
-            <button type="button" className="photo-btn-img">
-              <img src={btnAddPhoto} alt="사진 추가" />
-            </button>
-            <div className="photo-placeholder-img">
-              <img src={photoEmpty} alt="빈 슬롯" />
-            </div>
-            <div className="photo-placeholder-img">
-              <img src={photoEmpty} alt="빈 슬롯" />
-            </div>
-          </div>
-        </section>
+        <RecordPhotos photos={photos} onChange={setPhotos} />
 
         <div className="submit-area">
-          <button type="button" className="submit-btn-img"  onClick={onComplete}>
+          <button type="button" className="submit-btn-img"  onClick={() => onComplete({ etcType, recordedAt: pickedAt(), memo, photos })}>
             <img src={btnComplete} alt="완료" />
             <span className="btn-text">완료</span>
           </button>
@@ -195,48 +99,17 @@ const RecordEtc = ({ onBack,onComplete  }) => {
       </div>
 
       {isPickerOpen && (
-        <div className="picker-overlay" onClick={() => setIsPickerOpen(false)}>
-          <div className="picker-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="picker-header">
-              <h3>기록 시각 선택</h3>
-              <button type="button" className="close-btn" onClick={() => setIsPickerOpen(false)}>
-                <img src={iconClose} alt="닫기" />
-              </button>
-            </div>
-
-            <div className="picker-wheels">
-              <div className="picker-selection-highlight" />
-
-              <WheelColumn
-                items={MONTHS}
-                unit="월"
-                defaultValue={tempMonth}
-                onChange={setTempMonth}
-              />
-              <WheelColumn
-                items={DAYS}
-                unit="일"
-                defaultValue={tempDay}
-                onChange={setTempDay}
-              />
-              <WheelColumn
-                items={TIMES}
-                unit=""
-                defaultValue={tempTime}
-                onChange={setTempTime}
-              />
-            </div>
-
-            <button
-              type="button"
-              className="picker-confirm-btn-img"
-              onClick={handleConfirmTime}
-            >
-              <img src={btnConfirm} alt="확인" />
-              <span className="btn-text">확인</span>
-            </button>
-          </div>
-        </div>
+        <RecordTimeSheet
+          value={{ month: tempMonth, day: tempDay, time: tempTime }}
+          onConfirm={({ month, day, time }) => {
+            setTempMonth(month);
+            setTempDay(day);
+            setTempTime(time);
+            setSelectedTime(`${month}월 ${day}일 ${time}`);
+            setIsPickerOpen(false);
+          }}
+          onClose={() => setIsPickerOpen(false)}
+        />
       )}
     </div>
   );

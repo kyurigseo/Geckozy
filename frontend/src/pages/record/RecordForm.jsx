@@ -9,6 +9,8 @@ import RecordSymptom from "./RecordSymptom";
 import RecordEtc from "./RecordEtc";
 import RecordSaved from "./RecordSaved";
 import "./RecordForm.scss";
+import { ApiError, errorMessage } from "../../api/client";
+import { saveRecord } from "../../api/record";
 
 import buttonSrc from "../../assets/sounds/button.mp3";
 import selectSrc from "../../assets/sounds/select.mp3";
@@ -30,23 +32,52 @@ const playSelectSfx = () => {
 const RecordForm = () => {
   const { type } = useParams();
   const navigate = useNavigate();
-  const [isSaved, setIsSaved] = useState(false);
+  const [isSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  // 뒤로가기 공통 핸들러
   const handleBack = () => {
     playButtonSfx();
     navigate(-1);
   };
 
-  const handleComplete = () => {
-     playButtonSfx(); 
-  const d = new Date();
-  const date = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-  navigate("/record/saved", {
-    replace: true, 
-    state: { next: `/record/detail/${date}` },
-  });
-};
+  const saveType = { feed: "feeding", bowel: "poop" }[type] ?? type;
+
+  const handleComplete = async (values) => {
+    if (saving) return;
+    playButtonSfx();
+    setSaving(true);
+    try {
+      const result = await saveRecord(saveType, values);
+      if (result.photoFailed > 0) {
+        window.alert(`기록은 저장됐지만 사진 ${result.photoFailed}장은 올리지 못했어요.`);
+      }
+      navigate("/record/saved", {
+        replace: true,
+        state: { next: `/record/detail/${result.date}` },
+      });
+    } catch (error) {
+      console.error("[record save]", error, error?.status, error?.code);
+      setSaving(false);
+      const fallback = "저장에 실패했어요. 다시 시도해주세요.";
+      let message = fallback;
+      try {
+        message = errorMessage(
+          error,
+          {
+            INVALID_REQUEST: "입력한 내용을 확인해주세요. (체중은 0보다 커야 하고, 직접 입력은 비워둘 수 없어요.)",
+            INVALID_PHOTO: "사진 형식을 확인해주세요. (jpg, png, webp)",
+          },
+          fallback,
+        );
+      } catch {
+      }
+      if (error instanceof ApiError && error.status === 401) {
+        navigate("/onboarding", { replace: true });
+        return;
+      }
+      window.alert(message);
+    }
+  };
 
   const formProps = {
     onBack: handleBack,

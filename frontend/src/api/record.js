@@ -1,12 +1,9 @@
-// 기록(Record) 화면용 API. 백엔드 CareRecordController 기준이에요.
-// 화면이 쓰던 임시 데이터 모양으로 바꿔서 돌려주니까, 화면에서는 import 만 바꾸면 돼요.
 import { ApiError, getAccessToken, request } from './client'
 import { getMainLizard } from './home'
 
 const BASE_URL = import.meta.env.VITE_API_URL
 const pad = (n) => String(n).padStart(2, '0')
 
-// ───────── 화면 type ↔ 서버 recordType ─────────
 const TYPE_TO_SERVER = {
   feeding: 'FEEDING',
   shedding: 'SHEDDING',
@@ -19,7 +16,6 @@ const TYPE_TO_SERVER = {
 const SERVER_TO_TYPE = Object.fromEntries(Object.entries(TYPE_TO_SERVER).map(([ui, server]) => [server, ui]))
 export const toUiType = (serverType) => SERVER_TO_TYPE[serverType] ?? 'etc'
 
-// ───────── 폼에 보이는 글자 ↔ 서버 enum ─────────
 const FEEDING_TYPE = [['곤충', 'INSECT'], ['전용 사료', 'PELLET'], ['과일/퓨레', 'FRUIT_PUREE'], ['직접 입력', 'CUSTOM']]
 const FEEDING_RESPONSE = [['대부분 먹음', 'MOSTLY_ATE'], ['평소보다 적게 먹음', 'ATE_LESS_THAN_USUAL'], ['거의 먹지 않음', 'BARELY_ATE']]
 const SHEDDING_STATUS = [['완료', 'COMPLETED'], ['일부 남음', 'PARTIALLY_REMAINED'], ['진행 중', 'IN_PROGRESS']]
@@ -42,7 +38,6 @@ const need = (value) => {
   return value
 }
 
-// 폼 값 → 서버 typeDetail (증세는 여러 개를 고를 수 있어서 배열로 돌려줘요)
 const buildDetails = (type, f) => {
   switch (type) {
     case 'feeding': {
@@ -72,7 +67,6 @@ const buildDetails = (type, f) => {
     }
     case 'symptom': {
       if (!f.changes || f.changes.length === 0) throw invalid()
-      // 서버는 기록 하나에 증세 하나만 받아서, 고른 개수만큼 기록을 만들어요
       return f.changes.map((label) => ({
         abnormalBehaviorType: need(toEnum(ABNORMAL_TYPE, label)),
         abnormalOnset: need(toEnum(ABNORMAL_ONSET, f.startTime)),
@@ -86,11 +80,9 @@ const buildDetails = (type, f) => {
   }
 }
 
-// "2026-11-22T15:30:00" (서버 LocalDateTime 형식. 시간대 표시 없음)
 const toLocalDateTime = (date) =>
   `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
 
-// 사진은 따로 올려야 해서 multipart 로 직접 보내요 (request() 는 JSON 전용)
 const uploadPhoto = async (lizardId, recordId, file) => {
   const body = new FormData()
   body.append('file', file)
@@ -109,11 +101,8 @@ const uploadPhoto = async (lizardId, recordId, file) => {
   return json?.data
 }
 
-// 기록 저장. form 은 각 입력 폼이 onComplete 로 넘기는 값
-// { ...폼 값, memo, photos: File[], recordedAt?: Date }
-// 돌려주는 값: { recordIds, date: 'YYYY-MM-DD', photoFailed: 올리지 못한 사진 수 }
 export const saveRecord = async (type, form) => {
-  const details = buildDetails(type, form) // 잘못된 입력은 여기서 먼저 막아요
+  const details = buildDetails(type, form)
   const lizard = await getMainLizard()
   const recordedAt = form.recordedAt ?? new Date()
   const memo = (form.memo ?? '').trim() || null
@@ -127,7 +116,6 @@ export const saveRecord = async (type, form) => {
     recordIds.push(recordId)
   }
 
-  // 사진은 첫 번째 기록에만 붙여요 (서버 제한: 기록당 3장)
   let photoFailed = 0
   for (const file of (form.photos ?? []).slice(0, 3)) {
     try {
@@ -139,15 +127,12 @@ export const saveRecord = async (type, form) => {
   return { recordIds, date: toLocalDateTime(recordedAt).slice(0, 10), photoFailed }
 }
 
-// ───────── 조회 ─────────
 const getCalendar = (lizardId, year, month) => request(`/lizards/${lizardId}/care-records/calendar`, { params: { year, month } })
 const getRecordsByDate = (lizardId, date) => request(`/lizards/${lizardId}/care-records`, { params: { date } })
 const getRecordDetail = (lizardId, recordId) => request(`/lizards/${lizardId}/care-records/${recordId}`)
 
-// 사진 주소는 서버 기준 상대 경로('/uploads/...')라서 서버 주소를 붙여요
 const photoUrl = (imageUrl) => (/^https?:/.test(imageUrl) ? imageUrl : new URL(imageUrl, BASE_URL).href)
 
-// 한 달치 기록 목록 (상세 포함). 서버에 월 전체 조회가 없어서 날짜별로 받아요
 const loadMonthDetails = async (lizardId, year, month) => {
   const calendar = await getCalendar(lizardId, year, month)
   const perDay = await Promise.all((calendar?.dates ?? []).map((date) => getRecordsByDate(lizardId, date)))
@@ -155,7 +140,6 @@ const loadMonthDetails = async (lizardId, year, month) => {
   return Promise.all(list.map((item) => getRecordDetail(lizardId, item.recordId)))
 }
 
-// ───────── Record.jsx: 달력 + 지난달 대비 변화 ─────────
 const TYPE_LABEL = { feeding: '먹이', shedding: '탈피', weight: '체중', cleaning: '청소', poop: '배변', symptom: '이상 증세', etc: '추가 기록' }
 
 const toSummary = (item) => {
@@ -166,7 +150,6 @@ const toSummary = (item) => {
   return { type, percent, message }
 }
 
-// { records:[{date,type,alert}], summary:[{type,percent,message}] }
 export const fetchRecords = async (year, month) => {
   const lizard = await getMainLizard()
   const [calendar, changes] = await Promise.all([
@@ -182,13 +165,12 @@ export const fetchRecords = async (year, month) => {
     for (const item of perDay[i]) {
       const type = toUiType(item.recordType)
       const key = `${dates[i]}-${type}`
-      if (seen.has(key)) continue // 같은 날 같은 종류는 한 번만 표시
+      if (seen.has(key)) continue
       seen.add(key)
       records.push({ date: dates[i], type, recordId: item.recordId, alert: false })
     }
   }
 
-  // 배변 이상은 상세를 봐야 알 수 있어서 배변 기록만 확인해요
   await Promise.all(
     records
       .filter((r) => r.type === 'poop')
@@ -201,7 +183,6 @@ export const fetchRecords = async (year, month) => {
   return { records, summary: (changes?.items ?? []).map(toSummary) }
 }
 
-// ───────── Recorddetail / RecordList: 한 달 기록 ─────────
 const tag = (text, tone = 'orange') => ({ text, tone })
 
 const toTags = (type, d) => {
@@ -232,13 +213,12 @@ const toTags = (type, d) => {
   }
 }
 
-// [{ id, date, time:'HH:mm', recordedAt, type, alert, tags, memo, photos:[url] }]
 export const fetchMonthRecords = async (year, month) => {
   const lizard = await getMainLizard()
   const details = await loadMonthDetails(lizard.lizardId, year, month)
   return details.map((r) => {
     const type = toUiType(r.recordType)
-    const at = r.recordedAt // 'YYYY-MM-DDTHH:mm:ss'
+    const at = r.recordedAt
     return {
       id: r.recordId,
       date: at.slice(0, 10),
@@ -253,12 +233,10 @@ export const fetchMonthRecords = async (year, month) => {
   })
 }
 
-// ───────── 기록 전후 24시간 환경 ─────────
-export const POINTS = 25 // 2시간 간격 25칸, 가운데(12번)가 기록 시점
+export const POINTS = 25
 export const CENTER = 12
 const SLOT_MS = 2 * 60 * 60 * 1000
 
-// record: fetchMonthRecords 가 준 기록 하나. 측정값이 없는 칸은 null, 하나도 없으면 []
 export const fetchRecordEnv = async (record) => {
   const lizard = await getMainLizard()
   const graph = await request(`/lizards/${lizard.lizardId}/care-records/${record.id}/environment/graph`, {

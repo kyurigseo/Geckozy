@@ -4,11 +4,11 @@ import "./GuidePopup.scss";
 import closeImg from "../../assets/home/close.png";
 import ventImg from "../../assets/home/vent.png";
 import checkImg from "../../assets/home/check.png";
-import warnImg from "../../assets/home/warn.png"; 
-import sproutIcon from "../../assets/home/icon-leaf.png"; 
-import frameImg from "../../assets/home/frame.png"; 
-import prevImg from "../../assets/home/prev.png"; 
-import nextImg from "../../assets/home/next.png"; 
+import warnImg from "../../assets/home/warn.png";
+import sproutIcon from "../../assets/home/icon-leaf.png";
+import frameImg from "../../assets/home/frame.png";
+import prevImg from "../../assets/home/prev.png";
+import nextImg from "../../assets/home/next.png";
 
 import buttonSrc from "../../assets/sounds/button.mp3";
 import selectSrc from "../../assets/sounds/select.mp3";
@@ -51,36 +51,43 @@ const PAGES = [
     body: "환기 상태에 문제가 없는데도 습한 상태가 오래 이어진다면, 다음 분무 때 물의 양을 조금 줄여보고 건조 속도가 달라지는지 비교해보세요.",
     warn: {
       title: "주의 사항",
-      text: "습도를 빠르게 낮추기 위해 선풍기나 에어컨 바람을 사육장에 직접 쐬지 마세요.",
+      lines: ["습도를 빠르게 낮추기 위해 선풍기나 에어컨", "바람을 사육장에 직접 쐬지 마세요."],
     },
   },
 ];
 
 const LAST = PAGES.length - 1;
 
-function PageBody({ page, scrapped, onScrap }) {
-  const heading = (
+function Heading({ children }) {
+  return (
     <h3 className="guide-popup__sub">
-      <img src={sproutIcon} alt="" /> {page.title}
+      <img src={sproutIcon} alt="" />
+      <span>{children}</span>
     </h3>
   );
+}
 
+function PageBody({ page, scrapped, onScrap }) {
   if (page.key === "why") {
     return (
       <>
         <img src={ventImg} alt="환기구가 있는 사육장 일러스트" className="guide-popup__hero" />
-        {heading}
-        <p className="guide-popup__text">
-          <strong>{page.lead}</strong> <br />{page.body}
-        </p>
+        <div className="guide-popup__block guide-popup__block--why">
+          <Heading>{page.title}</Heading>
+          <p className="guide-popup__text">
+            <strong>{page.lead}</strong>
+            <br />
+            {page.body}
+          </p>
+        </div>
       </>
     );
   }
 
   if (page.key === "check") {
     return (
-      <>
-        {heading}
+      <div className="guide-popup__block guide-popup__block--check">
+        <Heading>{page.title}</Heading>
         <ul className="guide-popup__checks">
           {page.items.map((item) => (
             <li key={item.strong}>
@@ -92,31 +99,37 @@ function PageBody({ page, scrapped, onScrap }) {
             </li>
           ))}
         </ul>
-      </>
+      </div>
     );
   }
 
   return (
     <>
-      {heading}
-      <p className="guide-popup__text">
-        <strong>{page.lead}</strong>
-        <br />
-        {page.body}
-      </p>
+      <div className="guide-popup__block guide-popup__block--manage">
+        <Heading>{page.title}</Heading>
+        <div className="guide-popup__manage-text">
+          <p className="guide-popup__lead">{page.lead}</p>
+          <p className="guide-popup__body">{page.body}</p>
+        </div>
+      </div>
 
       <div className="guide-popup__warn">
         <h4>
-          <img src={warnImg} alt="" /> {page.warn.title}
+          <img src={warnImg} alt="" />
+          <span>{page.warn.title}</span>
         </h4>
-        <p>{page.warn.text}</p>
+        <p>
+          {page.warn.lines[0]}
+          <br />
+          {page.warn.lines[1]}
+        </p>
       </div>
 
       <button
         type="button"
         className={`guide-popup__scrap ${scrapped ? "is-on" : ""}`}
         onClick={() => {
-          playSelectSfx(); 
+          playSelectSfx();
           onScrap();
         }}
         aria-pressed={scrapped}
@@ -127,10 +140,9 @@ function PageBody({ page, scrapped, onScrap }) {
   );
 }
 
-
 export default function GuidePopup({ onClose, initialScrapped = false }) {
   const [page, setPage] = useState(0);
-  const [scrapped, setScrapped] = useState(initialScrapped); // TODO: 서버/로컬 저장소와 연결
+  const [scrapped, setScrapped] = useState(initialScrapped);
   const panelRef = useRef(null);
 
   const prev = () => setPage((p) => Math.max(0, p - 1));
@@ -169,13 +181,13 @@ export default function GuidePopup({ onClose, initialScrapped = false }) {
         style={{ backgroundImage: `url(${frameImg})` }}
         onClick={(e) => e.stopPropagation()}
       >
-        <button 
-          type="button" 
-          className="guide-popup__close" 
+        <button
+          type="button"
+          className="guide-popup__close"
           onClick={() => {
-            playButtonSfx(); // 🎯 닫기 버튼 효과음
+            playButtonSfx();
             onClose();
-          }} 
+          }}
           aria-label="닫기"
         >
           <img src={closeImg} alt="" />
@@ -190,14 +202,14 @@ export default function GuidePopup({ onClose, initialScrapped = false }) {
         </div>
 
         <footer className="guide-popup__pager">
-          <button 
-            type="button" 
-            className="guide-popup__arrow" 
+          <button
+            type="button"
+            className="guide-popup__arrow guide-popup__arrow--prev"
             onClick={() => {
-              if (page > 0) playButtonSfx(); // 🎯 첫 페이지가 아닐 때만 효과음 재생
+              if (page > 0) playButtonSfx();
               prev();
-            }} 
-            disabled={page === 0} 
+            }}
+            disabled={page === 0}
             aria-label="이전 페이지"
           >
             <img src={prevImg} alt="" />
@@ -205,14 +217,14 @@ export default function GuidePopup({ onClose, initialScrapped = false }) {
           <span className="guide-popup__count" aria-live="polite">
             {page + 1}/{PAGES.length}
           </span>
-          <button 
-            type="button" 
-            className="guide-popup__arrow" 
+          <button
+            type="button"
+            className="guide-popup__arrow guide-popup__arrow--next"
             onClick={() => {
-              if (page !== LAST) playButtonSfx(); // 🎯 마지막 페이지가 아닐 때만 효과음 재생
+              if (page !== LAST) playButtonSfx();
               next();
-            }} 
-            disabled={page === LAST} 
+            }}
+            disabled={page === LAST}
             aria-label="다음 페이지"
           >
             <img src={nextImg} alt="" />

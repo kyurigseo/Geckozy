@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-// 달력/페이지 뼈대(record-page, record-cal__*, record-add, record-menu, record-sheet)는 Record.scss를 그대로 씀
 import "./Record.scss";
 import "./Recorddetail.scss";
 
@@ -24,6 +23,7 @@ import trendIcon from "../../assets/record/icon_trend.png";
 import docIcon from "../../assets/record/icon_doc.png";
 import thermoIcon from "../../assets/record/icon_thermo.png";
 import dropIcon from "../../assets/record/icon_drop.png";
+import { fetchMonthRecords, fetchRecordEnv, POINTS, CENTER } from "../../api/record";
 
 const playSfx = (src) => {
   const sound = new Audio(src);
@@ -34,7 +34,6 @@ const playSfx = (src) => {
 const playButtonSfx = () => playSfx(buttonSrc);
 const playSelectSfx = () => playSfx(selectSrc);
 
-// TODO: Record.jsx와 중복이라 나중에 constants 파일로 빼면 좋음
 const TYPES = {
   feeding: { label: "먹이", icon: feedingIcon },
   shedding: { label: "탈피", icon: sheddingIcon },
@@ -57,58 +56,6 @@ const MENU = [
 
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
-// ─────────── 목 데이터 (API 붙이면 이 부분만 교체) ───────────
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-const pad = (n) => String(n).padStart(2, "0");
-
-const SAMPLE_DAYS = [
-  [1, "feeding"], [4, "etc"], [9, "shedding"], [10, "shedding"], [14, "cleaning"],
-  [22, "feeding"], [24, "symptom"], [25, "poop", true], [27, "weight"],
-];
-
-const SAMPLE_TAGS = {
-  shedding: [["일부 남음", "pink"], ["몸통", "orange"]],
-  feeding: [["귀뚜라미", "orange"]],
-  weight: [["체중 측정", "orange"]],
-  cleaning: [["전체 청소", "orange"]],
-  poop: [["이상 있음", "pink"]],
-  symptom: [["확인 필요", "pink"]],
-  etc: [["기타", "orange"]],
-};
-
-// photos에는 이미지 URL 배열이 들어옴 (없으면 사진 영역이 안 보임)
-const fetchMonth = async (year, month) => {
-  await delay(200);
-  const lastDay = new Date(year, month, 0).getDate();
-  return SAMPLE_DAYS.filter(([d]) => d <= lastDay).map(([d, type, alert]) => ({
-    id: `${year}-${pad(month)}-${pad(d)}-${type}`,
-    date: `${year}-${pad(month)}-${pad(d)}`,
-    time: d === 9 ? "19:35" : "10:00",
-    type,
-    alert: Boolean(alert),
-    tags: (SAMPLE_TAGS[type] ?? []).map(([text, tone]) => ({ text, tone })),
-    memo: d === 9 ? "발가락 쪽에 탈피가 조금 남아 있음" : "",
-    photos: [],
-  }));
-};
-
-// 기록 시점 기준 앞뒤 24시간, 2시간 간격 25개
-const POINTS = 25;
-const CENTER = 12;
-const fetchEnv = async () => {
-  await delay(250);
-  return Array.from({ length: POINTS }, (_, i) => {
-    const wave = Math.sin((i / 24) * Math.PI * 2 - 1);
-    const mid = 23 + wave * 1.6 + (i === CENTER ? 1 : 0);
-    return {
-      tmin: +(mid - 2.2).toFixed(1),
-      tmax: +(mid + 2.2).toFixed(1),
-      h: Math.round(52 + Math.cos((i / 24) * Math.PI * 2) * 7),
-    };
-  });
-};
-
-// ─────────── 유틸 ───────────
 const parseDate = (s) => {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s ?? "");
   if (m) return { y: +m[1], m: +m[2], d: +m[3] };
@@ -132,8 +79,11 @@ const mean = (arr) => arr.reduce((a, b) => a + b, 0) / (arr.length || 1);
 
 const summarize = (pts) => {
   const mid = (p) => (p.tmin + p.tmax) / 2;
-  const before = pts.slice(0, CENTER);
-  const after = pts.slice(CENTER + 1);
+  const before = pts.slice(0, CENTER).filter(Boolean);
+  const after = pts.slice(CENTER + 1).filter(Boolean);
+  if (before.length === 0 || after.length === 0) {
+    return "기록 전후 측정 데이터가 부족해서 변화를 확인하기 어려워요.";
+  }
   const dT = mean(after.map(mid)) - mean(before.map(mid));
   const dH = mean(after.map((p) => p.h)) - mean(before.map((p) => p.h));
   const bits = [];
@@ -145,7 +95,6 @@ const summarize = (pts) => {
 };
 
 
-// ─────────── 전후 24시간 차트 ───────────
 const VB_W = 300;
 const VB_H = 172;
 const PL = 30;
@@ -189,6 +138,7 @@ function EnvChart({ points, recordTime, dateLabel }) {
       })}
 
       {points.map((p, i) => {
+        if (!p) return null;
         const dist = Math.abs(i - CENTER) / CENTER;
         return (
           <g key={i}>
@@ -221,10 +171,9 @@ function EnvChart({ points, recordTime, dateLabel }) {
   );
 }
 
-// ─────────── 화면 ───────────
 export default function RecordDetail() {
   const navigate = useNavigate();
-  const { date: dateParam } = useParams(); // 예: /record/detail/2026-09-09
+  const { date: dateParam } = useParams();
   const start = useMemo(() => parseDate(dateParam), [dateParam]);
 
   const [ym, setYm] = useState({ y: start.y, m: start.m });
@@ -232,14 +181,21 @@ export default function RecordDetail() {
   const [records, setRecords] = useState(null);
   const [activeId, setActiveId] = useState(null);
   const [env, setEnv] = useState(null);
+  const [envMissing, setEnvMissing] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     setRecords(null);
-    fetchMonth(ym.y, ym.m).then((res) => {
-      if (!cancelled) setRecords(res);
-    });
+    fetchMonthRecords(ym.y, ym.m)
+      .then((res) => {
+        if (!cancelled) setRecords(res);
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        if (error.status === 401) navigate("/onboarding", { replace: true });
+        else setRecords([]);
+      });
     return () => {
       cancelled = true;
     };
@@ -274,9 +230,16 @@ export default function RecordDetail() {
     }
     let cancelled = false;
     setEnv(null);
-    fetchEnv(activeKey).then((res) => {
-      if (!cancelled) setEnv(res);
-    });
+    setEnvMissing(false);
+    fetchRecordEnv(active)
+      .then((res) => {
+        if (cancelled) return;
+        setEnv(res.length ? res : null);
+        setEnvMissing(res.length === 0);
+      })
+      .catch(() => {
+        if (!cancelled) setEnvMissing(true);
+      });
     return () => {
       cancelled = true;
     };
@@ -284,9 +247,10 @@ export default function RecordDetail() {
 
   const envStats = useMemo(() => {
     if (!env) return null;
+    const pts = env.filter(Boolean);
     return {
-      temp: mean(env.map((p) => (p.tmin + p.tmax) / 2)),
-      humid: mean(env.map((p) => p.h)),
+      temp: mean(pts.map((p) => (p.tmin + p.tmax) / 2)),
+      humid: mean(pts.map((p) => p.h)),
       note: summarize(env),
     };
   }, [env]);
@@ -313,9 +277,7 @@ export default function RecordDetail() {
 
   const handleDelete = () => {
     playButtonSfx();
-    if (!window.confirm("이 기록을 삭제할까요?")) return;
-    // TODO: 삭제 API 연결
-    navigate("/record");
+    window.alert("기록 삭제는 아직 지원하지 않아요.");
   };
 
   return (
@@ -517,7 +479,7 @@ export default function RecordDetail() {
                   </div>
                 </div>
               ) : (
-                <p className="record-detail__loading">환경 데이터를 불러오는 중이에요.</p>
+                <p className="record-detail__loading">{envMissing ? "이 시간대의 환경 데이터가 없어요." : "환경 데이터를 불러오는 중이에요."}</p>
               )}
 
 

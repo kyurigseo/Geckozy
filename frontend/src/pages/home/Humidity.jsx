@@ -12,13 +12,12 @@ import warnIcon from "../../assets/home/warning_icon.png";
 
 import { fetchHumidity } from "../../api/climate";
 
-// 서버 요청이 실패하거나 센서 데이터가 없을 때 보여줄 빈 값
 const EMPTY = { current: null, measuredAt: null, measured: [], ideal: [], sprayZones: [] };
 
-const HIGH = 70; 
-const LOW = 40; 
-const HIGH_STREAK = 4; 
-const NIGHT = [[0, 6], [20, 24]]; 
+const HIGH = 70;
+const LOW = 40;
+const HIGH_STREAK = 4;
+const NIGHT = [[0, 6], [20, 24]];
 
 const GUIDES = {
   high: {
@@ -91,7 +90,6 @@ function HumidityChart({ measured, ideal, sprayZones }) {
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="chart__svg" role="img" aria-label="오늘의 습도 변화 그래프" style={{ width: "100%", height: "auto" }}>
-      {/* 야간 구간 배경 */}
       {NIGHT.map(([a, b]) => (
         <g key={`night-${a}`}>
           <rect x={x(a)} y={PAD.t} width={x(b) - x(a)} height={plotH} fill="#E8F2F7" />
@@ -101,7 +99,6 @@ function HumidityChart({ measured, ideal, sprayZones }) {
         </g>
       ))}
 
-      {/* 분무 구간 배경 */}
       {sprayZones.map(([a, b]) => (
         <g key={`spray-${a}`}>
           <rect x={x(a)} y={PAD.t} width={x(b) - x(a)} height={plotH} fill="#E8F6CA" />
@@ -111,62 +108,56 @@ function HumidityChart({ measured, ideal, sprayZones }) {
         </g>
       ))}
 
-      {/* y축 가로 격자 점선 */}
       {[0, 20, 40, 60, 80, 100].map((v) => (
-        <line 
-          key={`grid-${v}`} 
-          x1={PAD.l} 
-          x2={W - PAD.r} 
-          y1={y(v)} 
-          y2={y(v)} 
-          stroke="#D1C2AF" 
-          strokeWidth="1" 
-          strokeDasharray="2 2" 
+        <line
+          key={`grid-${v}`}
+          x1={PAD.l}
+          x2={W - PAD.r}
+          y1={y(v)}
+          y2={y(v)}
+          stroke="#D1C2AF"
+          strokeWidth="1"
+          strokeDasharray="2 2"
         />
       ))}
 
-      {/* x축 & y축 기준 실선 (TempChart와 완벽 일치) */}
       <line x1={PAD.l} x2={PAD.l} y1={PAD.t} y2={H - PAD.b} stroke="#D1C2AF" strokeWidth="1" />
       <line x1={PAD.l} x2={W - PAD.r} y1={H - PAD.b} y2={H - PAD.b} stroke="#D1C2AF" strokeWidth="1" />
 
-      {/* y축 단위 % (최상단 눈금 위 위치) */}
       <text x={PAD.l - 12} y={PAD.t - 10} textAnchor="start" fontSize="12" fontWeight="600" fill="#B38A68" letterSpacing="-0.02em">
         %
       </text>
 
-      {/* y축 눈금 숫자 */}
       {[0, 20, 40, 60, 80, 100].map((v) => (
-        <text 
-          key={`ytick-${v}`} 
-          x={PAD.l - 8} 
-          y={y(v) + 4} 
-          textAnchor="end" 
-          fontSize="12" 
-          fontWeight="600" 
-          fill="#B38A68" 
+        <text
+          key={`ytick-${v}`}
+          x={PAD.l - 8}
+          y={y(v) + 4}
+          textAnchor="end"
+          fontSize="12"
+          fontWeight="600"
+          fill="#B38A68"
           letterSpacing="-0.02em"
         >
           {v}
         </text>
       ))}
 
-      {/* x축 시간 눈금 */}
       {[0, 6, 12, 18, 24].map((h) => (
-        <text 
-          key={h} 
-          x={x(h)} 
-          y={H - 4} 
-          textAnchor={h === 0 ? "start" : h === 24 ? "end" : "middle"} 
-          fontSize="12" 
-          fontWeight="600" 
-          fill="#B38A68" 
+        <text
+          key={h}
+          x={x(h)}
+          y={H - 4}
+          textAnchor={h === 0 ? "start" : h === 24 ? "end" : "middle"}
+          fontSize="12"
+          fontWeight="600"
+          fill="#B38A68"
           letterSpacing="-0.02em"
         >
           {h}시
         </text>
       ))}
 
-      {/* 곡선 & 측정 점 */}
       {idealPath && (
         <>
           <path d={idealPath} fill="none" stroke="#FFDCB9" strokeWidth="8" strokeLinecap="round" opacity="0.8" />
@@ -214,7 +205,6 @@ export default function Humidity() {
 
   if (!data) return <div className="humidity-page" />;
 
-  // 센서가 없거나 아직 측정값이 없을 때
   if (data.current == null) {
     return (
       <div className="humidity-page">

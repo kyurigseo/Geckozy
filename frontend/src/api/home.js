@@ -1,14 +1,11 @@
-// 홈 화면용 API. 팀 client.js(request, ApiError)를 그대로 쓰고, my.js 는 건드리지 않아요.
 import { ApiError, request } from './client'
 
-// 대표 도마뱀 = 처음 등록한 도마뱀 (my.js 와 같은 규칙)
 export const getMainLizard = async () => {
   const lizards = await request('/lizards')
   if (!lizards || lizards.length === 0) throw new ApiError(404, 'LIZARD_NOT_FOUND')
-  return lizards[0] // { lizardId, name, species }
+  return lizards[0]
 }
 
-// 사육장이 아직 없으면 null
 export const getEnclosureOf = async (lizardId) => {
   try {
     return await request('/enclosures', { params: { lizardId } })
@@ -18,7 +15,6 @@ export const getEnclosureOf = async (lizardId) => {
   }
 }
 
-// 온도·습도 화면처럼 사육장 번호만 필요할 때
 export const getMainEnclosureId = async () => {
   const lizard = await getMainLizard()
   const enclosure = await getEnclosureOf(lizard.lizardId)
@@ -26,11 +22,8 @@ export const getMainEnclosureId = async () => {
   return enclosure.enclosureId
 }
 
-// 한 요청이 실패해도 홈 전체가 비지 않게, 실패하면 null
 const soft = (promise) => promise.catch(() => null)
 
-// 알림 종류 → 이동할 화면, 일러스트 위 핀 위치(%)
-// TEMPERATURE 핀 위치는 임의로 잡은 값이에요. 디자인에 맞춰 조절하세요
 const ALERT_VIEW = {
   HUMIDITY: { link: '/humidity', x: 76, y: 20, bubbleSide: 'left' },
   SENSOR: { link: '/my/sensor', x: 33, y: 55, bubbleSide: 'right' },
@@ -43,7 +36,7 @@ const toAlerts = (alertData) => {
   const seen = new Set()
   return all.flatMap((a, i) => {
     const view = ALERT_VIEW[a.detailType]
-    if (!view || seen.has(a.detailType)) return [] // 같은 종류는 핀 하나만
+    if (!view || seen.has(a.detailType)) return []
     seen.add(a.detailType)
     return [{ id: `${a.detailType}-${i}`, text: a.message, ...view }]
   })
@@ -67,7 +60,6 @@ const toHumidityCard = (s) => {
   return { value: String(Math.round(Number(s.currentHumidity))), unit: '%', label: ok ? '안정' : '확인 필요', tone: ok ? 'ok' : 'warn' }
 }
 
-// 홈 화면에 필요한 걸 한 번에. 사육장이 없으면 enclosure: null
 export const fetchHome = async () => {
   const lizard = await getMainLizard()
   const enclosure = await getEnclosureOf(lizard.lizardId)
@@ -84,14 +76,12 @@ export const fetchHome = async () => {
     soft(request(`/enclosures/${id}/humidities/suggestions`)),
   ])
 
-  // 환경 코치: 온도 알림이 우선이면 온도 제안, 아니면 습도 제안
   const primary = alertData?.primaryAlert?.detailType
   const suggestion = primary === 'TEMPERATURE' ? tempSuggest : humidSuggest ?? tempSuggest
 
   return {
     ...base,
     enclosure,
-    // TankPreview 가 쓰는 모양 (my.js getMyTank 와 같은 키)
     tank: {
       wall: enclosure.wallDesign ?? '',
       floor: enclosure.floorDesign ?? '',
@@ -101,7 +91,7 @@ export const fetchHome = async () => {
     alerts: toAlerts(alertData),
     temperature: toTemperatureCard(temp),
     humidity: toHumidityCard(humid),
-    summary: summary?.summary ?? null, // 데이터 부족이면 null
+    summary: summary?.summary ?? null,
     coach: suggestion ? { title: suggestion.actionTitle, text: suggestion.actionGuide } : null,
   }
 }

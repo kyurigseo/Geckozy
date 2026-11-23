@@ -12,15 +12,14 @@ import closeBtn from "../../assets/home/close_btn.png";
 
 import { fetchTemperature } from "../../api/climate";
 
-// 서버 요청이 실패하거나 센서 데이터가 없을 때 보여줄 빈 값
 const EMPTY = { current: null, measuredAt: null, hourly: [] };
 
-const OK_MIN = 22; 
+const OK_MIN = 22;
 const OK_MAX = 29;
-const BAR_MIN = 16; 
+const BAR_MIN = 16;
 const BAR_MAX = 35;
 const NIGHT = [[0, 6], [19, 24]];
-const NIGHT_OK = [18, 22]; // 
+const NIGHT_OK = [18, 22];
 
 const GUIDES = {
   ok: {
@@ -49,7 +48,6 @@ const GUIDES = {
   },
 };
 
-// ─────────── 계산 함수 ───────────
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 const toPercent = (t) => clamp(((t - BAR_MIN) / (BAR_MAX - BAR_MIN)) * 100, 0, 100);
 
@@ -65,7 +63,6 @@ const formatTime = (iso) => {
   return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 };
 
-// ─────────── 적정 온도 범위 바 ───────────
 function RangeBar({ value }) {
   const lo = toPercent(OK_MIN);
   const hi = toPercent(OK_MAX);
@@ -83,10 +80,10 @@ function RangeBar({ value }) {
         }}
       >
         {ticks.map((pct, i) => (
-          <i 
-            key={i} 
-            className="range-bar__tick" 
-            style={{ 
+          <i
+            key={i}
+            className="range-bar__tick"
+            style={{
               position: "absolute",
               top: 0,
               bottom: 0,
@@ -95,7 +92,7 @@ function RangeBar({ value }) {
               borderLeft: "1.5px dashed #FFFFFF",
               opacity: 0.9,
               pointerEvents: "none"
-            }} 
+            }}
           />
         ))}
 
@@ -115,7 +112,6 @@ function RangeBar({ value }) {
     </div>
   );
 }
-// ─────────── 오늘의 온도 변화 그래프 ───────────
 function TempChart({ hourly }) {
   const W = 320;
   const H = 200;
@@ -151,14 +147,14 @@ function TempChart({ hourly }) {
       ))}
 
       {NIGHT.map(([a, b]) => (
-        <text 
-          key={`nt-txt-${a}`} 
-          x={(x(a) + x(b)) / 2} 
-          y={PAD.t + 15} 
-          textAnchor="middle" 
-          fontSize="11" 
-          fontWeight="600" 
-          fill="#94B9D0" 
+        <text
+          key={`nt-txt-${a}`}
+          x={(x(a) + x(b)) / 2}
+          y={PAD.t + 15}
+          textAnchor="middle"
+          fontSize="11"
+          fontWeight="600"
+          fill="#94B9D0"
           letterSpacing="-0.02em"
         >
           야간 구간
@@ -190,14 +186,14 @@ function TempChart({ hourly }) {
       ))}
 
       {[0, 6, 12, 18, 24].map((h) => (
-        <text 
-          key={h} 
-          x={x(h)} 
-          y={H - 4} 
-          textAnchor={h === 0 ? "start" : h === 24 ? "end" : "middle"} 
-          fontSize="12" 
-          fontWeight="600" 
-          fill="#B38A68" 
+        <text
+          key={h}
+          x={x(h)}
+          y={H - 4}
+          textAnchor={h === 0 ? "start" : h === 24 ? "end" : "middle"}
+          fontSize="12"
+          fontWeight="600"
+          fill="#B38A68"
           letterSpacing="-0.02em"
         >
           {h}시
@@ -249,7 +245,6 @@ export default function Temperature() {
 
   if (!data) return <div className="temperature-page" />;
 
-  // 센서가 없거나 아직 측정값이 없을 때
   if (data.current == null) {
     return (
       <div className="temperature-page">

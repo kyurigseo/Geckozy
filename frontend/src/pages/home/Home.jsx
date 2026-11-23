@@ -29,7 +29,6 @@ import buttonSrc from '../../assets/sounds/button.mp3';
 
 
 
-// 지표 카드의 아이콘·이동 경로 (값과 상태는 서버에서 받아요)
 const METRIC_META = [
   { id: "temperature", label: "온도", icon: temperatureIcon, path: "/temperature", key: "temperature" },
   { id: "humidity", label: "습도", icon: humidityIcon, path: "/humidity", key: "humidity" },
@@ -41,7 +40,6 @@ export default function Home() {
   const [showGuide, setShowGuide] = useState(false);
   const { isSoundOn, toggleSound, playSfx } = useSound();
 
-  // 서버에서 받은 홈 데이터 (도마뱀, 사육장, 알림, 온습도, 요약, 코치)
   const [home, setHome] = useState(null);
 
   useEffect(() => {
@@ -51,7 +49,6 @@ export default function Home() {
         if (!cancelled) setHome(h);
       })
       .catch((error) => {
-        // 로그인이 풀렸으면 처음 화면으로
         if (!cancelled && error.status === 401) navigate("/onboarding", { replace: true });
       });
     return () => {
@@ -60,7 +57,7 @@ export default function Home() {
   }, [navigate]);
 
   const petName = home?.petName ?? "";
-  const tankName = "1번 사육장"; // TODO: 서버에 사육장 이름이 없음
+  const tankName = "1번 사육장";
   const tank = home?.tank ?? null;
   const alerts = home?.alerts ?? [];
   const today = new Date();
@@ -74,7 +71,6 @@ export default function Home() {
 
   useEffect(() => {
     const unlockSfx = () => {
-      // 첫 클릭 시 무음으로 한번 재생을 시도해서 브라우저 차단을 풀어버림
       playSfx('button');
       window.removeEventListener('pointerdown', unlockSfx);
     };
@@ -85,8 +81,8 @@ export default function Home() {
 
   const playButtonSfx = () => {
     const sound = new Audio(buttonSrc);
-    sound.volume = 0.5; 
-    sound.currentTime = 0; 
+    sound.volume = 0.5;
+    sound.currentTime = 0;
     sound.play().catch((err) => {
       console.warn("효과음 재생 차단됨:", err);
     });
@@ -97,18 +93,15 @@ export default function Home() {
   return (
     <div className="home">
       <div className="home__scroll">
-        {/* 날짜 */}
         <div className="home__date" style={{ backgroundImage: `url(${dateBg})` }}>
           {formattedDate}
         </div>
 
-        {/* 인사 */}
         <h1 className="home__greeting">
           안녕하세요 <span className="accent">수정님</span>
           <img src={sproutIcon} alt="" className="home__sprout" />
         </h1>
 
-        {/* 사육장 선택 */}
         <button type="button" className="selector">
           <img src={sproutIcon} alt="" />
           <span>
@@ -117,11 +110,10 @@ export default function Home() {
           <span className="selector__arrow" aria-hidden="true"><img src={dropdownIcon} className="selector__dropdown-icon" /></span>
         </button>
 
-        {/* 사육장 일러스트 + 알림 핀 */}
         <section className="stage">
           <TankPreview tank={tank} className="home-tank-preview" />
-        
- 
+
+
               <button
                   type="button"
                   className={`stage__sound ${isSoundOn ? "" : "is-off"}`}
@@ -129,9 +121,9 @@ export default function Home() {
                   aria-label="소리 켜기/끄기"
                 >
                   <span aria-hidden="true">
-                    <img 
-                      src={isSoundOn ? musicOn : musicOff} 
-                      alt={isSoundOn ? "소리 켬" : "소리 끔"} 
+                    <img
+                      src={isSoundOn ? musicOn : musicOff}
+                      alt={isSoundOn ? "소리 켬" : "소리 끔"}
                     />
                   </span>
                 </button>
@@ -164,7 +156,6 @@ export default function Home() {
             })}
         </section>
 
-        {/* 하단 시트 */}
         <section className="sheet">
           <h2 className="sheet__title">
             {petName}의 사육장 <img src={sproutIcon} alt="" />
@@ -226,8 +217,8 @@ export default function Home() {
               <img src={sproutIcon} alt="" /> {petName}의 환경 코치
             </h3>
             <p>{home?.coach?.text ?? "지금은 특별히 안내할 내용이 없어요."}</p>
-            <button type="button" className="coach__btn" 
-      
+            <button type="button" className="coach__btn"
+
             onClick={() => {
               console.log("버튼 클릭됨 / playSfx 호출");
               playButtonSfx();
