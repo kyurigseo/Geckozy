@@ -17,12 +17,13 @@ import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * 서버 시작 시 기준 데이터(종, 환경 기준, 고민 항목)를 넣는다.
+ * 서버 시작 시 기준 데이터(종, 환경 기준, 사전 입양 가이드, 고민 항목)를 넣는다.
  * 이름 기준으로 없을 때만 INSERT 하므로 여러 번 재시작해도 중복되지 않는다.
  *
  * 빈 DB 기준 ID
  *  - species : 1 비어디드 드래곤 / 2 크레스티드 게코 / 3 레오파드 게코
  *  - concerns: 1 온도 관리 ~ 8 사육 환경 (CONCERNS 순서)
+ *  - pre_adoption_guides: 1 크레스티드 게코 (단계별 콘텐츠는 PreAdoptionGuideSeedData)
  */
 @Slf4j
 @Component
@@ -32,6 +33,7 @@ public class DataInitializer implements ApplicationRunner {
     private final SpeciesRepository speciesRepository;
     private final SpeciesEnvironmentStandardRepository standardRepository;
     private final ConcernRepository concernRepository;
+    private final PreAdoptionGuideSeeder preAdoptionGuideSeeder;
 
     private static final List<String> CONCERNS = List.of(
             "온도 관리",
@@ -85,6 +87,7 @@ public class DataInitializer implements ApplicationRunner {
     @Transactional
     public void run(ApplicationArguments args) {
         seedSpecies();
+        seedPreAdoptionGuides();
         seedConcerns();
     }
 
@@ -113,6 +116,10 @@ public class DataInitializer implements ApplicationRunner {
                 );
             }
         }
+    }
+
+    private void seedPreAdoptionGuides() {
+        preAdoptionGuideSeeder.seed();
     }
 
     private void seedConcerns() {
