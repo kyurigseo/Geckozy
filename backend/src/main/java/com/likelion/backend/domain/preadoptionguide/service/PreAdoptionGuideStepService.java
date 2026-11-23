@@ -42,6 +42,7 @@ public class PreAdoptionGuideStepService {
     private final PreAdoptionGuideBlockItemRepository blockItemRepository;
     private final PreAdoptionGuideCheckItemRepository checkItemRepository;
     private final PreAdoptionGuideUserCheckRepository userCheckRepository;
+    private final PreAdoptionGuideUserCheckUpserter userCheckUpserter;
 
     // 단계별 사전 입양 가이드 조회
     public PreAdoptionGuideStepResponse getStep(Long userId, Long preGuideId, Integer stepNumber) {
@@ -109,7 +110,7 @@ public class PreAdoptionGuideStepService {
 
         LocalDateTime now = KstTime.now();
         request.checks().forEach(check ->
-                userCheckRepository.upsert(userId, check.checkItemId(), check.checked(), now)
+                userCheckUpserter.upsert(userId, check.checkItemId(), check.checked(), now)
         );
 
         return new PreAdoptionGuideCheckSaveResponse(request.checks().size());
