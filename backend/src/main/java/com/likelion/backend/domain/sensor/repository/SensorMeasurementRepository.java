@@ -23,4 +23,8 @@ public interface SensorMeasurementRepository extends JpaRepository<SensorMeasure
     @Modifying
     @Query("delete from SensorMeasurement m where m.sensor = :sensor")
     void deleteBySensor(@Param("sensor") Sensor sensor);
+
+    @Modifying
+    @Query("delete from SensorMeasurement m where m.sensor = :sensor and m.measuredAt > :after")
+    void deleteBySensorAndMeasuredAtAfter(@Param("sensor") Sensor sensor, @Param("after") LocalDateTime after);
 }

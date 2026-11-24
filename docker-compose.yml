@@ -12,6 +12,8 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
       JWT_SECRET: ${JWT_SECRET}
+      MOCK_SENSOR_ENABLED: ${MOCK_SENSOR_ENABLED:-false}
+      MOCK_SENSOR_ENCLOSURE_IDS: ${MOCK_SENSOR_ENCLOSURE_IDS:-}
     depends_on:
       - mysql
     restart: always
