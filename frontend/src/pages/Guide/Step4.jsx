@@ -269,6 +269,7 @@ const Step4 = () => {
             )}
           </span>
 
+          <div className="step4-summary">
           <img
             className="step4-title2"
             src={title2}
@@ -353,6 +354,7 @@ const Step4 = () => {
             }
             onClick={isComplete ? handleNext : undefined}
           />
+          </div>
         </div>
       </div>
     </div>

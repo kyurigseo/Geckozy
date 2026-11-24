@@ -157,21 +157,14 @@ const Step3 = () => {
                   <div className="sensor-name">
                     <span className="sensor-status"></span>
 
-                    <strong>
-                      {sensor?.sensorId
-                        ? `Sensor ${sensor.sensorId}`
-                        : 'Sensor'}
-                    </strong>
+                    <strong>Geckozy Sensor</strong>
                   </div>
 
                   <div className="sensor-info">
                     <span>연결됨</span>
                     <span>·</span>
                     <span className="battery-icon"></span>
-                    <span>
-                      {sensor?.message ||
-                        '센서 연결 상태 확인됨'}
-                    </span>
+                    <span>&nbsp;배터리 92%</span>
                   </div>
                 </>
               ) : (

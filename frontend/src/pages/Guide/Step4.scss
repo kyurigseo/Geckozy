@@ -35,11 +35,6 @@
     .step4-inner {
     position: relative;
     width: 393px;
-    min-height: 1170px;
-
-    &.complete {
-        min-height: 1033px;
-    }
     }
 
   .step4-back {
@@ -331,19 +326,20 @@
     color: #A89EA1;
   }
 
+  .step4-summary {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 557px 0 130px;
+  }
+
   .step4-title2 {
-    position: absolute;
-    top: 557px;
-    left: 50%;
     width: 227px;
     height: auto;
-    transform: translateX(-50%);
   }
 
   .step4-result {
-    position: absolute;
-    bottom: 261px;
-    left: 22px;
     width: 350px;
 
     box-sizing: border-box;
@@ -499,11 +495,8 @@
   }
 
   .last-update {
-        position: absolute;
-        width: 145px;
-        height: 18px;
-        left: 218px;
-        bottom:238px;
+        align-self: flex-end;
+        margin-right: 30px;
 
 
         font-family: 'Pretendard';
@@ -519,11 +512,6 @@
   }
 
   .step4-button {
-        position: absolute;
-        bottom: 160px;
-        left: 50%;
-
-        transform: translateX(-50%);
         width: 196px;
         height: auto;
   }
