@@ -13,6 +13,11 @@ jwt:
   expiration: 86400000
   access-token-expiration: 86400000
 
+# [테스트 전용] 가상 센서 - 실제 센서 연동 전 화면 테스트용 (운영 시 false)
+mock-sensor:
+  enabled: ${MOCK_SENSOR_ENABLED:false}
+  enclosure-ids: ${MOCK_SENSOR_ENCLOSURE_IDS:}   # 10분마다 자동 생성할 사육장 ID (쉼표 구분)
+
 ---
 # 2. LOCAL 프로필 (로컬 H2 DB)
 spring:
