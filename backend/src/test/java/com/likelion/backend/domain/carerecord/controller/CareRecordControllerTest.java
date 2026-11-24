@@ -222,6 +222,7 @@ class CareRecordControllerTest {
 
         when(careRecordService.addPhoto(
                 eq(userId),
+                eq(lizardId),
                 eq(recordId),
                 any()
         )).thenReturn(response);
@@ -250,6 +251,7 @@ class CareRecordControllerTest {
 
         verify(careRecordService).addPhoto(
                 eq(userId),
+                eq(lizardId),
                 eq(recordId),
                 any()
         );
@@ -280,7 +282,7 @@ class CareRecordControllerTest {
                 .andExpect(jsonPath("$.data").doesNotExist());
 
         verify(careRecordService)
-                .updateMemo(userId, recordId, "먹이 급여 완료");
+                .updateMemo(userId, lizardId, recordId, "먹이 급여 완료");
     }
 
     @Test
@@ -291,7 +293,7 @@ class CareRecordControllerTest {
 
         EnvironmentResponse response = createEnvironmentResponse();
 
-        when(careRecordService.getEnvironment(userId, recordId))
+        when(careRecordService.getEnvironment(userId, lizardId, recordId))
                 .thenReturn(response);
 
         mockMvc.perform(
@@ -309,7 +311,7 @@ class CareRecordControllerTest {
                 .andExpect(jsonPath("$.data.measuredAt")
                         .value("2026-11-03T10:00:00"));
 
-        verify(careRecordService).getEnvironment(userId, recordId);
+        verify(careRecordService).getEnvironment(userId, lizardId, recordId);
     }
 
     @Test
@@ -337,7 +339,7 @@ class CareRecordControllerTest {
                         null
                 );
 
-        when(careRecordService.getRecordDetail(userId, recordId))
+        when(careRecordService.getRecordDetail(userId, lizardId, recordId))
                 .thenReturn(response);
 
         mockMvc.perform(
@@ -361,7 +363,7 @@ class CareRecordControllerTest {
                 .andExpect(jsonPath("$.data.photos.length()").value(0))
                 .andExpect(jsonPath("$.data.environment").doesNotExist());
 
-        verify(careRecordService).getRecordDetail(userId, recordId);
+        verify(careRecordService).getRecordDetail(userId, lizardId, recordId);
     }
 
     @Test
@@ -379,7 +381,7 @@ class CareRecordControllerTest {
                 List.of(graphResponse);
 
         when(careRecordService.getEnvironmentGraph(
-                userId, recordId, 60, 45
+                userId, lizardId, recordId, 60, 45
         )).thenReturn(response);
 
         mockMvc.perform(
@@ -402,7 +404,7 @@ class CareRecordControllerTest {
                         .value("2026-11-03T10:00:00"));
 
         verify(careRecordService)
-                .getEnvironmentGraph(userId, recordId, 60, 45);
+                .getEnvironmentGraph(userId, lizardId, recordId, 60, 45);
     }
 
     @Test
@@ -413,7 +415,7 @@ class CareRecordControllerTest {
 
         EnvironmentResponse response = createEnvironmentResponse();
 
-        when(careRecordService.getNearestEnvironment(userId, recordId))
+        when(careRecordService.getNearestEnvironment(userId, lizardId, recordId))
                 .thenReturn(response);
 
         mockMvc.perform(
@@ -432,7 +434,7 @@ class CareRecordControllerTest {
                         .value("2026-11-03T10:00:00"));
 
         verify(careRecordService)
-                .getNearestEnvironment(userId, recordId);
+                .getNearestEnvironment(userId, lizardId, recordId);
     }
 
     @Test
@@ -447,7 +449,7 @@ class CareRecordControllerTest {
                         "기록 시점의 온도와 습도는 적정 범위입니다."
                 );
 
-        when(careRecordService.getEnvironmentSummary(userId, recordId))
+        when(careRecordService.getEnvironmentSummary(userId, lizardId, recordId))
                 .thenReturn(response);
 
         mockMvc.perform(
@@ -465,7 +467,7 @@ class CareRecordControllerTest {
                         .value("기록 시점의 온도와 습도는 적정 범위입니다."));
 
         verify(careRecordService)
-                .getEnvironmentSummary(userId, recordId);
+                .getEnvironmentSummary(userId, lizardId, recordId);
     }
 
     @Test

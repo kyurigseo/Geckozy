@@ -1,5 +1,6 @@
 package com.likelion.backend.domain.carerecord.service;
 
+import lombok.extern.slf4j.Slf4j;
 import tools.jackson.databind.JsonNode;
 import com.likelion.backend.domain.carerecord.dto.request.CareRecordCreateRequest;
 import com.likelion.backend.domain.carerecord.dto.response.*;
@@ -21,6 +22,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.FileSystemResource;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -30,6 +35,7 @@ import java.nio.file.Paths;
 import java.time.*;
 import java.util.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -259,10 +265,15 @@ public class CareRecordService {
     @Transactional
     public CareRecordPhotoResponse addPhoto(
             Long userId,
+            Long lizardId,
             Long recordId,
             MultipartFile file
     ) {
-        CareRecord record = validateRecordOwner(userId, recordId);
+        CareRecord record = validateRecordOwner(
+                userId, lizardId, recordId
+        );
+
+        // 이하 기존 코드 유지
 
         if (file == null || file.isEmpty()) {
             throw new BusinessException(ErrorCode.INVALID_PHOTO);
@@ -315,16 +326,168 @@ public class CareRecordService {
         }
     }
 
+    // 사육 기록 사진 파일 조회
+    public Resource getPhotoFile(
+            Long userId,
+            String filename
+    ) {
+        // 1. 파일명 검증 (기존 UUID 기반 저장 형식)
+        if (filename == null || !filename.matches(
+                "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-"
+                        + "[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-"
+                        + "[0-9a-fA-F]{12}\\.(jpg|jpeg|png|webp)"
+        )) {
+            throw new BusinessException(
+                    ErrorCode.PHOTO_NOT_FOUND
+            );
+        }
+
+        // 2. DB에 저장된 사진 URL 생성
+        String imageUrl = "/uploads/care-records/" + filename;
+
+        // 3. 사진 존재 여부 및 소유권 검증
+        careRecordPhotoRepository
+                .findByImageUrlAndCareRecord_Lizard_User_UserIdAndCareRecord_Lizard_DeletedAtIsNull(
+                        imageUrl,
+                        userId
+                )
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.PHOTO_NOT_FOUND
+                ));
+
+        // 4. 실제 파일 저장 경로 확인
+        Path directory = Paths.get(uploadDir)
+                .toAbsolutePath()
+                .normalize();
+
+        Path targetPath = directory.resolve(filename)
+                .normalize();
+
+        // 5. 파일 경로 및 존재 여부 검증
+        if (!targetPath.startsWith(directory)
+                || !Files.isRegularFile(
+                targetPath,
+                java.nio.file.LinkOption.NOFOLLOW_LINKS
+        )
+                || !Files.isReadable(targetPath)) {
+            throw new BusinessException(
+                    ErrorCode.PHOTO_NOT_FOUND
+            );
+        }
+
+        // 6. 실제 이미지 파일 반환
+        return new FileSystemResource(targetPath);
+    }
+
     private void deleteFileIfExists(Path path) {
         if (path == null) {
             return;
         }
 
         try {
-            Files.deleteIfExists(path);
-        } catch (IOException e) {
-            // 파일 삭제 실패는 별도 로그로 남기는 것을 권장
+            Path directory = Paths.get(uploadDir)
+                    .toAbsolutePath()
+                    .normalize();
+
+            Path target = path.toAbsolutePath().normalize();
+
+            // 업로드 디렉터리 외부 파일 삭제 방지
+            if (!target.startsWith(directory)
+                    || target.equals(directory)) {
+                log.error("허용되지 않은 사진 삭제 경로: {}", target);
+                return;
+            }
+
+            boolean deleted = Files.deleteIfExists(target);
+
+            if (deleted) {
+                log.info("사육 기록 사진 파일 삭제 성공: {}", target);
+            } else {
+                log.info("사육 기록 사진 파일이 이미 존재하지 않음: {}", target);
+            }
+
+        } catch (IOException | SecurityException e) {
+            log.error(
+                    "사육 기록 사진 파일 삭제 실패. 수동 정리 필요. path={}",
+                    path,
+                    e
+            );
         }
+    }
+
+    private <T> void deleteByIdIfExists(
+            org.springframework.data.jpa.repository.JpaRepository<T, Long> repository,
+            Long recordId
+    ) {
+        repository.findById(recordId)
+                .ifPresent(repository::delete);
+    }
+
+    // REC-19. 사육 기록 삭제
+    @Transactional
+    public void deleteRecord(
+            Long userId,
+            Long lizardId,
+            Long recordId
+    ) {
+        // 1. 기록 소유권 검증
+        CareRecord record = validateRecordOwner(
+                userId, lizardId, recordId
+        );
+
+        // 2. 삭제 전 사진 경로 확보
+        List<Path> photoPaths = careRecordPhotoRepository
+                .findAllByCareRecord_RecordIdOrderByPhotoOrderAsc(recordId)
+                .stream()
+                .map(photo -> {
+                    String imageUrl = photo.getImageUrl();
+                    String filename = imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
+
+                    return Paths.get(uploadDir)
+                            .toAbsolutePath()
+                            .normalize()
+                            .resolve(filename)
+                            .normalize();
+                })
+                .toList();
+
+        // 3. 유형별 상세 데이터 삭제
+        deleteByIdIfExists(feedingRepository, recordId);
+        deleteByIdIfExists(weightRepository, recordId);
+        deleteByIdIfExists(sheddingRepository, recordId);
+        deleteByIdIfExists(stoolRepository, recordId);
+        deleteByIdIfExists(cleaningRepository, recordId);
+        deleteByIdIfExists(abnormalBehaviorRepository, recordId);
+        deleteByIdIfExists(extraRepository, recordId);
+
+        // 4. 사진 DB 데이터 삭제
+        careRecordPhotoRepository.deleteAllByCareRecord_RecordId(recordId);
+
+        // 5. 원본 기록 삭제
+        careRecordRepository.delete(record);
+
+        // 6. DB 커밋 성공 후 실제 사진 파일 삭제
+        TransactionSynchronizationManager.registerSynchronization(
+                new TransactionSynchronization() {
+                    @Override
+                    public void afterCommit() {
+                        log.info(
+                                "사육 기록 삭제 완료. 사진 파일 정리 시작. recordId={}, photoCount={}",
+                                recordId,
+                                photoPaths.size()
+                        );
+
+                        for (Path path : photoPaths) {
+                            deleteFileIfExists(path);
+                        }
+
+                        log.info(
+                                "사육 기록 사진 파일 정리 시도 완료. recordId={}",
+                                recordId
+                        );
+                    }
+                }
+        );
     }
 
     private String getImageExtension(String filename) {
@@ -348,10 +511,14 @@ public class CareRecordService {
     @Transactional
     public void updateMemo(
             Long userId,
+            Long lizardId,
             Long recordId,
             String memo
     ) {
-        CareRecord record = validateRecordOwner(userId, recordId);
+        CareRecord record = validateRecordOwner(
+                userId, lizardId, recordId
+        );
+
         record.updateMemo(memo);
     }
 
@@ -370,10 +537,20 @@ public class CareRecordService {
         return lizard;
     }
 
-    private CareRecord validateRecordOwner(Long userId, Long recordId) {
+    private CareRecord validateRecordOwner(
+            Long userId,
+            Long lizardId,
+            Long recordId
+    ) {
         return careRecordRepository
-                .findByRecordIdAndLizard_User_UserId(recordId, userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.CARE_RECORD_NOT_FOUND));
+                .findByRecordIdAndLizard_LizardIdAndLizard_User_UserIdAndLizard_DeletedAtIsNull(
+                        recordId,
+                        lizardId,
+                        userId
+                )
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.CARE_RECORD_NOT_FOUND
+                ));
     }
 
     // -----------------------------
@@ -445,9 +622,12 @@ public class CareRecordService {
     // -----------------------------
     public EnvironmentResponse getEnvironment(
             Long userId,
+            Long lizardId,
             Long recordId
     ) {
-        CareRecord record = validateRecordOwner(userId, recordId);
+        CareRecord record = validateRecordOwner(
+                userId, lizardId, recordId
+        );
 
         SensorMeasurement measurement = findNearestMeasurement(record);
 
@@ -508,14 +688,15 @@ public class CareRecordService {
                 .orElse(null);
     }
 
-    // -----------------------------
-// REC-15. 기록 상세 조회
-// -----------------------------
+    // REC-15. 기록 상세 조회
     public CareRecordDetailResponse getRecordDetail(
             Long userId,
+            Long lizardId,
             Long recordId
     ) {
-        CareRecord record = validateRecordOwner(userId, recordId);
+        CareRecord record = validateRecordOwner(
+                userId, lizardId, recordId
+        );
 
         // 기록 유형별 상세 정보
         Map<String, Object> typeDetail = getTypeDetail(record);
@@ -530,7 +711,7 @@ public class CareRecordService {
 
         // 기록 시점 환경 정보
         EnvironmentResponse environment =
-                getEnvironment(userId, recordId);
+                getEnvironment(userId, lizardId, recordId);
 
         return new CareRecordDetailResponse(
                 record,
@@ -605,11 +786,15 @@ public class CareRecordService {
     // -----------------------------
     public List<EnvironmentGraphResponse> getEnvironmentGraph(
             Long userId,
+            Long lizardId,
             Long recordId,
             int beforeMinutes,
             int afterMinutes
     ) {
-        CareRecord record = validateRecordOwner(userId, recordId);
+        CareRecord record = validateRecordOwner(
+                userId, lizardId, recordId
+        );
+
 
         if (beforeMinutes < 0 || afterMinutes < 0) {
             throw new BusinessException(ErrorCode.INVALID_REQUEST);
@@ -654,9 +839,12 @@ public class CareRecordService {
     // -----------------------------
     public EnvironmentResponse getNearestEnvironment(
             Long userId,
+            Long lizardId,
             Long recordId
     ) {
-        CareRecord record = validateRecordOwner(userId, recordId);
+        CareRecord record = validateRecordOwner(
+                userId, lizardId, recordId
+        );
 
         SensorMeasurement measurement = findNearestMeasurement(record);
 
@@ -672,9 +860,13 @@ public class CareRecordService {
     // -----------------------------
     public EnvironmentSummaryResponse getEnvironmentSummary(
             Long userId,
+            Long lizardId,
             Long recordId
     ) {
-        CareRecord record = validateRecordOwner(userId, recordId);
+        CareRecord record = validateRecordOwner(
+                userId, lizardId, recordId
+        );
+
 
         Enclosure enclosure = enclosureRepository
                 .findByLizard_LizardId(record.getLizard().getLizardId())
