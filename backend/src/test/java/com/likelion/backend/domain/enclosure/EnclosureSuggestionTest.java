@@ -37,6 +37,7 @@ class EnclosureSuggestionTest {
         enclosureService = new EnclosureService(
                 null,
                 new EnclosureRecommendationService(enclosureRepository),
+                null,
                 null
         );
     }

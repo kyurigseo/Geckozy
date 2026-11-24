@@ -167,4 +167,14 @@ public class EnclosureController {
         TemperaturePatternResponse response = enclosureService.getTemperaturePattern(enclosureId, currentUserId);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
+
+    @GetMapping("/{enclosureId}/environment/coach")
+    public ResponseEntity<ApiResponse<EnvironmentCoachResponse>> getEnvironmentCoach(
+            @PathVariable("enclosureId") Long enclosureId,
+            @AuthenticationPrincipal Long currentUserId
+    ) {
+        EnvironmentCoachResponse response = enclosureService.getEnvironmentCoach(enclosureId, currentUserId);
+        String message = response.insufficientData() ? "INSUFFICIENT_DATA" : "SUCCESS";
+        return ResponseEntity.ok(ApiResponse.success(message, response));
+    }
 }
