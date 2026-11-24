@@ -4,6 +4,7 @@ import RecordPhotos from './Recordphotos';
 import RecordTimeSheet from './Recordtimesheet';
 
 import bgDecoration from '../../assets/record/bg_pattern.png';
+import iconBack from '../../assets/record/icon_back.png';
 import num1 from '../../assets/record/num_1.png';
 import num2 from '../../assets/record/num_2.png';
 import iconClock from '../../assets/record/icon_clock.png';
@@ -36,8 +37,8 @@ const RecordEtc = ({ onBack,onComplete  }) => {
       <img src={bgDecoration} alt="" className="bg-decoration" />
 
       <header className="record-form-header">
-        <button type="button" className="back-btn" onClick={onBack}>
-          ‹
+        <button type="button" className="back-btn" onClick={onBack} aria-label="뒤로 가기">
+          <img src={iconBack} alt="" />
         </button>
         <h1 className="title">추가 기록</h1>
       </header>
@@ -48,18 +49,22 @@ const RecordEtc = ({ onBack,onComplete  }) => {
             <img src={num1} alt="1" className="num-badge-img" />
             <span>기록 유형</span>
           </h2>
-          <div className="options-grid">
-            {['행동 변화', '사육장 변화', '장비 변경', '기타'].map((val) => (
-              <label key={val} className={`option-item ${etcType === val ? 'is-checked' : ''}`}>
-                <input
-                  type="radio"
-                  name="etcType"
-                  checked={etcType === val}
-                  onChange={() => setEtcType(val)}
-                />
-                <span className="radio-circle" />
-                <span className="option-label">{val}</span>
-              </label>
+          <div className="options-rows">
+            {[['행동 변화', '사육장 변화'], ['장비 변경', '기타']].map((row, i) => (
+              <div key={i} className="options-row">
+                {row.map(val => (
+                  <label key={val} className={`option-item ${etcType === val ? 'is-checked' : ''}`}>
+                    <input
+                      type="radio"
+                      name="etcType"
+                      checked={etcType === val}
+                      onChange={() => setEtcType(val)}
+                      />
+                      <span className="radio-circle" />
+                      <span className="option-label">{val}</span>
+                    </label>
+                ))}
+              </div>
             ))}
           </div>
         </section>
@@ -69,8 +74,8 @@ const RecordEtc = ({ onBack,onComplete  }) => {
             <img src={num2} alt="2" className="num-badge-img" />
             <span>기록 시각 선택</span>
           </h2>
-          <div className="time-select-btn" onClick={() => setIsPickerOpen(true)}>
-            <span>{selectedTime || '발생 시간대를 선택해주세요.'}</span>
+          <div className={`time-select-btn ${selectedTime ? 'is-filled' : ''}`} onClick={() => setIsPickerOpen(true)}>
+            <span>{selectedTime || '기록 시간대를 선택해주세요.'}</span>
             <img src={iconClock} alt="시계" className="clock-icon-img" />
           </div>
         </section>

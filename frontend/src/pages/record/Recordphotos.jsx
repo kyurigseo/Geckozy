@@ -42,12 +42,11 @@ export default function RecordPhotos({ photos, onChange }) {
           <button
             key={previewOf(file)}
             type="button"
-            className="photo-placeholder-img"
+            className="photo-picked"
             onClick={() => remove(file)}
             aria-label="사진 빼기"
-            style={{ padding: 0, border: 0, background: "none" }}
           >
-            <img src={previewOf(file)} alt="첨부한 사진" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            <img src={previewOf(file)} alt="첨부한 사진" />
           </button>
         ))}
         {Array.from({ length: Math.max(0, MAX - photos.length - (photos.length < MAX ? 1 : 0)) }, (_, i) => (

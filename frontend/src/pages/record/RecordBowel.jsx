@@ -3,6 +3,7 @@ import './RecordForm.scss';
 import RecordPhotos from './Recordphotos';
 
 import bgDecoration from '../../assets/record/bg_pattern.png';
+import iconBack from '../../assets/record/icon_back.png';
 import num1 from '../../assets/record/num_1.png';
 import num2 from '../../assets/record/num_2.png';
 import btnComplete from '../../assets/record/btn_complete.png';
@@ -22,8 +23,8 @@ const RecordBowel = ({ onBack, onComplete }) => {
       <img src={bgDecoration} alt="" className="bg-decoration" />
 
       <header className="record-form-header">
-        <button type="button" className="back-btn" onClick={onBack}>
-          ‹
+        <button type="button" className="back-btn" onClick={onBack} aria-label="뒤로 가기">
+          <img src={iconBack} alt="" />
         </button>
         <h1 className="title">배변</h1>
       </header>
@@ -34,13 +35,17 @@ const RecordBowel = ({ onBack, onComplete }) => {
             <img src={num1} alt="1" className="num-badge-img" />
             <span>배변 상태</span>
           </h2>
-          <div className="options-grid">
-            {['평소와 비슷함', '평소와 다름'].map(val => (
-              <label key={val} className={`option-item ${status === val ? 'is-checked' : ''}`}>
-                <input type="radio" name="bowelStatus" checked={status === val} onChange={() => setStatus(val)} />
-                <span className="radio-circle" />
-                <span className="option-label">{val}</span>
-              </label>
+          <div className="options-rows">
+            {[['평소와 비슷함', '평소와 다름']].map((row, i) => (
+              <div key={i} className="options-row">
+                {row.map(val => (
+                  <label key={val} className={`option-item ${status === val ? 'is-checked' : ''}`}>
+                    <input type="radio" name="bowelStatus" checked={status === val} onChange={() => setStatus(val)} />
+                    <span className="radio-circle" />
+                    <span className="option-label">{val}</span>
+                  </label>
+                ))}
+              </div>
             ))}
           </div>
         </section>
@@ -50,13 +55,17 @@ const RecordBowel = ({ onBack, onComplete }) => {
             <img src={num2} alt="2" className="num-badge-img" />
             <span>달랐던 점</span>
           </h2>
-          <div className="options-grid grid-3">
-            {['묽음', '단단함', '색', '양', '기타'].map(val => (
-              <label key={val} className={`option-item ${diffs.includes(val) ? 'is-checked' : ''}`}>
-                <input type="checkbox" checked={diffs.includes(val)} onChange={() => handleDiffChange(val)} />
-                <span className="radio-circle" />
-                <span className="option-label">{val}</span>
-              </label>
+          <div className="options-rows">
+            {[['묽음', '단단함', '색'], ['양', '기타']].map((row, i) => (
+              <div key={i} className="options-row">
+                {row.map(val => (
+                  <label key={val} className={`option-item ${diffs.includes(val) ? 'is-checked' : ''}`}>
+                    <input type="checkbox" checked={diffs.includes(val)} onChange={() => handleDiffChange(val)} />
+                    <span className="radio-circle" />
+                    <span className="option-label">{val}</span>
+                  </label>
+                ))}
+              </div>
             ))}
           </div>
         </section>

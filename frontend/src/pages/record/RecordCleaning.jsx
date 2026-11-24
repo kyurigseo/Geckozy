@@ -3,6 +3,7 @@ import './RecordForm.scss';
 import RecordPhotos from './Recordphotos';
 
 import bgDecoration from '../../assets/record/bg_pattern.png';
+import iconBack from '../../assets/record/icon_back.png';
 import num1 from '../../assets/record/num_1.png';
 import num2 from '../../assets/record/num_2.png';
 import btnComplete from '../../assets/record/btn_complete.png';
@@ -22,8 +23,8 @@ const RecordCleaning = ({ onBack, onComplete }) => {
       <img src={bgDecoration} alt="" className="bg-decoration" />
 
       <header className="record-form-header">
-        <button type="button" className="back-btn" onClick={onBack}>
-          ‹
+        <button type="button" className="back-btn" onClick={onBack} aria-label="뒤로 가기">
+          <img src={iconBack} alt="" />
         </button>
         <h1 className="title">청소</h1>
       </header>
@@ -34,13 +35,17 @@ const RecordCleaning = ({ onBack, onComplete }) => {
             <img src={num1} alt="1" className="num-badge-img" />
             <span>청소 범위</span>
           </h2>
-          <div className="options-grid">
-            {['전체 청소', '부분 청소'].map(val => (
-              <label key={val} className={`option-item ${scope === val ? 'is-checked' : ''}`}>
-                <input type="radio" name="scope" checked={scope === val} onChange={() => setScope(val)} />
-                <span className="radio-circle" />
-                <span className="option-label">{val}</span>
-              </label>
+          <div className="options-rows">
+            {[['전체 청소', '부분 청소']].map((row, i) => (
+              <div key={i} className="options-row">
+                {row.map(val => (
+                  <label key={val} className={`option-item ${scope === val ? 'is-checked' : ''}`}>
+                    <input type="radio" name="scope" checked={scope === val} onChange={() => setScope(val)} />
+                    <span className="radio-circle" />
+                    <span className="option-label">{val}</span>
+                  </label>
+                ))}
+              </div>
             ))}
           </div>
         </section>
@@ -50,13 +55,17 @@ const RecordCleaning = ({ onBack, onComplete }) => {
             <img src={num2} alt="2" className="num-badge-img" />
             <span>무엇을 정리했나요?</span>
           </h2>
-          <div className="options-grid grid-3">
-            {['바닥재', '은신처', '물/먹이 그릇', '배설물', '기타'].map(val => (
-              <label key={val} className={`option-item ${items.includes(val) ? 'is-checked' : ''}`}>
-                <input type="checkbox" checked={items.includes(val)} onChange={() => handleItemChange(val)} />
-                <span className="radio-circle" />
-                <span className="option-label">{val}</span>
-              </label>
+          <div className="options-rows">
+            {[['바닥재', '은신처', '물/먹이 그릇'], ['배설물', '기타']].map((row, i) => (
+              <div key={i} className="options-row">
+                {row.map(val => (
+                  <label key={val} className={`option-item ${items.includes(val) ? 'is-checked' : ''}`}>
+                    <input type="checkbox" checked={items.includes(val)} onChange={() => handleItemChange(val)} />
+                    <span className="radio-circle" />
+                    <span className="option-label">{val}</span>
+                  </label>
+                ))}
+              </div>
             ))}
           </div>
         </section>

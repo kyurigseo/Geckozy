@@ -48,11 +48,17 @@ $font-mamablock: "mamablock-210", sans-serif;
       align-items: center;
       justify-content: center;
       background-color: #FFECCB;
+      transition: background-color 0.1s;
 
       img {
-        width: 10px;
-        height: 10px;
+        width: 12px;
+        height: 12px;
         object-fit: contain;
+      }
+
+      &:active,
+      &.active {
+        background-color: #FFC58D;
       }
     }
   }

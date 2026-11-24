@@ -3,6 +3,7 @@ import './RecordForm.scss';
 import RecordPhotos from './Recordphotos';
 
 import bgDecoration from '../../assets/record/bg_pattern.png';
+import iconBack from '../../assets/record/icon_back.png';
 import num1 from '../../assets/record/num_1.png';
 import btnComplete from '../../assets/record/btn_complete.png';
 
@@ -16,8 +17,8 @@ const RecordWeight = ({ onBack, onComplete }) => {
       <img src={bgDecoration} alt="" className="bg-decoration" />
 
       <header className="record-form-header">
-        <button type="button" className="back-btn" onClick={onBack} aria-label="뒤로 가기" >
-          ‹
+        <button type="button" className="back-btn" onClick={onBack} aria-label="뒤로 가기">
+          <img src={iconBack} alt="" />
         </button>
         <h1 className="title">체중</h1>
       </header>
