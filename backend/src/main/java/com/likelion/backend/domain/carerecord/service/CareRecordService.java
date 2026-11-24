@@ -24,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.FileSystemResource;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -322,6 +324,59 @@ public class CareRecordService {
             deleteFileIfExists(targetPath);
             throw e;
         }
+    }
+
+    // 사육 기록 사진 파일 조회
+    public Resource getPhotoFile(
+            Long userId,
+            String filename
+    ) {
+        // 1. 파일명 검증 (기존 UUID 기반 저장 형식)
+        if (filename == null || !filename.matches(
+                "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-"
+                        + "[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-"
+                        + "[0-9a-fA-F]{12}\\.(jpg|jpeg|png|webp)"
+        )) {
+            throw new BusinessException(
+                    ErrorCode.PHOTO_NOT_FOUND
+            );
+        }
+
+        // 2. DB에 저장된 사진 URL 생성
+        String imageUrl = "/uploads/care-records/" + filename;
+
+        // 3. 사진 존재 여부 및 소유권 검증
+        careRecordPhotoRepository
+                .findByImageUrlAndCareRecord_Lizard_User_UserIdAndCareRecord_Lizard_DeletedAtIsNull(
+                        imageUrl,
+                        userId
+                )
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.PHOTO_NOT_FOUND
+                ));
+
+        // 4. 실제 파일 저장 경로 확인
+        Path directory = Paths.get(uploadDir)
+                .toAbsolutePath()
+                .normalize();
+
+        Path targetPath = directory.resolve(filename)
+                .normalize();
+
+        // 5. 파일 경로 및 존재 여부 검증
+        if (!targetPath.startsWith(directory)
+                || !Files.isRegularFile(
+                targetPath,
+                java.nio.file.LinkOption.NOFOLLOW_LINKS
+        )
+                || !Files.isReadable(targetPath)) {
+            throw new BusinessException(
+                    ErrorCode.PHOTO_NOT_FOUND
+            );
+        }
+
+        // 6. 실제 이미지 파일 반환
+        return new FileSystemResource(targetPath);
     }
 
     private void deleteFileIfExists(Path path) {

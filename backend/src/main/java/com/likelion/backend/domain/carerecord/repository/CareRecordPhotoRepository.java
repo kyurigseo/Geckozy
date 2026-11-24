@@ -25,4 +25,10 @@ public interface CareRecordPhotoRepository
 
     // 기록에 연결된 사진 전체 삭제
     void deleteAllByCareRecord_RecordId(Long recordId);
+
+    Optional<CareRecordPhoto>
+    findByImageUrlAndCareRecord_Lizard_User_UserIdAndCareRecord_Lizard_DeletedAtIsNull(
+            String imageUrl,
+            Long userId
+    );
 }

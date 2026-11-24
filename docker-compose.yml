@@ -12,6 +12,9 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
       JWT_SECRET: ${JWT_SECRET}
+      FILE_UPLOAD_DIR: /app/uploads/care-records
+    volumes:
+      - care-record-photos:/app/uploads/care-records
     depends_on:
       - mysql
     restart: always
@@ -30,3 +33,4 @@ services:
 
 volumes:
   mysql-data:
+  care-record-photos:
