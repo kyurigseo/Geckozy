@@ -16,7 +16,7 @@ const RecordWeight = ({ onBack, onComplete }) => {
       <img src={bgDecoration} alt="" className="bg-decoration" />
 
       <header className="record-form-header">
-        <button type="button" className="back-btn" onClick={onBack}>
+        <button type="button" className="back-btn" onClick={onBack} aria-label="뒤로 가기" >
           ‹
         </button>
         <h1 className="title">체중</h1>

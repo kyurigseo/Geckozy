@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './RecordList.scss';
-import { fetchMonthRecords } from '../../api/record';
+import { deleteRecord, fetchMonthRecords, fetchPhotoBlob } from '../../api/record';
 
 import iconBack from '../../assets/record/icon_before.png';
 import iconEdit from '../../assets/record/icon_edit.png';
@@ -64,6 +64,31 @@ const toItem = (r, i) => ({
   imgUrl: r.photos[0] ?? null,
 });
 
+function AuthImage({ src, alt, className }) {
+  const [url, setUrl] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    let objectUrl = null;
+    setUrl(null);
+    fetchPhotoBlob(src)
+      .then((u) => {
+        if (cancelled) URL.revokeObjectURL(u);
+        else {
+          objectUrl = u;
+          setUrl(u);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [src]);
+
+  return url ? <img src={url} alt={alt} className={className} /> : null;
+}
+
 export default function RecordList() {
   const navigate = useNavigate();
   const [records, setRecords] = useState([]);
@@ -89,9 +114,16 @@ export default function RecordList() {
     };
   }, [navigate]);
 
-  const handleDelete = () => {
+  const handleDelete = async (id) => {
     playSelectSfx();
-    window.alert('기록 삭제는 아직 지원하지 않아요.');
+    if (!window.confirm('이 기록을 삭제할까요?')) return;
+    try {
+      await deleteRecord(id);
+      setRecords((prev) => prev.filter((r) => r.id !== id));
+    } catch (error) {
+      if (error.status === 401) navigate('/onboarding', { replace: true });
+      else window.alert('기록을 삭제하지 못했어요. 다시 시도해주세요.');
+    }
   };
 
   return (
@@ -160,7 +192,7 @@ export default function RecordList() {
                 </div>
 
                 {item.imgUrl && (
-                  <img src={item.imgUrl} alt="기록 썸네일" className="record-img" />
+                  <AuthImage src={item.imgUrl} alt="기록 썸네일" className="record-img" />
                 )}
               </div>
             </div>

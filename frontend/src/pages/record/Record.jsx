@@ -52,7 +52,16 @@ const MENU = [
   { type: "etc", x: 42, y: 100 },
 ];
 
-const SUMMARY_COLOR = { shedding: "#5B911C", poop: "#FF9834", cleaning: "#FF646E" };
+const SUMMARY_COLOR = {
+  shedding: "#5B911C",
+  poop: "#FF9834",
+  cleaning: "#FF646E",
+  weight: "#3770C8",
+  feeding: "#EB7B49",
+  symptom: "#A66DD9",
+  etc: "#C79F7E",
+};
+const TWO_LINE_LABEL = new Set(["symptom", "etc"]);
 
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
@@ -73,7 +82,16 @@ function SummaryRow({ item }) {
       <img className="record-summary__icon" src={icon} alt="" />
       <div className="record-summary__body">
         <div className="record-summary__head">
-          <strong className="record-summary__label">{label}</strong>
+          <strong className="record-summary__label" style={TWO_LINE_LABEL.has(item.type) ? { lineHeight: 1.15 } : undefined}>
+            {TWO_LINE_LABEL.has(item.type)
+              ? label.split(" ").map((word, i) => (
+                  <span key={word}>
+                    {i > 0 && <br />}
+                    {word}
+                  </span>
+                ))
+              : label}
+          </strong>
           <div className="record-summary__bar" role="img" aria-label={`지난달 대비 ${up ? "증가" : "감소"} ${Math.abs(item.percent)}%`}>
             {Array.from({ length: 10 }, (_, i) => (
               <i

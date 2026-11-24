@@ -105,6 +105,8 @@ export const saveRecord = async (type, form) => {
   const details = buildDetails(type, form)
   const lizard = await getMainLizard()
   const recordedAt = form.recordedAt ?? new Date()
+  const existing = await getRecordsByDate(lizard.lizardId, toLocalDateTime(recordedAt).slice(0, 10))
+  if (existing && existing.length > 0) throw new ApiError(409, 'RECORD_ALREADY_EXISTS')
   const memo = (form.memo ?? '').trim() || null
 
   const recordIds = []
@@ -125,6 +127,25 @@ export const saveRecord = async (type, form) => {
     }
   }
   return { recordIds, date: toLocalDateTime(recordedAt).slice(0, 10), photoFailed }
+}
+
+export const fetchPhotoBlob = async (url) => {
+  const headers = {}
+  const token = getAccessToken()
+  if (token) headers.Authorization = `Bearer ${token}`
+  let response
+  try {
+    response = await fetch(url, { headers })
+  } catch {
+    throw new ApiError(0, 'NETWORK_ERROR')
+  }
+  if (!response.ok) throw new ApiError(response.status, 'PHOTO_LOAD_FAILED')
+  return URL.createObjectURL(await response.blob())
+}
+
+export const deleteRecord = async (recordId) => {
+  const lizard = await getMainLizard()
+  await request(`/lizards/${lizard.lizardId}/care-records/${recordId}`, { method: 'DELETE' })
 }
 
 const getCalendar = (lizardId, year, month) => request(`/lizards/${lizardId}/care-records/calendar`, { params: { year, month } })

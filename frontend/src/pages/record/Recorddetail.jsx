@@ -23,7 +23,32 @@ import trendIcon from "../../assets/record/icon_trend.png";
 import docIcon from "../../assets/record/icon_doc.png";
 import thermoIcon from "../../assets/record/icon_thermo.png";
 import dropIcon from "../../assets/record/icon_drop.png";
-import { fetchMonthRecords, fetchRecordEnv, POINTS, CENTER } from "../../api/record";
+import { deleteRecord, fetchMonthRecords, fetchPhotoBlob, fetchRecordEnv, POINTS, CENTER } from "../../api/record";
+
+function AuthImage({ src, alt }) {
+  const [url, setUrl] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    let objectUrl = null;
+    setUrl(null);
+    fetchPhotoBlob(src)
+      .then((u) => {
+        if (cancelled) URL.revokeObjectURL(u);
+        else {
+          objectUrl = u;
+          setUrl(u);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [src]);
+
+  return url ? <img src={url} alt={alt} style={{ display: "block", width: "100%", height: "100%", objectFit: "cover" }} /> : null;
+}
 
 const playSfx = (src) => {
   const sound = new Audio(src);
@@ -275,9 +300,23 @@ export default function RecordDetail() {
     navigate(`/record/new/${type}`);
   };
 
-  const handleDelete = () => {
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async () => {
     playButtonSfx();
-    window.alert("기록 삭제는 아직 지원하지 않아요.");
+    if (!active || deleting) return;
+    if (!window.confirm("선택한 기록을 삭제할까요?")) return;
+    setDeleting(true);
+    try {
+      await deleteRecord(active.id);
+      setRecords((prev) => (prev ?? []).filter((r) => r.id !== active.id));
+      setActiveId(null);
+    } catch (error) {
+      if (error.status === 401) navigate("/onboarding", { replace: true });
+      else window.alert("기록을 삭제하지 못했어요. 다시 시도해주세요.");
+    } finally {
+      setDeleting(false);
+    }
   };
 
   return (
@@ -440,10 +479,10 @@ export default function RecordDetail() {
                       </div>
 
                       {r.photos.length > 0 && (
-                        <ul className="record-detail__photos">
-                          {r.photos.map((src, i) => (
-                            <li key={src}>
-                              <img src={src} alt={`${t.label} 기록 사진 ${i + 1}`} />
+                        <ul className="record-detail__photos" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8, padding: 0, margin: "12px 0 0", listStyle: "none" }}>
+                          {r.photos.slice(0, 3).map((src, i) => (
+                            <li key={src} style={{ width: "auto", minWidth: 0, aspectRatio: "1 / 1", overflow: "hidden", borderRadius: 12 }}>
+                              <AuthImage src={src} alt={`${t.label} 기록 사진 ${i + 1}`} />
                             </li>
                           ))}
                         </ul>

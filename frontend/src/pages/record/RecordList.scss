@@ -255,7 +255,7 @@ $font-mamablock: "mamablock-210", sans-serif;
     pointer-events: none;
   }
 
-  .finish-btn {
+    .finish-btn {
     position: relative;
     z-index: 2;
     width: 100%;
@@ -264,11 +264,11 @@ $font-mamablock: "mamablock-210", sans-serif;
     border: none;
     outline: none;
     cursor: pointer;
-    
+
     padding: 0;
     margin: 0;
     line-height: 1;
-    
+
     font-family: $font-pixel;
     font-size: 20px;
     font-weight: 400;
@@ -276,9 +276,6 @@ $font-mamablock: "mamablock-210", sans-serif;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: 15px;
-    
-
   }
 }
 }

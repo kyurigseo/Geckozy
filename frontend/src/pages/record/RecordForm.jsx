@@ -56,7 +56,6 @@ const RecordForm = () => {
         state: { next: `/record/detail/${result.date}` },
       });
     } catch (error) {
-      console.error("[record save]", error, error?.status, error?.code);
       setSaving(false);
       const fallback = "저장에 실패했어요. 다시 시도해주세요.";
       let message = fallback;
@@ -65,6 +64,7 @@ const RecordForm = () => {
           error,
           {
             INVALID_REQUEST: "입력한 내용을 확인해주세요. (체중은 0보다 커야 하고, 직접 입력은 비워둘 수 없어요.)",
+            RECORD_ALREADY_EXISTS: "이 날은 이미 기록이 있어요. 하루에 한 건만 작성할 수 있어요.",
             INVALID_PHOTO: "사진 형식을 확인해주세요. (jpg, png, webp)",
           },
           fallback,
