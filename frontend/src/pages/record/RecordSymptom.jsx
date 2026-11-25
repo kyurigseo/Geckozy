@@ -10,15 +10,11 @@ import num3 from '../../assets/record/num_3.png';
 import btnComplete from '../../assets/record/btn_complete.png';
 
 const RecordSymptom = ({ onBack, onComplete }) => {
-  const [changes, setChanges] = useState(['먹이 반응 저하']);
+  const [change, setChange] = useState('');
   const [startTime, setStartTime] = useState('오늘 처음');
   const [observed, setObserved] = useState('현재도 관찰됨');
   const [memo, setMemo] = useState('');
   const [photos, setPhotos] = useState([]);
-
-  const handleChangeSelect = (val) => {
-    setChanges(prev => prev.includes(val) ? prev.filter(i => i !== val) : [...prev, val]);
-  };
 
   return (
     <div className="record-form-page">
@@ -41,8 +37,8 @@ const RecordSymptom = ({ onBack, onComplete }) => {
             {[['활동 감소', '먹이 반응 저하', '호흡'], ['외형 변화', '움직임 이상', '기타']].map((row, i) => (
               <div key={i} className="options-row">
                 {row.map(val => (
-                  <label key={val} className={`option-item ${changes.includes(val) ? 'is-checked' : ''}`}>
-                    <input type="checkbox" checked={changes.includes(val)} onChange={() => handleChangeSelect(val)} />
+                  <label key={val} className={`option-item ${change === val ? 'is-checked' : ''}`}>
+                    <input type="radio" name="change" checked={change === val} onChange={() => setChange(val)} />
                     <span className="radio-circle" />
                     <span className="option-label">{val}</span>
                   </label>
@@ -103,7 +99,7 @@ const RecordSymptom = ({ onBack, onComplete }) => {
         <RecordPhotos photos={photos} onChange={setPhotos} />
 
         <div className="submit-area">
-    <button type="button" className="submit-btn-img"  onClick={() => onComplete({ changes, startTime, observed, memo, photos })}>
+    <button type="button" className="submit-btn-img"  onClick={() => onComplete({ changes: change ? [change] : [], startTime, observed, memo, photos })}>
         <img src={btnComplete} alt="완료 배경" />
         <span className="btn-text">완료</span>
     </button>

@@ -120,75 +120,136 @@ const summarize = (pts) => {
 };
 
 
-const VB_W = 300;
-const VB_H = 172;
-const PL = 30;
-const PR = 270;
-const PT = 26;
-const PB = 140;
+const VB_W = 350;
+const VB_H = 212;
+const PL = 23;
+const PR = 323;
+const CH_TOP = 31;
+const CH_BOT = 184;
+const BAR_W = 8;
+
+const COLOR = {
+  grid: "#FFDCB9",
+  axis: "#FFC58D",
+  temp: "#FF9834",
+  tempSoft: "#FFC58D",
+  tempCap: "#FF6B01",
+  hum: "#6BC4FF",
+  tick: "#B47952",
+  brown: "#5B3524",
+  tip: "#B47952",
+  tipText: "#FDF7EE",
+};
+
+const FONT = { fontFamily: "Pretendard, sans-serif", fontWeight: 500, fontSize: 12, letterSpacing: "-0.24px" };
+
+const mix = (a, b, t) => {
+  const p = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+  const [r1, g1, b1] = p(a);
+  const [r2, g2, b2] = p(b);
+  const c = (x, y) => Math.round(x + (y - x) * t);
+  return `rgb(${c(r1, r2)}, ${c(g1, g2)}, ${c(b1, b2)})`;
+};
 
 function EnvChart({ points, recordTime, dateLabel }) {
-  const x = (i) => PL + (i * (PR - PL)) / (POINTS - 1);
-  const yT = (t) => PT + ((32 - Math.min(32, Math.max(16, t))) / 16) * (PB - PT);
-  const yH = (h) => PT + ((80 - Math.min(80, Math.max(0, h))) / 80) * (PB - PT);
+  const step = (PR - PL - 20) / (POINTS - 1);
+  const x = (i) => PL + 10 + i * step;
+  const yT = (t) => CH_TOP + ((32 - Math.min(32, Math.max(16, t))) / 16) * (CH_BOT - CH_TOP);
+  const yH = (h) => CH_TOP + ((80 - Math.min(80, Math.max(0, h))) / 80) * (CH_BOT - CH_TOP);
+  const rows = [0, 1, 2, 3, 4].map((i) => CH_TOP + (i * (CH_BOT - CH_TOP)) / 4);
   const cx = x(CENTER);
   const tip = `기록 시점 : ${fmtTime(recordTime, false)}`;
   const xTicks = [
-    [0, "-24h"],
-    [6, "-12h"],
-    [12, dateLabel],
-    [18, "+12h"],
-    [24, "+24h"],
+    [PL, "-24h", "start", false],
+    [PL + 70, "-12h", "start", false],
+    [cx, dateLabel, "middle", true],
+    [PR - 98, "+12h", "start", false],
+    [PR - 27, "+24h", "start", false],
   ];
 
   return (
     <svg
       className="env-chart"
       viewBox={`0 0 ${VB_W} ${VB_H}`}
+      width="100%"
       role="img"
       aria-label="기록 전후 24시간 온도와 습도 변화"
     >
-      <text className="env-chart__unit env-chart__unit--t" x={4} y={PT - 6}>°C</text>
-      <text className="env-chart__unit env-chart__unit--h" x={VB_W - 4} y={PT - 6} textAnchor="end">%</text>
+      <text x={5} y={14} fill={COLOR.temp} style={FONT}>℃</text>
+      <text x={VB_W - 24} y={14} fill={COLOR.hum} style={FONT}>%</text>
 
-      {[0, 1, 2, 3, 4].map((i) => {
-        const y = PT + (i * (PB - PT)) / 4;
-        return (
-          <g key={i}>
-            <line className="env-chart__grid" x1={PL} x2={PR} y1={y} y2={y} />
-            <text className="env-chart__tick env-chart__tick--t" x={PL - 5} y={y + 3} textAnchor="end">{32 - i * 4}</text>
-            <text className="env-chart__tick env-chart__tick--h" x={PR + 5} y={y + 3}>{80 - i * 20}</text>
-          </g>
-        );
-      })}
+      {rows.map((y, i) => (
+        <g key={i}>
+          {i < 4 && <line x1={PL} x2={PR} y1={y} y2={y} stroke={COLOR.grid} strokeWidth="1" strokeDasharray="2 3" />}
+          <text x={4} y={y + 4} fill={COLOR.temp} style={FONT}>{32 - i * 4}</text>
+          <text x={PR + 3} y={y + 4} fill={COLOR.hum} style={FONT}>{80 - i * 20}</text>
+        </g>
+      ))}
+
+      <line x1={PL} x2={PR} y1={CH_BOT + 2} y2={CH_BOT + 2} stroke={COLOR.axis} strokeWidth="1" />
+      <line x1={PL} x2={PL} y1={CH_TOP - 9} y2={CH_BOT + 2} stroke={COLOR.axis} strokeWidth="1" />
+      <line x1={PR} x2={PR} y1={CH_TOP - 9} y2={CH_BOT + 2} stroke={COLOR.axis} strokeWidth="1" />
+
+      <line
+        x1={cx}
+        x2={cx}
+        y1={CH_TOP - 2}
+        y2={CH_BOT + 2}
+        stroke={COLOR.brown}
+        strokeWidth="1.5"
+        strokeDasharray="2 3"
+        strokeLinecap="round"
+      />
 
       {points.map((p, i) => {
         if (!p) return null;
         const dist = Math.abs(i - CENTER) / CENTER;
+        const top = yT(p.tmax);
+        const bottom = yT(p.tmin);
+        const h = Math.max(BAR_W, bottom - top);
+        const y0 = top - (h - (bottom - top)) / 2;
         return (
           <g key={i}>
-            <line
-              className="env-chart__bar"
-              x1={x(i)}
-              x2={x(i)}
-              y1={yT(p.tmax)}
-              y2={yT(p.tmin)}
-              style={{ opacity: 0.35 + 0.65 * (1 - dist) }}
+            <rect
+              x={x(i) - BAR_W / 2}
+              y={y0}
+              width={BAR_W}
+              height={h}
+              rx={BAR_W / 2}
+              fill={mix(COLOR.temp, COLOR.tempSoft, dist)}
             />
-            <circle className="env-chart__dot" cx={x(i)} cy={yH(p.h)} r="2.6" />
+            <circle cx={x(i)} cy={y0 + BAR_W / 2} r={BAR_W / 2} fill={mix(COLOR.tempCap, COLOR.tempSoft, dist)} />
+            <circle cx={x(i)} cy={yH(p.h)} r="5" fill={COLOR.hum} />
           </g>
         );
       })}
 
-      <line className="env-chart__mark" x1={cx} x2={cx} y1={PT - 6} y2={PB} />
-      <circle className="env-chart__mark-dot" cx={cx} cy={PB} r="3" />
-      <g>
-        <rect className="env-chart__tip" x={cx - 48} y="2" width="96" height="16" rx="4" />
-        <text className="env-chart__tip-text" x={cx} y="13" textAnchor="middle">{tip}</text>
-      </g>
+      <circle cx={cx} cy={CH_BOT + 2} r="4" fill={COLOR.brown} />
 
-      {xTicks.map(([i, label]) => (
-        <text key={i} className="env-chart__tick env-chart__tick--x" x={x(i)} y={PB + 17} textAnchor="middle">
+      <g style={{ filter: "drop-shadow(0 2px 2.5px rgba(0,0,0,0.25))" }}>
+        <rect x={cx - 46.5} y={0.75} width="93" height="21" rx="6" fill={COLOR.tip} stroke={COLOR.brown} strokeWidth="1.5" />
+        <path d={`M${cx - 5} 21 L${cx} 27 L${cx + 5} 21 Z`} fill={COLOR.tip} stroke={COLOR.brown} strokeWidth="1.5" strokeLinejoin="round" />
+        <rect x={cx - 4} y={19.5} width="8" height="3" fill={COLOR.tip} />
+      </g>
+      <text
+        x={cx}
+        y={15}
+        textAnchor="middle"
+        fill={COLOR.tipText}
+        style={{ fontFamily: "Pretendard, sans-serif", fontWeight: 600, fontSize: 10 }}
+      >
+        {tip}
+      </text>
+
+      {xTicks.map(([tx, label, anchor, strong]) => (
+        <text
+          key={label}
+          x={tx}
+          y={CH_BOT + 22}
+          textAnchor={anchor}
+          fill={strong ? COLOR.brown : COLOR.tick}
+          style={{ ...FONT, fontWeight: strong ? 600 : 500 }}
+        >
           {label}
         </text>
       ))}

@@ -22,6 +22,9 @@ import bgBtnFinish from '../../assets/record/bg_btn_finish.png';
 import buttonSrc from '../../assets/sounds/button.mp3';
 import selectSrc from '../../assets/sounds/select.mp3';
 
+import lineGreen from '../../assets/record/line_green.svg';
+import lineOrange from '../../assets/record/line_orange.svg';
+
 const playButtonSfx = () => {
   const sound = new Audio(buttonSrc);
   sound.volume = 0.5;
@@ -153,8 +156,15 @@ export default function RecordList() {
       </header>
 
       <main className="list-content">
-        {records.map((item) => (
-          <div key={item.id} className="timeline-item">
+        {records.map((item, index) => (
+      <div key={item.id} className={`timeline-item ${item.color}`}>
+        {index < records.length - 1 && (
+          <img
+            src={item.color === 'green' ? lineGreen : lineOrange}
+            alt=""
+            className="timeline-line"
+          />
+        )}
             <div className={`date-badge ${item.color}`}>
             <img
                 src={item.color === 'green' ? bgBadgeGreen : bgBadgeOrange}

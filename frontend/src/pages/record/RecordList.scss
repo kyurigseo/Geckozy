@@ -79,27 +79,25 @@ $font-mamablock: "mamablock-210", sans-serif;
     gap: 12px;
     position: relative;
 
-    /* 타임라인 점선 연결 (마지막 요소 제외) */
-    &:not(:last-child)::after {
-      content: '';
+    .timeline-line {
       position: absolute;
-      left: 20px; /* 뱃지 중앙 좌표 */
-      top: 44px;
-      bottom: -20px;
-      width: 2px;
-      border-left: 2px dotted #C7BBA5;
+      left: 14.5px;
+      top: 69.5px;
+      width: 11px;
+      height: 53px;
       z-index: 0;
+      pointer-events: none;
     }
 
     .date-badge {
-  position: relative;
-  z-index: 1;
-  width: 40px;  
-  height: 51px; 
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    position: relative;
+    z-index: 1;
+    width: 40px;  
+    height: 51px; 
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
   .badge-bg {
     position: absolute;
@@ -187,12 +185,12 @@ $font-mamablock: "mamablock-210", sans-serif;
         overflow: hidden;
 
         .type-row {
-  display: flex;
-  align-items: center; /* 아이콘과 텍스트 영역 세로 중앙 정렬 */
-  gap: 10px; /* 아이콘과 텍스트 사이 간격 */
+        display: flex;
+        align-items: center; 
+        gap: 10px; 
 
   .type-icon {
-    width: 36px;  /* 디자인에 맞게 아이콘 크기 조절 */
+    width: 36px; 
     height: 36px;
     object-fit: contain;
     flex-shrink: 0;
