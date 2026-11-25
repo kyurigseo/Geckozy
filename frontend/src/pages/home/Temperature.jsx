@@ -18,7 +18,7 @@ const OK_MIN = 22;
 const OK_MAX = 29;
 const BAR_MIN = 16;
 const BAR_MAX = 35;
-const NIGHT = [[0, 6], [19, 24]];
+const NIGHT = [[0, 6], [19.67, 24]];
 const NIGHT_OK = [18, 22];
 
 const GUIDES = {
@@ -113,52 +113,51 @@ function RangeBar({ value }) {
   );
 }
 function TempChart({ hourly }) {
-  const W = 320;
-  const H = 200;
-  const PAD = { l: 30, r: 10, t: 24, b: 24 };
-  const BAR_W = 13;
+  const L = 56;
+  const R = 355;
+  const TOP = 502;
+  const BOTTOM = 666;
+  const BAR_W = 15;
+  const BAR_MIN_H = 33;
+  const BUCKET_H = 2;
+  const TIP_W = 114;
+  const TIP_H = 21;
 
-  const highs = hourly.map((d) => d.max);
-  const lows = hourly.map((d) => d.min);
-  const hi = Math.max(...highs);
-  const lo = Math.min(...lows);
+  const x = (h) => L + (h / 24) * (R - L);
+  const y = (v) => 511 + (32 - clamp(v, 16, 32)) * 9.5;
+  const isNight = (h) => NIGHT.some(([a, b]) => h >= a && h < b);
 
-  const yMin = Math.min(16, Math.floor(lo / 4) * 4);
-  const yMax = Math.max(32, Math.ceil(hi / 4) * 4);
-  const ticks = [];
-  for (let v = yMin; v <= yMax; v += 4) ticks.push(v);
+  const merged = [];
+  hourly.forEach((d) => {
+    const i = Math.floor(d.h / BUCKET_H);
+    const prev = merged[i];
+    merged[i] = prev
+      ? { h: prev.h, min: Math.min(prev.min, d.min), max: Math.max(prev.max, d.max) }
+      : { h: i * BUCKET_H + BUCKET_H / 2, min: d.min, max: d.max };
+  });
+  const bars = merged.filter(Boolean).map((d) => {
+    const rawTop = y(d.max);
+    const rawBottom = y(d.min);
+    const height = Math.min(BOTTOM - TOP, Math.max(BAR_MIN_H, rawBottom - rawTop));
+    const top = clamp((rawTop + rawBottom) / 2 - height / 2, TOP, BOTTOM - height);
+    return { ...d, top, height };
+  });
+  const peak = bars.length ? bars.reduce((a, b) => (b.max > a.max ? b : a), bars[0]) : null;
 
-  const x = (h) => PAD.l + (h / 24) * (W - PAD.l - PAD.r);
-  const y = (v) => PAD.t + ((yMax - v) / (yMax - yMin)) * (H - PAD.t - PAD.b);
-  const plotH = H - PAD.t - PAD.b;
+  const tipLeft = peak ? clamp(x(peak.h) - TIP_W / 2, L, R - TIP_W) : 0;
+  const tipTop = peak ? Math.max(TOP - 4, peak.top - 31) : 0;
+  const tailX = peak ? clamp(x(peak.h), tipLeft + 14, tipLeft + TIP_W - 14) : 0;
 
-  const peak = hourly.reduce((a, b) => (b.max > a.max ? b : a), hourly[0]);
-  const tipX = clamp(x(peak.h), PAD.l + 45, W - PAD.r - 45);
-  const tipY = Math.max(PAD.t + 10, y(peak.max) - 18);
+  const labelStyle = { fontSize: 12, fontWeight: 500, letterSpacing: "-0.24px" };
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="chart__svg" role="img" aria-label="오늘의 온도 변화 그래프" style={{ width: "100%", height: "auto" }}>
-      {ticks.map((v) => (
-        <line key={`grid-${v}`} x1={PAD.l} x2={W - PAD.r} y1={y(v)} y2={y(v)} stroke="#E6D9C6" strokeWidth="0.8" strokeDasharray="2 2" />
+    <svg viewBox="32 484 326 204" className="chart__svg" role="img" aria-label="오늘의 온도 변화 그래프" style={{ width: "100%", height: "auto" }}>
+      {[32, 28, 24, 20].map((v) => (
+        <line key={`grid-${v}`} x1={55} x2={355} y1={y(v)} y2={y(v)} stroke="#FFDCB9" strokeWidth="1" strokeDasharray="3 3" />
       ))}
 
       {NIGHT.map(([a, b]) => (
-        <rect key={`night-${a}`} x={x(a)} y={PAD.t} width={x(b) - x(a)} height={plotH} fill="#E8F2F7" />
-      ))}
-
-      {NIGHT.map(([a, b]) => (
-        <text
-          key={`nt-txt-${a}`}
-          x={(x(a) + x(b)) / 2}
-          y={PAD.t + 15}
-          textAnchor="middle"
-          fontSize="11"
-          fontWeight="600"
-          fill="#94B9D0"
-          letterSpacing="-0.02em"
-        >
-          야간 구간
-        </text>
+        <rect key={`night-${a}`} x={x(a)} y={TOP} width={x(b) - x(a)} height={BOTTOM - TOP - 1} fill="rgba(211,238,255,0.5)" />
       ))}
 
       <rect x={x(NIGHT[0][1])} y={y(OK_MAX)} width={x(NIGHT[1][0]) - x(NIGHT[0][1])} height={y(OK_MIN) - y(OK_MAX)} fill="#E8F6CA" opacity="0.85" />
@@ -166,60 +165,59 @@ function TempChart({ hourly }) {
         <rect key={`nok-${a}`} x={x(a)} y={y(NIGHT_OK[1])} width={x(b) - x(a)} height={y(NIGHT_OK[0]) - y(NIGHT_OK[1])} fill="#E8F6CA" opacity="0.85" />
       ))}
 
-      <line x1={PAD.l} x2={PAD.l} y1={PAD.t} y2={H - PAD.b} stroke="#E6D9C6" strokeWidth="1" />
-      <line x1={PAD.l} x2={W - PAD.r} y1={H - PAD.b} y2={H - PAD.b} stroke="#E6D9C6" strokeWidth="1" />
+      <line x1={L} x2={L} y1={TOP} y2={BOTTOM} stroke="#FFC58D" strokeWidth="1" />
+      <line x1={55} x2={R} y1={BOTTOM} y2={BOTTOM} stroke="#FFC58D" strokeWidth="1" />
 
       <line x1={x(NIGHT[0][1])} x2={x(NIGHT[1][0])} y1={y(OK_MAX)} y2={y(OK_MAX)} stroke="#5B911C" strokeWidth="1" strokeDasharray="3 2" />
-      <line x1={PAD.l} x2={W - PAD.r} y1={y(OK_MIN)} y2={y(OK_MIN)} stroke="#5B911C" strokeWidth="1" strokeDasharray="3 2" />
+      <line x1={L} x2={R} y1={y(OK_MIN)} y2={y(OK_MIN)} stroke="#5B911C" strokeWidth="1" strokeDasharray="3 2" />
       {NIGHT.map(([a, b]) => (
         <line key={`g-night-low-${a}`} x1={x(a)} x2={x(b)} y1={y(NIGHT_OK[0])} y2={y(NIGHT_OK[0])} stroke="#5B911C" strokeWidth="1" strokeDasharray="3 2" />
       ))}
 
-      <text x={PAD.l - 12} y={PAD.t - 10} textAnchor="start" fontSize="12" fontWeight="600" fill="#B38A68" letterSpacing="-0.02em">
-        °C
-      </text>
-
-      {ticks.map((v) => (
-        <text key={`ytick-${v}`} x={PAD.l - 8} y={y(v) + 4} textAnchor="end" fontSize="12" fontWeight="600" fill="#B38A68" letterSpacing="-0.02em">
+      <text x={33} y={497.5} fill="#B47952" style={labelStyle}>℃</text>
+      {[32, 28, 24, 20, 16].map((v) => (
+        <text key={`ytick-${v}`} x={32} y={y(v) + 4.5} fill="#B47952" style={labelStyle}>
           {v}
         </text>
       ))}
 
-      {[0, 6, 12, 18, 24].map((h) => (
-        <text
-          key={h}
-          x={x(h)}
-          y={H - 4}
-          textAnchor={h === 0 ? "start" : h === 24 ? "end" : "middle"}
-          fontSize="12"
-          fontWeight="600"
-          fill="#B38A68"
-          letterSpacing="-0.02em"
-        >
+      <text x={116} y={515.5} textAnchor="end" fill="#A0AFCC" style={labelStyle}>야간 구간</text>
+      <text x={350} y={515.5} textAnchor="end" fill="#A0AFCC" style={labelStyle}>야간 구간</text>
+
+      {[[0, 64], [6, 131], [12, 200.5], [18, 272.5], [24, 345.5]].map(([h, cx]) => (
+        <text key={h} x={cx} y={683.5} textAnchor="middle" fill="#B47952" style={labelStyle}>
           {h}시
         </text>
       ))}
 
-      {hourly.map((d) => (
-        <rect
-          key={d.h}
-          x={x(d.h) - BAR_W / 2}
-          y={y(d.max)}
-          width={BAR_W}
-          height={Math.max(BAR_W, y(d.min) - y(d.max))}
-          rx={BAR_W / 2}
-          fill={d.max >= 26 ? "#FF7A00" : "#FFB066"}
-        />
-      ))}
+      {bars.map((d, i) => {
+        const bx = x(d.h) - BAR_W / 2;
+        const night = isNight(d.h);
+        const warmH = d.min >= OK_MIN ? d.height : clamp(y(OK_MIN) - d.top, 0, d.height);
+        return (
+          <g key={d.h}>
+            <clipPath id={`temp-bar-${i}`}>
+              <rect x={bx} y={d.top} width={BAR_W} height={d.height} rx={BAR_W / 2} />
+            </clipPath>
+            <g clipPath={`url(#temp-bar-${i})`}>
+              <rect x={bx} y={d.top} width={BAR_W} height={d.height} fill={night ? "#FFC58D" : "#FFB66F"} />
+              {!night && d.max > OK_MIN && <rect x={bx} y={d.top} width={BAR_W} height={warmH} fill="#FF9834" />}
+              {d === peak && <rect x={bx} y={d.top} width={BAR_W} height={Math.min(21, d.height)} fill="#FF6B01" />}
+            </g>
+          </g>
+        );
+      })}
 
-      <g transform={`translate(${tipX}, ${tipY})`}>
-        <rect x={-52} y={-21} width={104} height={23} rx={7} fill="#FFEED6" stroke="#FF9834" strokeWidth="1.2" />
-        <polygon points="-4,2 4,2 0,7" fill="#FFECCB" stroke="#FF9834" strokeWidth="1.2" strokeLinejoin="round" />
-        <line x1={-3.5} y1={2} x2={3.5} y2={2} stroke="#FFEED6" strokeWidth="1.5" />
-        <text textAnchor="middle" y={-5} fontSize="10" fontWeight="600" fill="#FF9834" >
-          최고 : {hi}°C 최저 : {lo}°C
-        </text>
-      </g>
+      {peak && (
+        <g style={{ filter: "drop-shadow(0 2px 2.5px rgba(0,0,0,0.25))" }}>
+          <rect x={tipLeft} y={tipTop} width={TIP_W} height={TIP_H} rx={8} fill="#FFF1DA" stroke="#FF9834" strokeWidth="1" />
+          <polygon points={`${tailX - 5},${tipTop + TIP_H} ${tailX},${tipTop + TIP_H + 5} ${tailX + 5},${tipTop + TIP_H}`} fill="#FFF1DA" stroke="#FF9834" strokeWidth="1" strokeLinejoin="round" />
+          <line x1={tailX - 4} x2={tailX + 4} y1={tipTop + TIP_H} y2={tipTop + TIP_H} stroke="#FFF1DA" strokeWidth="2" />
+          <text x={tipLeft + TIP_W / 2} y={tipTop + 14.5} textAnchor="middle" fill="#FF9834" style={{ fontSize: 10, fontWeight: 600 }}>
+            최고 : {Math.round(peak.max)}℃ 최저 : {Math.round(peak.min)}℃
+          </text>
+        </g>
+      )}
     </svg>
   );
 }

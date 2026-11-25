@@ -9,7 +9,11 @@ import TankPreview from "../../components/tank/TankPreview"
 import { fetchHome } from "../../api/home";
 
 import sproutIcon from "../../assets/onboarding/icon-leaf.png";
-import leoImg from "../../assets/onboarding/gecko-yellow.png";
+import geckoOrange from "../../assets/home/home_gecko_orange.png";
+import geckoYellow from "../../assets/home/home_gecko_yellow.png";
+import geckoBlue from "../../assets/home/home_gecko_blue.png";
+import geckoGreen from "../../assets/home/home_gecko_green.png";
+import geckoBeige from "../../assets/home/home_gecko_beige.png";
 import temperatureIcon from "../../assets/home/temp_icon.png";
 import humidityIcon from "../../assets/home/humid_icon.png";
 import calendarIcon from "../../assets/home/calendar_icon.png";
@@ -28,6 +32,14 @@ import darkRightBtn from "../../assets/home/darker_rightarrow_icon.png"
 import buttonSrc from '../../assets/sounds/button.mp3';
 
 
+
+const GECKO_IMAGES = {
+  orange: geckoOrange,
+  yellow: geckoYellow,
+  blue: geckoBlue,
+  green: geckoGreen,
+  beige: geckoBeige,
+};
 
 const METRIC_META = [
   { id: "temperature", label: "온도", icon: temperatureIcon, path: "/temperature", key: "temperature" },
@@ -57,6 +69,7 @@ export default function Home() {
   }, [navigate]);
 
   const petName = home?.petName ?? "";
+  const leoImg = GECKO_IMAGES[String(home?.characterColor ?? "").toLowerCase()] ?? geckoYellow;
   const tankName = "1번 사육장";
   const tank = home?.tank ?? null;
   const alerts = home?.alerts ?? [];
