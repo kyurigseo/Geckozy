@@ -69,8 +69,12 @@ const toHumidityCard = (s) => {
 // 홈 화면에 필요한 걸 한 번에. 사육장이 없으면 enclosure: null
 export const fetchHome = async () => {
   const lizard = await getMainLizard()
-  const enclosure = await getEnclosureOf(lizard.lizardId)
-  const base = { petName: lizard.name, speciesName: lizard.species, lizardId: lizard.lizardId, characterColor: lizard.characterColor ?? null }
+  const [enclosure, detail] = await Promise.all([
+    getEnclosureOf(lizard.lizardId),
+    soft(request(`/lizards/${lizard.lizardId}`)),
+  ])
+  const characterColor = detail?.characterColor ?? lizard.characterColor ?? null
+  const base = { petName: lizard.name, speciesName: lizard.species, lizardId: lizard.lizardId, characterColor }
   if (!enclosure) return { ...base, enclosure: null, tank: null, alerts: [], temperature: null, humidity: null, summary: null, coach: null }
 
   const id = enclosure.enclosureId
