@@ -1,21 +1,21 @@
 import React, { useState } from 'react';
 import './RecordForm.scss';
+import RecordPhotos from './Recordphotos';
 
-// 이미지 Assets Import
 import bgDecoration from '../../assets/record/bg_pattern.png';
+import iconBack from '../../assets/record/icon_back.png';
 import num1 from '../../assets/record/num_1.png';
 import num2 from '../../assets/record/num_2.png';
-import btnAddPhoto from '../../assets/record/btn_add_photo.png';
-import photoEmpty from '../../assets/record/photo_empty.png';
 import btnComplete from '../../assets/record/btn_complete.png';
 
 const RecordShedding = ({ onBack,onComplete }) => {
   const [status, setStatus] = useState('일부 남음');
   const [parts, setParts] = useState(['몸통']);
   const [memo, setMemo] = useState('');
+  const [photos, setPhotos] = useState([]);
 
   const handlePartChange = (value) => {
-    setParts(prev => 
+    setParts(prev =>
       prev.includes(value) ? prev.filter(item => item !== value) : [...prev, value]
     );
   };
@@ -25,8 +25,8 @@ const RecordShedding = ({ onBack,onComplete }) => {
       <img src={bgDecoration} alt="" className="bg-decoration" />
 
       <header className="record-form-header">
-        <button type="button" className="back-btn" onClick={onBack}>
-          ‹
+        <button type="button" className="back-btn" onClick={onBack} aria-label="뒤로 가기">
+          <img src={iconBack} alt="" />
         </button>
         <h1 className="title">탈피</h1>
       </header>
@@ -37,13 +37,17 @@ const RecordShedding = ({ onBack,onComplete }) => {
             <img src={num1} alt="1" className="num-badge-img" />
             <span>탈피 상태</span>
           </h2>
-          <div className="options-grid">
-            {['완료', '일부 남음', '진행 중'].map(val => (
-              <label key={val} className={`option-item ${status === val ? 'is-checked' : ''}`}>
-                <input type="radio" name="sheddingStatus" checked={status === val} onChange={() => setStatus(val)} />
-                <span className="radio-circle" />
-                <span className="option-label">{val}</span>
-              </label>
+          <div className="options-rows">
+            {[['완료', '일부 남음', '진행 중']].map((row, i) => (
+              <div key={i} className="options-row">
+                {row.map(val => (
+                  <label key={val} className={`option-item ${status === val ? 'is-checked' : ''}`}>
+                    <input type="radio" name="sheddingStatus" checked={status === val} onChange={() => setStatus(val)} />
+                    <span className="radio-circle" />
+                    <span className="option-label">{val}</span>
+                  </label>
+                ))}
+              </div>
             ))}
           </div>
         </section>
@@ -53,13 +57,17 @@ const RecordShedding = ({ onBack,onComplete }) => {
             <img src={num2} alt="2" className="num-badge-img" />
             <span>남아있는 부위</span>
           </h2>
-          <div className="options-grid grid-3">
-            {['몸통', '머리 주변', '발가락', '꼬리', '기타'].map(val => (
-              <label key={val} className={`option-item ${parts.includes(val) ? 'is-checked' : ''}`}>
-                <input type="checkbox" checked={parts.includes(val)} onChange={() => handlePartChange(val)} />
-                <span className="radio-circle" />
-                <span className="option-label">{val}</span>
-              </label>
+          <div className="options-rows">
+            {[['몸통', '머리 주변', '발가락'], ['꼬리', '기타']].map((row, i) => (
+              <div key={i} className="options-row">
+                {row.map(val => (
+                  <label key={val} className={`option-item ${parts.includes(val) ? 'is-checked' : ''}`}>
+                    <input type="checkbox" checked={parts.includes(val)} onChange={() => handlePartChange(val)} />
+                    <span className="radio-circle" />
+                    <span className="option-label">{val}</span>
+                  </label>
+                ))}
+              </div>
             ))}
           </div>
         </section>
@@ -72,29 +80,15 @@ const RecordShedding = ({ onBack,onComplete }) => {
           </div>
         </section>
 
-        <section className="form-section photo-section">
-          <h2 className="photo-title">사진 추가</h2>
-          <p className="photo-sub">최대 3장의 사진을 업로드할 수 있어요.</p>
-          <div className="photo-grid">
-            <button type="button" className="photo-btn-img">
-              <img src={btnAddPhoto} alt="사진 추가" />
-            </button>
-            <div className="photo-placeholder-img">
-              <img src={photoEmpty} alt="빈 슬롯" />
-            </div>
-            <div className="photo-placeholder-img">
-              <img src={photoEmpty} alt="빈 슬롯" />
-            </div>
-          </div>
-        </section>
+        <RecordPhotos photos={photos} onChange={setPhotos} />
         <div className="submit-area">
-        <button type="button" className="submit-btn-img" onClick={onComplete}>
+        <button type="button" className="submit-btn-img" onClick={() => onComplete({ status, parts, memo, photos })}>
             <img src={btnComplete} alt="완료 배경" />
             <span className="btn-text">완료</span>
         </button>
         </div>
 
-        
+
       </div>
     </div>
   );

@@ -6,10 +6,14 @@ import "./Home.scss";
 import TankPreview from "../../components/tank/TankPreview"
 
 
-import { getMyProfile, getMyTank } from "../../api/my";
+import { fetchHome } from "../../api/home";
 
 import sproutIcon from "../../assets/onboarding/icon-leaf.png";
-import leoImg from "../../assets/onboarding/gecko-yellow.png";
+import geckoOrange from "../../assets/home/home_gecko_orange.png";
+import geckoYellow from "../../assets/home/home_gecko_yellow.png";
+import geckoBlue from "../../assets/home/home_gecko_blue.png";
+import geckoGreen from "../../assets/home/home_gecko_green.png";
+import geckoBeige from "../../assets/home/home_gecko_beige.png";
 import temperatureIcon from "../../assets/home/temp_icon.png";
 import humidityIcon from "../../assets/home/humid_icon.png";
 import calendarIcon from "../../assets/home/calendar_icon.png";
@@ -29,16 +33,17 @@ import buttonSrc from '../../assets/sounds/button.mp3';
 
 
 
-const TERRARIUMS = [{ id: 1, pet: "레오", name: "1번 사육장", alerts: 2 }];
+const GECKO_IMAGES = {
+  orange: geckoOrange,
+  yellow: geckoYellow,
+  blue: geckoBlue,
+  green: geckoGreen,
+  beige: geckoBeige,
+};
 
-const ALERTS = [
-  { id: "humidity", x: 76, y: 20, bubbleSide: "left", text: "습도가 오래 유지되고 있어요!", link: "/humidity" },
-  { id: "sensor", x: 33, y: 55, bubbleSide: "right", text: "센서 연결을 확인해주세요.", link: "/my/sensor" },
-];
-
-const METRICS = [
-  { id: "temperature", label: "온도", icon: temperatureIcon, value: "24.2", unit: "°C", status: "안정", statusIcon: stateok, tone: "ok", path: "/temperature" },
-  { id: "humidity", label: "습도", icon: humidityIcon, value: "78", unit: "%", status: "확인 필요", statusIcon: statewarning, tone: "warn", path: "/humidity" },
+const METRIC_META = [
+  { id: "temperature", label: "온도", icon: temperatureIcon, path: "/temperature", key: "temperature" },
+  { id: "humidity", label: "습도", icon: humidityIcon, path: "/humidity", key: "humidity" },
 ];
 
 export default function Home() {
@@ -47,25 +52,27 @@ export default function Home() {
   const [showGuide, setShowGuide] = useState(false);
   const { isSoundOn, toggleSound, playSfx } = useSound();
 
-  // 마이페이지에서 고른 프로필/사육장
-  const [profile, setProfile] = useState(null);
-  const [tank, setTank] = useState(null);
+  const [home, setHome] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([getMyProfile(), getMyTank()]).then(([p, t]) => {
-      if (cancelled) return;
-      setProfile(p);
-      setTank(t);
-    });
+    fetchHome()
+      .then((h) => {
+        if (!cancelled) setHome(h);
+      })
+      .catch((error) => {
+        if (!cancelled && error.status === 401) navigate("/onboarding", { replace: true });
+      });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [navigate]);
 
-  const current = TERRARIUMS[0];
-  const petName = profile?.name ?? current.pet;
-  const tankName = profile?.tankName ?? current.name;
+  const petName = home?.petName ?? "";
+  const leoImg = GECKO_IMAGES[String(home?.characterColor ?? "").toLowerCase()] ?? geckoYellow;
+  const tankName = "1번 사육장";
+  const tank = home?.tank ?? null;
+  const alerts = home?.alerts ?? [];
   const today = new Date();
   const dateStr = today.toLocaleDateString("ko-KR", {
     year: "numeric",
@@ -77,7 +84,6 @@ export default function Home() {
 
   useEffect(() => {
     const unlockSfx = () => {
-      // 첫 클릭 시 무음으로 한번 재생을 시도해서 브라우저 차단을 풀어버림
       playSfx('button');
       window.removeEventListener('pointerdown', unlockSfx);
     };
@@ -88,8 +94,8 @@ export default function Home() {
 
   const playButtonSfx = () => {
     const sound = new Audio(buttonSrc);
-    sound.volume = 0.5; 
-    sound.currentTime = 0; 
+    sound.volume = 0.5;
+    sound.currentTime = 0;
     sound.play().catch((err) => {
       console.warn("효과음 재생 차단됨:", err);
     });
@@ -100,31 +106,27 @@ export default function Home() {
   return (
     <div className="home">
       <div className="home__scroll">
-        {/* 날짜 */}
         <div className="home__date" style={{ backgroundImage: `url(${dateBg})` }}>
           {formattedDate}
         </div>
 
-        {/* 인사 */}
         <h1 className="home__greeting">
-          안녕하세요 <span className="accent">수정님</span>
+          안녕하세요 <span className="accent">{home?.username ? `${home.username}님` : "수정님"}</span>
           <img src={sproutIcon} alt="" className="home__sprout" />
         </h1>
 
-        {/* 사육장 선택 */}
         <button type="button" className="selector">
           <img src={sproutIcon} alt="" />
           <span>
-            {petName} • {tankName} • <em>새 알림 {ALERTS.length}개</em>
+            {petName} • {tankName} • <em>새 알림 {alerts.length}개</em>
           </span>
           <span className="selector__arrow" aria-hidden="true"><img src={dropdownIcon} className="selector__dropdown-icon" /></span>
         </button>
 
-        {/* 사육장 일러스트 + 알림 핀 */}
         <section className="stage">
           <TankPreview tank={tank} className="home-tank-preview" />
-        
- 
+
+
               <button
                   type="button"
                   className={`stage__sound ${isSoundOn ? "" : "is-off"}`}
@@ -132,14 +134,14 @@ export default function Home() {
                   aria-label="소리 켜기/끄기"
                 >
                   <span aria-hidden="true">
-                    <img 
-                      src={isSoundOn ? musicOn : musicOff} 
-                      alt={isSoundOn ? "소리 켬" : "소리 끔"} 
+                    <img
+                      src={isSoundOn ? musicOn : musicOff}
+                      alt={isSoundOn ? "소리 켬" : "소리 끔"}
                     />
                   </span>
                 </button>
 
-          {ALERTS.map((a) => {
+          {alerts.map((a) => {
               const isOpen = activePinId === a.id;
               return (
                 <div key={a.id} className="pin" style={{ left: `${a.x}%`, top: `${a.y}%` }}>
@@ -167,7 +169,6 @@ export default function Home() {
             })}
         </section>
 
-        {/* 하단 시트 */}
         <section className="sheet">
           <h2 className="sheet__title">
             {petName}의 사육장 <img src={sproutIcon} alt="" />
@@ -179,12 +180,22 @@ export default function Home() {
               <h3>
                 <img src={calendarIcon} alt="" /> 오늘의 사육환경
               </h3>
-              <p>온도는 비교적 일정했고, <br/>습도는 오후부터 높게 유지되고 있어요.</p>
+              <p>{home?.summary ?? "아직 오늘의 데이터가 충분하지 않아요."}</p>
             </div>
           </div>
 
           <div className="metrics">
-            {METRICS.map((m) => (
+            {METRIC_META.map((meta) => {
+              const v = home?.[meta.key];
+              const m = {
+                ...meta,
+                value: v?.value ?? "-",
+                unit: v?.unit ?? "",
+                tone: v?.tone ?? "warn",
+                status: v?.label ?? "확인 중",
+                statusIcon: v?.tone === "ok" ? stateok : statewarning,
+              };
+              return (
               <button
                 key={m.id}
                 type="button"
@@ -210,18 +221,17 @@ export default function Home() {
                   <img src={m.statusIcon} alt="" className="badge__icon" />
                   {m.status}</span>
               </button>
-            ))}
+              );
+            })}
           </div>
 
           <div className="card coach">
             <h3>
               <img src={sproutIcon} alt="" /> {petName}의 환경 코치
             </h3>
-            <p>
-              분무 이후 습도가 평소보다 오래 유지되고 있어요. 환기가 원활한지 확인해보는 것을 추천드려요!
-            </p>
-            <button type="button" className="coach__btn" 
-      
+            <p>{home?.coach?.text ?? "지금은 특별히 안내할 내용이 없어요."}</p>
+            <button type="button" className="coach__btn"
+
             onClick={() => {
               console.log("버튼 클릭됨 / playSfx 호출");
               playButtonSfx();

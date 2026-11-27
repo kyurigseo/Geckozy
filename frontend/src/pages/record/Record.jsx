@@ -4,21 +4,20 @@ import { useSound } from "../../sound/SoundProvider";
 
 import "./Record.scss";
 
-import bgImg from "../../assets/record/bg.svg"; 
-import addBtnImg from "../../assets/record/add_btn.png"; 
-import feedingIcon from "../../assets/record/icon_feeding.png"; 
-import sheddingIcon from "../../assets/record/icon_shedding.png"; 
-import weightIcon from "../../assets/record/icon_weight.png"; 
-import cleaningIcon from "../../assets/record/icon_cleaning.png"; 
-import poopIcon from "../../assets/record/icon_poop.png"; 
-import symptomIcon from "../../assets/record/icon_symptom.png"; 
-import etcIcon from "../../assets/record/icon_etc.png"; 
+import bgImg from "../../assets/record/bg.svg";
+import addBtnImg from "../../assets/record/add_btn.png";
+import feedingIcon from "../../assets/record/icon_feeding.png";
+import sheddingIcon from "../../assets/record/icon_shedding.png";
+import weightIcon from "../../assets/record/icon_weight.png";
+import cleaningIcon from "../../assets/record/icon_cleaning.png";
+import poopIcon from "../../assets/record/icon_poop.png";
+import symptomIcon from "../../assets/record/icon_symptom.png";
+import etcIcon from "../../assets/record/icon_etc.png";
 
-// 🎯 효과음 파일 import
 import buttonSrc from '../../assets/sounds/button.mp3';
 import selectSrc from '../../assets/sounds/select.mp3';
+import { fetchRecords } from "../../api/record";
 
-// 🎯 BGM On/Off 상태와 무관하게 항상 소리가 나는 독립 효과음 함수
 const playButtonSfx = () => {
   const sound = new Audio(buttonSrc);
   sound.volume = 0.5;
@@ -53,43 +52,25 @@ const MENU = [
   { type: "etc", x: 42, y: 100 },
 ];
 
-const SUMMARY_COLOR = { shedding: "#5B911C", poop: "#FF9834", cleaning: "#FF646E" };
+const SUMMARY_COLOR = {
+  shedding: "#5B911C",
+  poop: "#FF9834",
+  cleaning: "#FF646E",
+  weight: "#3770C8",
+  feeding: "#EB7B49",
+  symptom: "#A66DD9",
+  etc: "#C79F7E",
+};
+const TWO_LINE_LABEL = new Set(["symptom", "etc"]);
 
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
-const SAMPLE_DAYS = [
-  [1, "feeding"], [4, "etc"], [9, "shedding"], [10, "shedding"], [14, "cleaning"],
-  [22, "feeding"], [24, "symptom"], [25, "poop", true], [27, "weight"],
-];
-
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const fetchRecords = async (year, month) => {
-  await delay(200);
-  const lastDay = new Date(year, month, 0).getDate();
-  const pad = (n) => String(n).padStart(2, "0");
-  return {
-    records: SAMPLE_DAYS.filter(([d]) => d <= lastDay).map(([d, type, alert]) => ({
-      date: `${year}-${pad(month)}-${pad(d)}`,
-      type,
-      alert: Boolean(alert),
-    })),
-    summary: [
-      { type: "shedding", percent: 50, message: "이번 달에는 탈피가 1회 확인됐어요." },
-      { type: "poop", percent: 80, message: "지난 달보다 배변 이상 기록이 늘었어요." },
-      { type: "cleaning", percent: -40, message: "사육장 청소 주기가 지난달보다 길어졌어요." },
-    ],
-  };
-};
-
-// ─────────── 달력 계산 ───────────
 const buildCells = (year, month) => {
   const blanks = new Date(year, month - 1, 1).getDay();
   const days = new Date(year, month, 0).getDate();
   return [...Array(blanks).fill(null), ...Array.from({ length: days }, (_, i) => i + 1)];
 };
 
-// ─────────── 요약 한 줄 (아이콘 + 막대 + 증감 + 설명) ───────────
 function SummaryRow({ item }) {
   const { label, icon } = TYPES[item.type] ?? { label: item.type, icon: etcIcon };
   const color = SUMMARY_COLOR[item.type] ?? "#B47952";
@@ -101,7 +82,16 @@ function SummaryRow({ item }) {
       <img className="record-summary__icon" src={icon} alt="" />
       <div className="record-summary__body">
         <div className="record-summary__head">
-          <strong className="record-summary__label">{label}</strong>
+          <strong className="record-summary__label" style={TWO_LINE_LABEL.has(item.type) ? { lineHeight: 1.15 } : undefined}>
+            {TWO_LINE_LABEL.has(item.type)
+              ? label.split(" ").map((word, i) => (
+                  <span key={word}>
+                    {i > 0 && <br />}
+                    {word}
+                  </span>
+                ))
+              : label}
+          </strong>
           <div className="record-summary__bar" role="img" aria-label={`지난달 대비 ${up ? "증가" : "감소"} ${Math.abs(item.percent)}%`}>
             {Array.from({ length: 10 }, (_, i) => (
               <i
@@ -121,7 +111,6 @@ function SummaryRow({ item }) {
   );
 }
 
-// ─────────── 화면 ───────────
 export default function Record() {
   const navigate = useNavigate();
   const today = new Date();
@@ -132,9 +121,15 @@ export default function Record() {
 
   useEffect(() => {
     let cancelled = false;
-    fetchRecords(ym.y, ym.m).then((res) => {
-      if (!cancelled) setData(res);
-    });
+    fetchRecords(ym.y, ym.m)
+      .then((res) => {
+        if (!cancelled) setData(res);
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        if (error.status === 401) navigate("/onboarding", { replace: true });
+        else setData({ records: [], summary: [] });
+      });
     return () => {
       cancelled = true;
     };
@@ -173,13 +168,13 @@ export default function Record() {
     <div className="record-page" style={{ backgroundImage: `url(${bgImg})` }}>
       <div className="record-page__scroll">
         <header className="record-cal__nav">
-          <button 
-            type="button" 
-            className="record-cal__arrow" 
+          <button
+            type="button"
+            className="record-cal__arrow"
             onClick={() => {
-              playButtonSfx(); // 🎯 이전 달 클릭 효과음
+              playButtonSfx();
               moveMonth(-1);
-            }} 
+            }}
             aria-label="이전 달"
           >
             ‹
@@ -187,13 +182,13 @@ export default function Record() {
           <h1 className="record-cal__title" aria-live="polite">
             {ym.y}년 <span>{ym.m}월</span>
           </h1>
-          <button 
-            type="button" 
-            className="record-cal__arrow" 
+          <button
+            type="button"
+            className="record-cal__arrow"
             onClick={() => {
-              playButtonSfx(); // 🎯 다음 달 클릭 효과음
+              playButtonSfx();
               moveMonth(1);
-            }} 
+            }}
             aria-label="다음 달"
           >
             ›
@@ -210,7 +205,6 @@ export default function Record() {
             const rec = day ? byDay.get(day) : null;
             const type = rec ? TYPES[rec.type] : null;
 
-            // 기록이 있는 날짜를 누르면 상세 보기로 이동
             const goDetail = rec
               ? () => {
                   playButtonSfx();
@@ -241,7 +235,6 @@ export default function Record() {
           })}
         </ul>
 
-        {/* 기록 추가하기 + 7개 아이콘 메뉴 */}
         {menuOpen && <div className="record-menu__backdrop" onClick={() => setMenuOpen(false)} aria-hidden="true" />}
         <div className={`record-add ${menuOpen ? "is-open" : ""}`}>
           <button
@@ -251,7 +244,7 @@ export default function Record() {
             aria-haspopup="menu"
             aria-expanded={menuOpen}
             onClick={() => {
-              playButtonSfx(); // 🎯 기록 추가하기 버튼 클릭 효과음
+              playButtonSfx();
               setMenuOpen((v) => !v);
             }}
           >
@@ -268,7 +261,7 @@ export default function Record() {
                   className="record-menu__item"
                   style={{ "--x": `${x}px`, "--y": `${y}px` }}
                   onClick={() => {
-                    playSelectSfx(); // 🎯 7가지 카테고리 항목 선택 효과음
+                    playSelectSfx();
                     openForm(type);
                   }}
                 >
@@ -285,11 +278,11 @@ export default function Record() {
             <h2>
               {ym.m}월의 기록 <span>({data.records.length}건)</span>
             </h2>
-            <button 
-              type="button" 
-              className="record-sheet__more" 
+            <button
+              type="button"
+              className="record-sheet__more"
               onClick={() => {
-                playButtonSfx(); // 🎯 자세히 보기 버튼 효과음
+                playButtonSfx();
                 navigate("/record/list");
               }}
             >

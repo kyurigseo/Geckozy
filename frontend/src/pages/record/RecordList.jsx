@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './RecordList.scss';
+import { deleteRecord, fetchMonthRecords, fetchPhotoBlob } from '../../api/record';
 
 import iconBack from '../../assets/record/icon_before.png';
 import iconEdit from '../../assets/record/icon_edit.png';
-import iconDelete from '../../assets/record/icon_delete.png'; 
+import iconDelete from '../../assets/record/icon_delete.png';
 
 import iconFood from '../../assets/record/icon_feeding.png';
 import iconEtc from '../../assets/record/icon_etc.png';
@@ -21,6 +22,9 @@ import bgBtnFinish from '../../assets/record/bg_btn_finish.png';
 import buttonSrc from '../../assets/sounds/button.mp3';
 import selectSrc from '../../assets/sounds/select.mp3';
 
+import lineGreen from '../../assets/record/line_green.svg';
+import lineOrange from '../../assets/record/line_orange.svg';
+
 const playButtonSfx = () => {
   const sound = new Audio(buttonSrc);
   sound.volume = 0.5;
@@ -35,47 +39,115 @@ const playSelectSfx = () => {
   sound.play().catch(() => {});
 };
 
-const INITIAL_DATA = [
-  { id: 1, date: '1', day: '화', color: 'green', type: '먹이', icon: iconFood, time: '오후 7시 35분', text: '밀웜 5마리를 줬는데 다 먹지 않고 자러...', imgUrl: 'https://via.placeholder.com/80' },
-  { id: 2, date: '4', day: '금', color: 'orange', type: '추가기록', icon: iconEtc, time: '오후 7시 35분', text: '새 은신처로 바꿨는데 들어가서 잘 쉬...', imgUrl: 'https://via.placeholder.com/80' },
-  { id: 3, date: '9', day: '수', color: 'green', type: '탈피', icon: iconShedding, time: '오후 7시 35분', text: '발가락 쪽에 탈피가 조금 남아 있음', imgUrl: 'https://via.placeholder.com/80' },
-  { id: 4, date: '10', day: '목', color: 'orange', type: '탈피', icon: iconShedding, time: '오후 7시 35분', text: '어제부터 탈피 시작했는데 오늘 보니...', imgUrl: 'https://via.placeholder.com/80' },
-  { id: 5, date: '14', day: '월', color: 'green', type: '청소', icon: iconClean, time: '오후 7시 35분', text: '바닥재 부분 교체하고 물그릇도 같이...', imgUrl: 'https://via.placeholder.com/80' },
-  { id: 6, date: '22', day: '화', color: 'orange', type: '먹이', icon: iconFood, time: '오후 7시 35분', text: '밀웜 5마리 줬는데 2마리만 먹고 더 안...', imgUrl: 'https://via.placeholder.com/80' },
-  { id: 7, date: '24', day: '목', color: 'green', type: '이상증세', icon: iconSymptom, time: '오후 7시 35분', text: '오늘은 평소보다 움직임이 적고 은신처...', imgUrl: 'https://via.placeholder.com/80' },
-  { id: 8, date: '25', day: '금', color: 'orange', type: '배변', icon: iconPoop, time: '오후 7시 35분', text: '평소보다 양이 적고 조금 단단해 보임', imgUrl: 'https://via.placeholder.com/80' },
-  { id: 9, date: '27', day: '일', color: 'green', type: '체중', icon: iconWeight, time: '오후 7시 35분', text: '오늘 재보니 38.6g, 지난번보다 조금...', imgUrl: 'https://via.placeholder.com/80' },
-];
+const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
+const TYPE_META = {
+  feeding: { label: '먹이', icon: iconFood },
+  shedding: { label: '탈피', icon: iconShedding },
+  weight: { label: '체중', icon: iconWeight },
+  cleaning: { label: '청소', icon: iconClean },
+  poop: { label: '배변', icon: iconPoop },
+  symptom: { label: '이상증세', icon: iconSymptom },
+  etc: { label: '추가기록', icon: iconEtc },
+};
+
+const fmtTime = (hhmm) => {
+  const [h, m] = hhmm.split(':').map(Number);
+  return `${h < 12 ? '오전' : '오후'} ${h % 12 || 12}시${m ? ` ${m}분` : ''}`;
+};
+
+const toItem = (r, i) => ({
+  id: r.id,
+  date: String(Number(r.date.slice(8, 10))),
+  day: WEEKDAYS[new Date(r.date).getDay()],
+  color: i % 2 === 0 ? 'green' : 'orange',
+  type: TYPE_META[r.type].label,
+  icon: TYPE_META[r.type].icon,
+  time: fmtTime(r.time),
+  text: r.memo || r.tags.map((t) => t.text).join(' · '),
+  imgUrl: r.photos[0] ?? null,
+});
+
+function AuthImage({ src, alt, className }) {
+  const [url, setUrl] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    let objectUrl = null;
+    setUrl(null);
+    fetchPhotoBlob(src)
+      .then((u) => {
+        if (cancelled) URL.revokeObjectURL(u);
+        else {
+          objectUrl = u;
+          setUrl(u);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [src]);
+
+  return url ? <img src={url} alt={alt} className={className} /> : null;
+}
 
 export default function RecordList() {
   const navigate = useNavigate();
-  const [records, setRecords] = useState(INITIAL_DATA);
-  const [isEditing, setIsEditing] = useState(false); 
+  const [records, setRecords] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const month = new Date().getMonth() + 1;
 
-  const handleDelete = (id) => {
-    playSelectSfx(); // 🎯 삭제 버튼 효과음
-    setRecords((prev) => prev.filter((item) => item.id !== id));
+  useEffect(() => {
+    let cancelled = false;
+    const now = new Date();
+    fetchMonthRecords(now.getFullYear(), now.getMonth() + 1)
+      .then((list) => {
+        if (cancelled) return;
+        const sorted = [...list].sort((a, b) => a.recordedAt.localeCompare(b.recordedAt));
+        setRecords(sorted.map(toItem));
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        if (error.status === 401) navigate('/onboarding', { replace: true });
+        else setRecords([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [navigate]);
+
+  const handleDelete = async (id) => {
+    playSelectSfx();
+    if (!window.confirm('이 기록을 삭제할까요?')) return;
+    try {
+      await deleteRecord(id);
+      setRecords((prev) => prev.filter((r) => r.id !== id));
+    } catch (error) {
+      if (error.status === 401) navigate('/onboarding', { replace: true });
+      else window.alert('기록을 삭제하지 못했어요. 다시 시도해주세요.');
+    }
   };
 
   return (
     <div className={`record-list-page ${isEditing ? 'is-editing-mode' : ''}`}>
       <header className="list-header">
-        <button 
-          type="button" 
-          className="header-btn" 
+        <button
+          type="button"
+          className="header-btn"
           onClick={() => {
-            playButtonSfx(); // 🎯 뒤로가기 효과음
+            playButtonSfx();
             navigate(-1);
           }}
         >
           <img src={iconBack} alt="뒤로가기" />
         </button>
-        <h1 className="header-title">9월의 기록 ({records.length}건)</h1>
-        <button 
-          type="button" 
+        <h1 className="header-title">{month}월의 기록 ({records.length}건)</h1>
+        <button
+          type="button"
           className={`header-btn ${isEditing ? 'active' : ''}`}
           onClick={() => {
-            playButtonSfx(); // 🎯 편집 모드 전환 효과음
+            playButtonSfx();
             setIsEditing((v) => !v);
           }}
         >
@@ -84,12 +156,19 @@ export default function RecordList() {
       </header>
 
       <main className="list-content">
-        {records.map((item) => (
-          <div key={item.id} className="timeline-item">
+        {records.map((item, index) => (
+      <div key={item.id} className={`timeline-item ${item.color}`}>
+        {index < records.length - 1 && (
+          <img
+            src={item.color === 'green' ? lineGreen : lineOrange}
+            alt=""
+            className="timeline-line"
+          />
+        )}
             <div className={`date-badge ${item.color}`}>
-            <img 
-                src={item.color === 'green' ? bgBadgeGreen : bgBadgeOrange} 
-                alt="" 
+            <img
+                src={item.color === 'green' ? bgBadgeGreen : bgBadgeOrange}
+                alt=""
                 className="badge-bg"
             />
             <div className="badge-text">
@@ -100,8 +179,8 @@ export default function RecordList() {
 
             <div className="record-card">
               {isEditing && (
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="card-delete-btn"
                   onClick={() => handleDelete(item.id)}
                 >
@@ -113,7 +192,7 @@ export default function RecordList() {
                 <div className="card-info">
                   <div className="type-row">
                     <img src={item.icon} alt="" className="type-icon" />
-                    
+
                     <div className="type-text-wrap">
                         <span className="type-name">{item.type}</span>
                         <span className="time-text">{item.time}</span>
@@ -121,9 +200,9 @@ export default function RecordList() {
                     </div>
                   <p className="record-text">{item.text}</p>
                 </div>
-                
+
                 {item.imgUrl && (
-                  <img src={item.imgUrl} alt="기록 썸네일" className="record-img" />
+                  <AuthImage src={item.imgUrl} alt="기록 썸네일" className="record-img" />
                 )}
               </div>
             </div>
@@ -134,12 +213,12 @@ export default function RecordList() {
       {isEditing && (
         <div className="finish-btn-wrapper">
           <img src={bgBtnFinish} alt="" className="finish-btn-bg" />
-          
-          <button 
-            type="button" 
-            className="finish-btn" 
+
+          <button
+            type="button"
+            className="finish-btn"
             onClick={() => {
-              playSelectSfx(); 
+              playSelectSfx();
               setIsEditing(false);
             }}
           >

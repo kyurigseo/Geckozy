@@ -49,18 +49,20 @@ $summary-icon: 58px;
 
 
   &__scroll {
+    display: flex;
+    flex-direction: column;
     width: 100%;
     height: 100%;
     overflow-y: auto;
-    padding-bottom: 140px; 
+    padding-bottom: 0;
     box-sizing: border-box;
     -webkit-overflow-scrolling: touch;
 
-    scrollbar-width: none;      
-    -ms-overflow-style: none;    
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 
     &::-webkit-scrollbar {
-      display: none;  
+      display: none;
     }
   }
 
@@ -271,6 +273,7 @@ $summary-icon: 58px;
 
   // ─────────── 아래 요약 시트 ───────────
   .record-sheet {
+    flex: 1 0 auto;
     box-sizing: border-box;
     padding: 24px 20px 40px;
     background: $beige-4;
@@ -283,7 +286,7 @@ $summary-icon: 58px;
     box-shadow: 0px -5px 0px 0px rgba(255, 197, 141, 0.4);
 
     padding-bottom: 170px;
-    margin-bottom: -260px;
+    margin-bottom: 0;
 
 
 
@@ -327,14 +330,18 @@ $summary-icon: 58px;
       width: 103px;
       height: 32px;
       color: #B47952;
-
+      transition: background-color 0.1s, border-color 0.1s;
 
       span {
         font-size: 20px;
         line-height: 1;
         color: #B47952;
         margin-left: 9px;
+      }
 
+      &:active {
+        background-color: #FFC58D;
+        border-color: #FF9834;
       }
     }
 

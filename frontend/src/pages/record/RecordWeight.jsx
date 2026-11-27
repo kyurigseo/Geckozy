@@ -1,23 +1,24 @@
 import React, { useState } from 'react';
 import './RecordForm.scss';
+import RecordPhotos from './Recordphotos';
 
 import bgDecoration from '../../assets/record/bg_pattern.png';
+import iconBack from '../../assets/record/icon_back.png';
 import num1 from '../../assets/record/num_1.png';
-import btnAddPhoto from '../../assets/record/btn_add_photo.png';
-import photoEmpty from '../../assets/record/photo_empty.png';
 import btnComplete from '../../assets/record/btn_complete.png';
 
 const RecordWeight = ({ onBack, onComplete }) => {
   const [weight, setWeight] = useState('');
   const [memo, setMemo] = useState('');
+  const [photos, setPhotos] = useState([]);
 
   return (
     <div className="record-form-page">
       <img src={bgDecoration} alt="" className="bg-decoration" />
 
       <header className="record-form-header">
-        <button type="button" className="back-btn" onClick={onBack}>
-          ‹
+        <button type="button" className="back-btn" onClick={onBack} aria-label="뒤로 가기">
+          <img src={iconBack} alt="" />
         </button>
         <h1 className="title">체중</h1>
       </header>
@@ -42,18 +43,10 @@ const RecordWeight = ({ onBack, onComplete }) => {
           </div>
         </section>
 
-        <section className="form-section photo-section">
-          <h2 className="photo-title">사진 추가</h2>
-          <p className="photo-sub">최대 3장의 사진을 업로드할 수 있어요.</p>
-          <div className="photo-grid">
-            <button type="button" className="photo-btn-img"><img src={btnAddPhoto} alt="사진 추가" /></button>
-            <div className="photo-placeholder-img"><img src={photoEmpty} alt="빈 슬롯" /></div>
-            <div className="photo-placeholder-img"><img src={photoEmpty} alt="빈 슬롯" /></div>
-          </div>
-        </section>
+        <RecordPhotos photos={photos} onChange={setPhotos} />
 
         <div className="submit-area">
-        <button type="button" className="submit-btn-img"  onClick={onComplete}>
+        <button type="button" className="submit-btn-img"  onClick={() => onComplete({ weight, memo, photos })}>
             <img src={btnComplete} alt="완료 배경" />
             <span className="btn-text">완료</span>
         </button>

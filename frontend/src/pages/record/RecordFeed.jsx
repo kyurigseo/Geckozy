@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import './RecordForm.scss';
+import RecordPhotos from './Recordphotos';
 
 import bgDecoration from '../../assets/record/bg_pattern.png';
+import iconBack from '../../assets/record/icon_back.png';
 import num1 from '../../assets/record/num_1.png';
 import num2 from '../../assets/record/num_2.png';
-import btnAddPhoto from '../../assets/record/btn_add_photo.png';
-import photoEmpty from '../../assets/record/photo_empty.png';
 import btnComplete from '../../assets/record/btn_complete.png';
 
 const RecordFeed = ({ onBack, onComplete }) => {
@@ -13,14 +13,15 @@ const RecordFeed = ({ onBack, onComplete }) => {
   const [customInput, setCustomInput] = useState('');
   const [response, setResponse] = useState('대부분 먹음');
   const [memo, setMemo] = useState('');
+  const [photos, setPhotos] = useState([]);
 
   return (
     <div className="record-form-page">
       <img src={bgDecoration} alt="" className="bg-decoration" />
 
       <header className="record-form-header">
-        <button type="button" className="back-btn" onClick={onBack}>
-          ‹
+        <button type="button" className="back-btn" onClick={onBack} aria-label="뒤로 가기">
+          <img src={iconBack} alt="" />
         </button>
         <h1 className="title">먹이</h1>
       </header>
@@ -31,18 +32,22 @@ const RecordFeed = ({ onBack, onComplete }) => {
             <img src={num1} alt="1" className="num-badge-img" />
             <span>먹이 종류</span>
           </h2>
-          <div className="options-grid grid-3">
-            {['곤충', '전용 사료', '과일/퓨레', '직접 입력'].map(val => (
-              <label key={val} className={`option-item ${feedType === val ? 'is-checked' : ''}`}>
-                <input type="radio" name="feedType" checked={feedType === val} onChange={() => setFeedType(val)} />
-                <span className="radio-circle" />
-                <span className="option-label">{val}</span>
-              </label>
+          <div className="options-rows">
+            {[['곤충', '전용 사료', '과일/퓨레'], ['직접 입력']].map((row, i) => (
+              <div key={i} className="options-row">
+                {row.map(val => (
+                  <label key={val} className={`option-item ${feedType === val ? 'is-checked' : ''}`}>
+                    <input type="radio" name="feedType" checked={feedType === val} onChange={() => setFeedType(val)} />
+                    <span className="radio-circle" />
+                    <span className="option-label">{val}</span>
+                  </label>
+                ))}
+              </div>
             ))}
+            {feedType === '직접 입력' && (
+              <input type="text" className="input-custom-orange" placeholder="먹이를 입력해주세요." value={customInput} onChange={e => setCustomInput(e.target.value)} />
+            )}
           </div>
-          {feedType === '직접 입력' && (
-            <input type="text" className="input-custom-orange" placeholder="먹이를 입력해주세요." value={customInput} onChange={e => setCustomInput(e.target.value)} />
-          )}
         </section>
 
         <section className="form-section">
@@ -50,13 +55,17 @@ const RecordFeed = ({ onBack, onComplete }) => {
             <img src={num2} alt="2" className="num-badge-img" />
             <span>섭취 반응</span>
           </h2>
-          <div className="options-grid">
-            {['대부분 먹음', '평소보다 적게 먹음', '거의 먹지 않음'].map(val => (
-              <label key={val} className={`option-item ${response === val ? 'is-checked' : ''}`}>
-                <input type="radio" name="feedResponse" checked={response === val} onChange={() => setResponse(val)} />
-                <span className="radio-circle" />
-                <span className="option-label">{val}</span>
-              </label>
+          <div className="options-rows">
+            {[['대부분 먹음', '평소보다 적게 먹음'], ['거의 먹지 않음']].map((row, i) => (
+              <div key={i} className="options-row">
+                {row.map(val => (
+                  <label key={val} className={`option-item ${response === val ? 'is-checked' : ''}`}>
+                    <input type="radio" name="feedResponse" checked={response === val} onChange={() => setResponse(val)} />
+                    <span className="radio-circle" />
+                    <span className="option-label">{val}</span>
+                  </label>
+                ))}
+              </div>
             ))}
           </div>
         </section>
@@ -69,18 +78,10 @@ const RecordFeed = ({ onBack, onComplete }) => {
           </div>
         </section>
 
-        <section className="form-section photo-section">
-          <h2 className="photo-title">사진 추가</h2>
-          <p className="photo-sub">최대 3장의 사진을 업로드할 수 있어요.</p>
-          <div className="photo-grid">
-            <button type="button" className="photo-btn-img"><img src={btnAddPhoto} alt="사진 추가" /></button>
-            <div className="photo-placeholder-img"><img src={photoEmpty} alt="빈 슬롯" /></div>
-            <div className="photo-placeholder-img"><img src={photoEmpty} alt="빈 슬롯" /></div>
-          </div>
-        </section>
+        <RecordPhotos photos={photos} onChange={setPhotos} />
 
         <div className="submit-area">
-        <button type="button" className="submit-btn-img"  onClick={onComplete}>
+        <button type="button" className="submit-btn-img"  onClick={() => onComplete({ feedType, customInput, response, memo, photos })}>
             <img src={btnComplete} alt="완료 배경" />
             <span className="btn-text">완료</span>
         </button>

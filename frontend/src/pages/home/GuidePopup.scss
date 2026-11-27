@@ -1,50 +1,36 @@
 $brown-1: #492515;
-$brown-2: #B47952;
-$brown-4: #944B1B;
 $text-outline: #5B3524;
-$beige-1: #FFECCB;
-$beige-3: #FFDCB9;
 
 $font-katuri: "andong-katuri", sans-serif;
-$font-mamablock: "mamablock-210", sans-serif;
 $font-pixel: "yoon-px-pixman", sans-serif;
-
 
 $panel-w: 313px;
 $panel-h: 501px;
 
-// 홈 위에 뜨는 팝업. 모든 클래스가 guide-popup으로 시작해서 가이드 페이지(.guide)와 겹치지 않아요.
 .guide-popup {
   position: fixed;
   inset: 0;
-  z-index: 50; // 하단 네비(100)보다 아래
+  z-index: 50;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 24px;
-  background: rgba(0, 0, 0, 0.4);
+  padding-top: 150px;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.2);
   font-family: "Pretendard", sans-serif;
-  line-height: 1.5; 
-  letter-spacing: -0.02em; 
   color: $text-outline;
   animation: guide-popup-fade 0.15s ease-out;
 
   &__panel {
     position: relative;
-    display: flex;
-    flex-direction: column;
+    flex-shrink: 0;
     box-sizing: border-box;
     width: $panel-w;
     height: $panel-h;
-    aspect-ratio: #{$panel-w} / #{$panel-h};
-    padding: 64px 28px 30px; 
-    overflow: hidden; 
     background-position: center;
     background-size: 100% 100%;
     background-repeat: no-repeat;
     animation: guide-popup-pop 0.18s ease-out;
-
-
 
     &:focus {
       outline: none;
@@ -53,8 +39,8 @@ $panel-h: 501px;
 
   &__close {
     position: absolute;
-    top: 6px;
-    right: 6px;
+    top: 8px;
+    left: 281px;
     z-index: 1;
     width: 35px;
     height: 36px;
@@ -65,9 +51,8 @@ $panel-h: 501px;
 
     img {
       display: block;
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
+      width: 35px;
+      height: 36px;
     }
 
     &:focus-visible {
@@ -77,60 +62,79 @@ $panel-h: 501px;
   }
 
   &__title {
-    margin: 0 0 14px;
+    position: absolute;
+    top: 58px;
+    left: 0;
+    width: 100%;
+    margin: 0;
     font-family: $font-katuri;
     font-size: 28px;
     font-weight: 400;
     line-height: 1.4;
+    letter-spacing: -0.56px;
     text-align: center;
-    color: #5B3524;
-    letter-spacing: -0.02em;
+    color: $text-outline;
   }
 
   &__page {
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    scrollbar-width: none;
+    position: absolute;
+    inset: 0;
     animation: guide-popup-slide 0.2s ease-out;
-    margin: 0 0px;
-
-
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
   }
 
   &__hero {
+    position: absolute;
+    top: 118px;
+    left: 49px;
     display: block;
     width: 217px;
     height: 131px;
-    margin: 0 auto 14px;
-    object-fit: contain;
-    margin-bottom: 29px;
+  }
+
+  &__block {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    &--why {
+      top: 278px;
+      left: 28px;
+      width: 258px;
+    }
+
+    &--check {
+      top: 122px;
+      left: 38px;
+      width: 236px;
+    }
+
+    &--manage {
+      top: 122px;
+      left: 33px;
+      width: 247px;
+    }
   }
 
   &__sub {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin: 0 0 10px;
+    gap: 10px;
+    height: 25px;
+    margin: 0;
+    font-family: $font-katuri;
     font-size: 18px;
     font-weight: 400;
     line-height: 1.4;
-    color: #5B3524;
-    font-family: $font-katuri;
-    letter-spacing: -0.02em;
-    margin-bottom: 15px;
-    margin-top: 5px;
+    letter-spacing: -0.36px;
+    color: $brown-1;
+    white-space: nowrap;
 
     img {
       flex-shrink: 0;
+      display: block;
       width: 29px;
       height: 20px;
-      object-fit: contain;
-      margin-right: 10px;
     }
   }
 
@@ -138,148 +142,198 @@ $panel-h: 501px;
     margin: 0;
     font-size: 14px;
     font-weight: 500;
-    letter-spacing: -0.02em;
-    line-height: 1.5; 
-    max-width: 2405x;     
-    margin: 0 auto;       
-    text-align: left;
-    
+    line-height: 1.5;
+    letter-spacing: -0.28px;
+    word-break: break-word;
 
     strong {
       font-weight: 700;
-      letter-spacing: -0.02em;
-      line-height: 1.4;
-      font-family: Pretendard;
-  
     }
   }
 
   &__checks {
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    margin: 0;
+    gap: 12px;
+    margin: 5px 0 0;
     padding: 0;
     list-style: none;
 
     li {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      letter-spacing: -0.02em;
-      font-weight: 400;
-      color: #5B3524;
-      font-size: 18px;
+      position: relative;
+      width: 236px;
+      height: 42px;
     }
 
     p {
-      flex: 1;
+      position: absolute;
+      top: 0;
+      left: 47px;
+      width: 189px;
       margin: 0;
       font-size: 14px;
-      font-weight: 400;
+      font-weight: 500;
+      line-height: 1.5;
+      letter-spacing: -0.28px;
+      word-break: break-word;
 
       strong {
         font-weight: 700;
-        letter-spacing: -0.02em;
-
-
       }
     }
   }
 
   &__check {
-    flex-shrink: 0;
+    position: absolute;
+    top: 7px;
+    left: 0;
+    display: block;
     width: 28px;
     height: 28px;
-    object-fit: contain;
-    margin-right: 15px;
+  }
+
+  &__manage-text {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 14px;
+    line-height: 1.5;
+    letter-spacing: -0.28px;
+    word-break: break-word;
+  }
+
+  &__lead {
+    width: 247px;
+    margin: 0;
+    font-weight: 700;
+  }
+
+  &__body {
+    width: 250px;
+    margin: 0;
+    font-weight: 500;
   }
 
   &__warn {
-    margin: 14px 0 12px;
-    padding: 10px 12px;
-    background: #FFC58D99;
-    border-radius: 10px;
+    position: absolute;
+    top: 257px;
+    left: 34px;
+    box-sizing: border-box;
     width: 246px;
     height: 98px;
+    padding: 13px 20px 10px;
+    background: rgba(255, 197, 141, 0.6);
+    border-radius: 10px;
 
     h4 {
       display: flex;
       align-items: center;
-      gap: 6px;
-      margin: 0 0 4px;
-      font-size: 14px;
-      font-weight: 400;
-      line-height: 1.5;
-      color: #5B3524;
-      letter-spacing: -0.02em;
+      gap: 10px;
+      height: 26px;
+      margin: 0 0 10px;
       font-family: $font-katuri;
       font-size: 18px;
+      font-weight: 400;
+      line-height: 1.4;
+      letter-spacing: -0.36px;
+      color: $text-outline;
+      white-space: nowrap;
 
       img {
+        flex-shrink: 0;
+        display: block;
         width: 26px;
         height: 26px;
-        object-fit: contain;
-        margin-right: 10px;
-        margin-left: 10px;
-        margin-bottom: 5px;
       }
     }
 
     p {
+      margin: 0;
       font-size: 12px;
       font-weight: 500;
-      margin: 10px;
-      color: #5B3524;
-      letter-spacing: -0.02em;
       line-height: 1.5;
+      letter-spacing: -0.24px;
+      white-space: nowrap;
     }
   }
 
   &__scrap {
-    display: block;
-    margin: 0 auto;
-    padding: 5px 26px;
-    font-family: $font-pixel;
-    font-size: 12px;
-    font-weight: 700;
-    line-height: 1.4;
-    color: #5B3524;
-    background: url(../../assets/home/btn_frame.png);
+    position: absolute;
+    top: 371px;
+    left: 104px;
+    box-sizing: border-box;
     width: 105px;
     height: 35px;
+    padding: 0;
+    font-family: $font-pixel;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 35px;
+    letter-spacing: -0.26px;
+    text-align: center;
+    color: $text-outline;
+    background: url(../../assets/home/btn_frame.png) center / 100% 100% no-repeat;
+    border: 0;
     cursor: pointer;
 
+    &:active {
+      transform: translateY(1px);
+    }
+
+    &:focus-visible {
+      outline: 2px solid $brown-1;
+      outline-offset: 2px;
+    }
   }
 
   &__pager {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 30px 6px 0;
+    position: absolute;
+    top: 427px;
+    left: 40px;
+    width: 234px;
+    height: 30px;
   }
 
   &__count {
+    position: absolute;
+    top: 0;
+    left: 99px;
+    width: 36px;
     font-family: $font-pixel;
     font-size: 20px;
     font-weight: 400;
-    line-height: 1;
-    color: #5B3524;
+    line-height: 30px;
+    letter-spacing: -0.4px;
+    text-align: center;
+    color: $text-outline;
   }
 
   &__arrow {
-    flex-shrink: 0;
-    width: 36px;
-    height: 36px;
+    position: absolute;
+    top: 0;
+    width: 29px;
+    height: 29px;
     padding: 0;
     background: none;
     border: 0;
     cursor: pointer;
 
+    &--prev {
+      left: 0;
+    }
+
+    &--next {
+      left: 205px;
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: -6px;
+    }
 
     img {
       display: block;
-      object-fit: contain;
       width: 29px;
       height: 29px;
     }
@@ -289,7 +343,6 @@ $panel-h: 501px;
     }
 
     &:disabled {
-      opacity: 0.35;
       cursor: default;
     }
 

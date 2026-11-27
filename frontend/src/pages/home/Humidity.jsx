@@ -10,42 +10,17 @@ import closeBtn from "../../assets/home/close_btn.png";
 import humidityIcon from "../../assets/home/humid_icon.png";
 import warnIcon from "../../assets/home/warning_icon.png";
 
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+import { fetchHumidity } from "../../api/climate";
 
-const fetchHumidity = async () => {
-  await delay(300);
-  return {
-    current: 78,
-    measuredAt: "2026-11-01T14:32:00",
-    measured: [
-      { h: 0.5, v: 48 },
-      { h: 1.5, v: 41 },
-      { h: 2.5, v: 39 },
-      { h: 3.5, v: 36 },
-      { h: 4.5, v: 36 },
-      { h: 7.5, v: 63 },
-      { h: 8.7, v: 81 },
-      { h: 9.9, v: 80 },
-      { h: 11, v: 79 },
-      { h: 12.2, v: 78 },
-      { h: 13.3, v: 78 },
-      { h: 14.4, v: 78 },
-    ],
-    ideal: [
-      { h: 0, v: 55 }, { h: 2, v: 40 }, { h: 4.5, v: 33 }, { h: 6, v: 34 },
-      { h: 7.2, v: 62 }, { h: 8.3, v: 82 }, { h: 9.2, v: 80 }, { h: 11, v: 62 },
-      { h: 13, v: 45 }, { h: 15, v: 36 }, { h: 16.5, v: 35 }, { h: 17.3, v: 50 },
-      { h: 18.3, v: 78 }, { h: 19, v: 84 }, { h: 20, v: 80 }, { h: 22, v: 58 },
-      { h: 24, v: 46 },
-    ],
-    sprayZones: [[6, 9], [17, 20]],
-  };
-};
+const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 
-const HIGH = 70; 
-const LOW = 40; 
-const HIGH_STREAK = 4; 
-const NIGHT = [[0, 6], [20, 24]]; 
+const EMPTY = { current: null, measuredAt: null, measured: [], ideal: [], sprayZones: [] };
+
+const HIGH = 70;
+const LOW = 40;
+const HIGH_STREAK = 4;
+const NIGHT = [[0, 6], [19.67, 24]];
+const SPRAY_ZONES = [[6, 8.8], [16.85, 19.67]];
 
 const GUIDES = {
   high: {
@@ -91,13 +66,13 @@ const formatTime = (iso) => {
 };
 
 function HumidityChart({ measured, ideal, sprayZones }) {
-  const W = 360;
-  const H = 200;
-  const PAD = { l: 36, r: 16, t: 24, b: 24 };
-  const plotH = H - PAD.t - PAD.b;
+  const L = 56;
+  const R = 355;
+  const TOP = 493;
+  const BOTTOM = 657;
 
-  const x = (h) => PAD.l + (h / 24) * (W - PAD.l - PAD.r);
-  const y = (v) => PAD.t + ((100 - v) / 100) * plotH;
+  const x = (h) => L + (h / 24) * (R - L);
+  const y = (v) => 502 + (100 - clamp(v, 0, 100)) * 1.5;
 
   const smoothPath = (points) => {
     const p = points.map(({ h, v }) => [x(h), y(v)]);
@@ -116,93 +91,61 @@ function HumidityChart({ measured, ideal, sprayZones }) {
 
   const idealPath = ideal.length > 1 ? smoothPath(ideal) : "";
 
+  const sums = new Map();
+  measured.forEach(({ h, v }) => {
+    const hour = Math.min(23, Math.floor(h));
+    const prev = sums.get(hour) ?? { total: 0, count: 0 };
+    sums.set(hour, { total: prev.total + v, count: prev.count + 1 });
+  });
+  const dots = [...sums.entries()].map(([hour, { total, count }]) => ({ h: hour + 0.5, v: total / count }));
+
+  const labelStyle = { fontSize: 12, fontWeight: 500, letterSpacing: "-0.24px" };
+
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="chart__svg" role="img" aria-label="오늘의 습도 변화 그래프" style={{ width: "100%", height: "auto" }}>
-      {/* 야간 구간 배경 */}
+    <svg viewBox="32 475 326 205" className="chart__svg" role="img" aria-label="오늘의 습도 변화 그래프" style={{ width: "100%", height: "auto" }}>
       {NIGHT.map(([a, b]) => (
-        <g key={`night-${a}`}>
-          <rect x={x(a)} y={PAD.t} width={x(b) - x(a)} height={plotH} fill="#E8F2F7" />
-          <text x={(x(a) + x(b)) / 2} y={PAD.t + 15} textAnchor="middle" fontSize="11" fontWeight="600" fill="#94B9D0" letterSpacing="-0.02em">
-            야간 구간
-          </text>
-        </g>
+        <rect key={`night-${a}`} x={x(a)} y={TOP} width={x(b) - x(a)} height={BOTTOM - TOP - 1} fill="rgba(211,238,255,0.5)" />
       ))}
 
-      {/* 분무 구간 배경 */}
       {sprayZones.map(([a, b]) => (
         <g key={`spray-${a}`}>
-          <rect x={x(a)} y={PAD.t} width={x(b) - x(a)} height={plotH} fill="#E8F6CA" />
-          <text x={(x(a) + x(b)) / 2} y={PAD.t + 15} textAnchor="middle" fontSize="11" fontWeight="600" fill="#5B911C" letterSpacing="-0.02em">
-            분무
-          </text>
+          <rect x={x(a)} y={TOP} width={x(b) - x(a)} height={BOTTOM - TOP - 1} fill="rgba(200,245,147,0.4)" />
+          <text x={x(b) - 7} y={506.5} textAnchor="end" fill="#5B911C" style={labelStyle}>분무</text>
         </g>
       ))}
 
-      {/* y축 가로 격자 점선 */}
-      {[0, 20, 40, 60, 80, 100].map((v) => (
-        <line 
-          key={`grid-${v}`} 
-          x1={PAD.l} 
-          x2={W - PAD.r} 
-          y1={y(v)} 
-          y2={y(v)} 
-          stroke="#D1C2AF" 
-          strokeWidth="1" 
-          strokeDasharray="2 2" 
-        />
+      {[100, 80, 60, 40, 20].map((v) => (
+        <line key={`grid-${v}`} x1={55} x2={355} y1={y(v)} y2={y(v)} stroke="#FFDCB9" strokeWidth="1" strokeDasharray="3 3" />
       ))}
 
-      {/* x축 & y축 기준 실선 (TempChart와 완벽 일치) */}
-      <line x1={PAD.l} x2={PAD.l} y1={PAD.t} y2={H - PAD.b} stroke="#D1C2AF" strokeWidth="1" />
-      <line x1={PAD.l} x2={W - PAD.r} y1={H - PAD.b} y2={H - PAD.b} stroke="#D1C2AF" strokeWidth="1" />
+      <line x1={L} x2={L} y1={TOP} y2={BOTTOM} stroke="#FFC58D" strokeWidth="1" />
+      <line x1={55} x2={R} y1={BOTTOM} y2={BOTTOM} stroke="#FFC58D" strokeWidth="1" />
 
-      {/* y축 단위 % (최상단 눈금 위 위치) */}
-      <text x={PAD.l - 12} y={PAD.t - 10} textAnchor="start" fontSize="12" fontWeight="600" fill="#B38A68" letterSpacing="-0.02em">
-        %
-      </text>
-
-      {/* y축 눈금 숫자 */}
-      {[0, 20, 40, 60, 80, 100].map((v) => (
-        <text 
-          key={`ytick-${v}`} 
-          x={PAD.l - 8} 
-          y={y(v) + 4} 
-          textAnchor="end" 
-          fontSize="12" 
-          fontWeight="600" 
-          fill="#B38A68" 
-          letterSpacing="-0.02em"
-        >
+      <text x={39} y={488.5} fill="#B47952" style={labelStyle}>%</text>
+      {[100, 80, 60, 40, 20, 0].map((v) => (
+        <text key={`ytick-${v}`} x={50} y={y(v) + 4.5} textAnchor="end" fill="#B47952" style={labelStyle}>
           {v}
         </text>
       ))}
 
-      {/* x축 시간 눈금 */}
-      {[0, 6, 12, 18, 24].map((h) => (
-        <text 
-          key={h} 
-          x={x(h)} 
-          y={H - 4} 
-          textAnchor={h === 0 ? "start" : h === 24 ? "end" : "middle"} 
-          fontSize="12" 
-          fontWeight="600" 
-          fill="#B38A68" 
-          letterSpacing="-0.02em"
-        >
+      <text x={116} y={506.5} textAnchor="end" fill="#A0AFCC" style={labelStyle}>야간 구간</text>
+      <text x={350} y={506.5} textAnchor="end" fill="#A0AFCC" style={labelStyle}>야간 구간</text>
+
+      {[[0, 64], [6, 131], [12, 200.5], [18, 272.5], [24, 345.5]].map(([h, cx]) => (
+        <text key={h} x={cx} y={674.5} textAnchor="middle" fill="#B47952" style={labelStyle}>
           {h}시
         </text>
       ))}
 
-      {/* 곡선 & 측정 점 */}
       {idealPath && (
         <>
-          <path d={idealPath} fill="none" stroke="#FFDCB9" strokeWidth="8" strokeLinecap="round" opacity="0.8" />
-          <path d={idealPath} fill="none" stroke="#FF9834" strokeWidth="1.2" strokeDasharray="3 2" strokeLinecap="round" />
+          <path d={idealPath} fill="none" stroke="#FFDCB9" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round" opacity="0.8" />
+          <path d={idealPath} fill="none" stroke="#FF9834" strokeWidth="1.5" strokeDasharray="3 3" strokeLinecap="round" />
         </>
       )}
 
-      {measured.map(({ h, v }) => (
-        <circle key={h} cx={x(h)} cy={y(v)} r="3.4" fill="#6BC4FF" />
+      {dots.map(({ h, v }) => (
+        <circle key={h} cx={x(h)} cy={y(v)} r="5.5" fill="#6BC4FF" />
       ))}
     </svg>
   );
@@ -215,9 +158,13 @@ export default function Humidity() {
 
   useEffect(() => {
     let cancelled = false;
-    fetchHumidity().then((res) => {
-      if (!cancelled) setData(res);
-    });
+    fetchHumidity()
+      .then((res) => {
+        if (!cancelled) setData(res);
+      })
+      .catch(() => {
+        if (!cancelled) setData(EMPTY);
+      });
     return () => {
       cancelled = true;
     };
@@ -236,6 +183,27 @@ export default function Humidity() {
   }, [showWhyModal]);
 
   if (!data) return <div className="humidity-page" />;
+
+  if (data.current == null) {
+    return (
+      <div className="humidity-page">
+        <div className="humidity-page__scroll">
+          <header className="header">
+            <button type="button" className="header__back" onClick={() => navigate(-1)}>
+              <img src={backBtn} alt="뒤로가기" />
+            </button>
+            <h1 className="header__title">습도</h1>
+          </header>
+          <p style={{ textAlign: "center", marginTop: 80, lineHeight: 1.6 }}>
+            아직 측정된 습도가 없어요.<br />센서 연결을 확인해주세요.
+          </p>
+          <button type="button" style={{ display: "block", margin: "16px auto" }} onClick={() => navigate("/my/sensor")}>
+            센서 확인하기
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const status = getStatus(data.current, data.measured);
   const guide = GUIDES[status.key];
@@ -294,7 +262,7 @@ export default function Humidity() {
             </div>
 
             <div className="chart">
-              <HumidityChart measured={data.measured} ideal={data.ideal} sprayZones={data.sprayZones} />
+              <HumidityChart measured={data.measured} ideal={data.ideal} sprayZones={data.sprayZones.length > 0 ? data.sprayZones : SPRAY_ZONES} />
             </div>
 
             <div className="chart-legend">
