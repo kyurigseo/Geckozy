@@ -111,7 +111,7 @@ export default function Home() {
         </div>
 
         <h1 className="home__greeting">
-          안녕하세요 <span className="accent">수정님</span>
+          안녕하세요 <span className="accent">{home?.username ? `${home.username}님` : "수정님"}</span>
           <img src={sproutIcon} alt="" className="home__sprout" />
         </h1>
 
